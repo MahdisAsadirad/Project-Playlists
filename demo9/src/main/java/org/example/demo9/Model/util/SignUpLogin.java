@@ -1,4 +1,4 @@
-package org.example.demo9.Model;
+package org.example.demo9.Model.util;
 
 import java.sql.*;
 
@@ -9,7 +9,6 @@ public class SignUpLogin {
         this.conn = conn;
     }
 
-    // ثبت نام
     public boolean signUp(String username, String password) throws SQLException {
         String query = "INSERT INTO users(username, password) VALUES (?, ?)";
         PreparedStatement ps = conn.prepareStatement(query);
@@ -18,8 +17,8 @@ public class SignUpLogin {
         return ps.executeUpdate() > 0;
     }
 
-    // ورود
-    public User login(String username, String password) throws SQLException {
+
+    public org.example.demo9.Model.util.User login(String username, String password) throws SQLException {
         String query = "SELECT * FROM users WHERE username = ? AND password = ?";
         PreparedStatement ps = conn.prepareStatement(query);
         ps.setString(1, username);

@@ -1,6 +1,6 @@
 package org.example.demo9.Controller;
 
-import org.example.demo9.Model.song.User;
+import org.example.demo9.Model.util.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

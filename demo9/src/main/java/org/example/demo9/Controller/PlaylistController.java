@@ -1,72 +1,83 @@
 package org.example.demo9.Controller;
 
-import org.example.demo9.Model.song.Playlist;
-import org.example.demo9.Model.song.PlaylistManager;
-import org.example.demo9.Model.song.Song;
-import org.example.demo9.Model.util.CSVLoader;
+import org.example.demo9.Model.util.Database;
+import org.example.demo9.Model.util.User;
 
-import java.io.IOException;
-import java.util.List;
+import java.sql.*;
+import java.util.Scanner;
 
 public class PlaylistController {
-    private PlaylistManager manager;
+    private final Connection conn;
 
-    public PlaylistController(PlaylistManager manager) {
-        this.manager = manager;
+    public PlaylistController(Database db) {
+        this.conn = db.getConnection();
     }
 
-    public void loadSongsFromCSV(String filePath, String targetPlaylist) throws IOException {
-        List<Song> songs = CSVLoader.loadSongs(filePath);
-        Playlist p = manager.createPlaylist(targetPlaylist);
-        for (Song s : songs) p.addSong(s);
-    }
 
-    public void handleCreatePlaylist(String name) {
-        manager.createPlaylist(name);
-    }
+    public void createPlaylist(User user, Scanner scanner) {
+        try {
+            System.out.print("🎵 Enter new playlist name: ");
+            String name = scanner.nextLine();
 
-    public void handleAddSong(String playlistName, Song song) {
-        Playlist p = manager.getPlaylist(playlistName);
-        if (p != null) p.addSong(song);
-    }
+            String sql = "INSERT INTO playlists (user_id, name) VALUES (?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, user.getId());
+            stmt.setString(2, name);
+            stmt.executeUpdate();
 
-    public void handleMerge(String p1, String p2, String newName) {
-        manager.mergePlaylists(p1, p2, newName);
-    }
-
-    public void handleShuffleMerge(List<String> names, String newName) {
-        manager.shuffleMergePlaylists(names, newName);
-    }
-
-    public Playlist handleFilter(String playlistName, String criteria, String value) {
-        Playlist p = manager.getPlaylist(playlistName);
-        if (p == null) return null;
-        return p.filterBy(criteria, value);
-    }
-
-    public void handleSort(String playlistName, String criteria) {
-        Playlist p = manager.getPlaylist(playlistName);
-        if (p != null) p.sortBy(criteria);
-    }
-
-    public void handlePlay(String playlistName, boolean shuffle) {
-        Playlist p = manager.getPlaylist(playlistName);
-        if (p == null) {
-            System.out.println("Playlist not found");
-            return;
+            System.out.println("✅ Playlist '" + name + "' created successfully!");
+            stmt.close();
+        } catch (SQLException e) {
+            System.out.println("❌ Error creating playlist: " + e.getMessage());
         }
-        if (shuffle) p.shufflePlay();
-        else p.play();
     }
 
-    public void handleLike(String playlistName, String trackName) {
-        Playlist p = manager.getPlaylist(playlistName);
-        if (p != null) p.likeSong(trackName);
-    }
 
-    public void handleUnlike(String playlistName, String trackName) {
-        Playlist p = manager.getPlaylist(playlistName);
-        if (p != null) p.unlikeSong(trackName);
+    public void showPlaylists(User user) {
+        try {
+            String sql = "SELECT id, name FROM playlists WHERE user_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, user.getId());
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("\n🎧 Your Playlists:");
+            boolean hasPlaylists = false;
+            while (rs.next()) {
+                System.out.println(" - [" + rs.getInt("id") + "] " + rs.getString("name"));
+                hasPlaylists = true;
+            }
+
+            if (!hasPlaylists)
+                System.out.println("(No playlists yet!)");
+
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            System.out.println("❌ Error fetching playlists: " + e.getMessage());
+        }
+    }
+    
+    public void deletePlaylist(User user, Scanner scanner) {
+        try {
+            showPlaylists(user);
+            System.out.print("\n🗑 Enter playlist ID to delete: ");
+            int id = Integer.parseInt(scanner.nextLine());
+
+            String sql = "DELETE FROM playlists WHERE id = ? AND user_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            stmt.setInt(2, user.getId());
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0)
+                System.out.println("✅ Playlist deleted successfully!");
+            else
+                System.out.println("⚠️ Playlist not found or not yours.");
+
+            stmt.close();
+        } catch (SQLException e) {
+            System.out.println("❌ Error deleting playlist: " + e.getMessage());
+        }
     }
 }
 
