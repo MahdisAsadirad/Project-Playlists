@@ -82,17 +82,15 @@ public class Playlist {
         size = 0;
     }
 
-    public void merge(Playlist playlist) {
-        Set<Song> set = new HashSet<>();
-        for (Song song : this.toList()) {
-            set.add(song);
-        }
-        for (Song song : playlist.toList()) {
-            if (!set.contains(song)) {
-                this.addSong(song);
-            }
+    public void merge(Playlist other) {
+        SongNode current = other.head;
+        while (current != null) {
+            if (findSong(current.data.getTrackName()) == null)
+                addSong(current.data);
+            current = current.next;
         }
     }
+
 
     public static Playlist shuffleMerge(List<Playlist> lists, String newName) {
         Playlist result = new Playlist(newName);
@@ -113,10 +111,20 @@ public class Playlist {
         List<Song> list = toList();
         Comparator<Song> cmp;
         switch (criteria.toLowerCase()) {
-            case "track name": cmp = Comparator.comparing(Song::getTrackName, String.CASE_INSENSITIVE_ORDER); break;
-            case "artist name": cmp = Comparator.comparing(Song::getArtistName, String.CASE_INSENSITIVE_ORDER); break;
-            case "release date": cmp = Comparator.comparing(Song::getReleaseDate, String.CASE_INSENSITIVE_ORDER); break;
-            default: return;
+            case "track name":
+            case "track_name":
+                cmp = Comparator.comparing(Song::getTrackName, String.CASE_INSENSITIVE_ORDER);
+                break;
+            case "artist name":
+            case "artist_name":
+                cmp = Comparator.comparing(Song::getArtistName, String.CASE_INSENSITIVE_ORDER);
+                break;
+            case "release date":
+            case "release_date":
+                cmp = Comparator.comparing(Song::getReleaseDate, String.CASE_INSENSITIVE_ORDER);
+                break;
+            default:
+                return;
         }
         list.sort(cmp);
         clear();
@@ -127,11 +135,20 @@ public class Playlist {
         Playlist out = new Playlist(this.name + "-filtered");
         for (Song s : toList()) {
             switch (criteria.toLowerCase()) {
-                case "genre": if (s.getGenre().equalsIgnoreCase(value)) out.addSong(s); break;
-                case "artist": if (s.getArtistName().equalsIgnoreCase(value)) out.addSong(s); break;
-                case "year": if (s.getReleaseDate().equalsIgnoreCase(value)) out.addSong(s); break;
-                case "topic": if (s.getTopic().equalsIgnoreCase(value)) out.addSong(s); break;
-                default: break;
+                case "genre":
+                    if (s.getGenre().equalsIgnoreCase(value)) out.addSong(s);
+                    break;
+                case "artist":
+                    if (s.getArtistName().equalsIgnoreCase(value)) out.addSong(s);
+                    break;
+                case "year":
+                    if (s.getReleaseDate().equalsIgnoreCase(value)) out.addSong(s);
+                    break;
+                case "topic":
+                    if (s.getTopic().equalsIgnoreCase(value)) out.addSong(s);
+                    break;
+                default:
+                    break;
             }
         }
         return out;
@@ -147,15 +164,30 @@ public class Playlist {
         if (s != null) s.setLiked(false);
     }
 
-    public void play() {
-        for (Song s : toList()) System.out.println(s);
+    public String play() {
+        StringBuilder sb = new StringBuilder();
+        SongNode current = head;
+
+        while (current != null) {
+            sb.append(current.data).append("\n");
+            current = current.next;
+        }
+
+        return sb.toString();
     }
 
-    public void shufflePlay() {
+    public String shufflePlay() {
         List<Song> list = toList();
         Collections.shuffle(list);
-        for (Song s : list) System.out.println(s);
+
+        StringBuilder sb = new StringBuilder();
+        for (Song s : list) {
+            sb.append(s).append("\n");
+        }
+
+        return sb.toString();
     }
+
 
     @Override
     public String toString() {

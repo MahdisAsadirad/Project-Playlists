@@ -1,58 +1,93 @@
 package org.example.demo9;
 
+import org.example.demo9.Controller.PlaylistController;
 import org.example.demo9.Model.song.Playlist;
-import org.example.demo9.Model.song.Song;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import org.example.demo9.Model.song.PlaylistManager;
+import org.example.demo9.View.CommandView;
 
 public class Main {
     public static void main(String[] args) {
-        // مسیر فایل CSV
-        String filePath = "C:\\Users\\RGB\\Downloads\\musics.csv";
+        PlaylistManager manager = new PlaylistManager();
+        PlaylistController controller = new PlaylistController(manager);
+        CommandView view = new CommandView(manager);
 
-        // ساخت یک پلی‌لیست جدید
-        Playlist myPlaylist = new Playlist("My Favorite Songs");
+        System.out.println(view.showMenu());
 
-        // خواندن فایل CSV و اضافه کردن آهنگ‌ها به پلی‌لیست
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            br.readLine(); // رد کردن هدر
-            while ((line = br.readLine()) != null) {
-                // جدا کردن مقادیر توسط کاما
-                String[] values = line.split(",");
-                if (values.length == 6) {
-                    Song song = new Song(
-                            values[0], // artistName
-                            values[1], // trackName
-                            values[2], // releaseDate
-                            values[3], // genre
-                            Double.parseDouble(values[4]), // length
-                            values[5]  // topic
-                    );
-                    myPlaylist.addSong(song);
+        while (true) {
+            String input = view.getUserCommand().trim();
+            if (input.equalsIgnoreCase("exit"))
+                break;
+
+            try {
+                String[] parts = input.split(" ", 2);
+                String command = parts[0].toLowerCase();
+
+                switch (command) {
+                    case "create": {
+                        controller.handleCreatePlaylist(parts[1]);
+                        view.displayMessage("Playlist created: " + parts[1]);
+                        break;
+                    }
+                    case "load": {
+                        String[] args2 = parts[1].split(" ");
+                        controller.loadSongsFromCSV(args2[0], args2[1]);
+                        view.displayMessage("Loaded songs from " + args2[0]);
+                        break;
+                    }
+                    case "list": {
+                        for (Playlist p : manager.allPlaylists()) {
+                            view.displayMessage(p.getName());
+                        }
+                        break;
+                    }
+                    case "show": {
+                        Playlist p = manager.getPlaylist(parts[1]);
+                        view.displayPlaylist(p);
+                        break;
+                    }
+                    case "play": {
+                        String[] args2 = parts[1].split(" ");
+                        String name = args2[0];
+                        boolean shuffle = args2.length > 1 && args2[1].equalsIgnoreCase("shuffle");
+                        controller.handlePlay(name, shuffle);
+                        break;
+                    }
+                    case "sort": {
+                        String[] args2 = parts[1].split(" ");
+                        controller.handleSort(args2[0], args2[1]);
+                        view.displayMessage("Sorted playlist: " + args2[0]);
+                        break;
+                    }
+                    case "filter": {
+                        String[] args2 = parts[1].split(" ");
+                        Playlist filtered = controller.handleFilter(args2[0], args2[1], args2[2]);
+                        view.displayPlaylist(filtered);
+                        break;
+                    }
+                    case "like": {
+                        String[] args2 = parts[1].split(" ");
+                        controller.handleLike(args2[0], args2[1]);
+                        view.displayMessage("Liked " + args2[1]);
+                        break;
+                    }
+                    case "unlike": {
+                        String[] args2 = parts[1].split(" ");
+                        controller.handleUnlike(args2[0], args2[1]);
+                        view.displayMessage("Unliked " + args2[1]);
+                        break;
+                    }
+                    case "liked": {
+                        Playlist liked = manager.getLikedSongsPlaylist();
+                        view.displayPlaylist(liked);
+                        break;
+                    }
+                    default:
+                        view.displayError("Unknown command: " + command);
                 }
+
+            } catch (Exception e) {
+                view.displayError("Error: " + e.getMessage());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
-        // چاپ پلی‌لیست کامل
-        System.out.println(myPlaylist);
-
-        // مثال: فیلتر کردن بر اساس ژانر
-        Playlist popSongs = myPlaylist.filterBy("genre", "pop");
-        System.out.println("Filtered by genre 'pop':");
-        popSongs.play();
-
-        // مثال: مرتب‌سازی بر اساس نام آهنگ
-        myPlaylist.sortBy("track name");
-        System.out.println("Sorted by track name:");
-        myPlaylist.play();
-
-        // مثال: Shuffle Play
-        System.out.println("Shuffle Play:");
-        myPlaylist.shufflePlay();
     }
 }

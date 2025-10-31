@@ -55,17 +55,21 @@ public class Song {
 
     @Override
     public String toString() {
-        return String.format("%s - %s (%s) [%s] %.0fs Topic:%s%s",
-                artistName, trackName, releaseDate, genre, length, topic, liked ? " <3" : "");
+        return "🎵 " + trackName + " by " + artistName + " (" + releaseDate + "), Genre: " + genre + ", Length: " + length + "s, Topic: " + topic;
     }
 
-    public boolean equals(Song song) {
-        if(song == null) return false;
-        return this.trackName.equalsIgnoreCase(song.getTrackName()) && this.artistName.equalsIgnoreCase(song.getArtistName());
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Song)) return false;
+        Song song = (Song) o;
+        return trackName.equalsIgnoreCase(song.trackName)
+                && artistName.equalsIgnoreCase(song.artistName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(artistName.toLowerCase(), trackName.toLowerCase());
+        return Objects.hash(trackName.toLowerCase(), artistName.toLowerCase());
     }
 }
