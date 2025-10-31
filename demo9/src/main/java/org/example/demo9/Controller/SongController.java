@@ -2,8 +2,10 @@ package org.example.demo9.Controller;
 
 import org.example.demo9.Model.util.Database;
 
-import java.sql.*;
-import java.util.Scanner;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class SongController {
     private final Database db;
@@ -12,82 +14,58 @@ public class SongController {
         this.db = db;
     }
 
-    // 🎶 نمایش لیست آهنگ‌ها از جدول songs
+    // 🎵 نمایش تمام آهنگ‌ها
     public void showAllSongs() {
-        String query = "SELECT id, artist_name, track_name, genre, len, topic FROM songs LIMIT 50";
+        String query = "SELECT id, artist_name, track_name, release_date, genre, len, topic FROM songs";
         try (Connection conn = db.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
 
-            System.out.println("\n🎶 Available Songs:");
-            System.out.println("-----------------------------------------------------------");
+            System.out.println("\n🎼 ----- All Songs in Library -----");
+            System.out.printf("%-5s | %-25s | %-35s | %-6s | %-10s | %-6s | %-10s%n",
+                    "ID", "Artist", "Track", "Year", "Genre", "Len", "Topic");
+            System.out.println("-----------------------------------------------------------------------------------------------");
+
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String artist = rs.getString("artist_name");
-                String track = rs.getString("track_name");
-                String genre = rs.getString("genre");
-                double len = rs.getDouble("len");
-                String topic = rs.getString("topic");
-
-                System.out.printf("%d. %s - %s (%s, %.1f sec, %s)\n",
-                        id, artist, track, genre, len, topic);
+                System.out.printf("%-5d | %-25s | %-35s | %-6d | %-10s | %-6d | %-10s%n",
+                        rs.getInt("id"),
+                        rs.getString("artist_name"),
+                        rs.getString("track_name"),
+                        rs.getInt("release_date"),
+                        rs.getString("genre"),
+                        rs.getInt("len"),
+                        rs.getString("topic"));
             }
-            System.out.println("-----------------------------------------------------------");
+            System.out.println("-----------------------------------------------------------------------------------------------");
 
         } catch (SQLException e) {
-            System.out.println("❌ Error loading songs: " + e.getMessage());
+            System.out.println("⚠️ Error while loading songs: " + e.getMessage());
         }
     }
 
-    // ➕ افزودن آهنگ به پلی‌لیست
+    // 🎶 اضافه کردن آهنگ به پلی‌لیست
     public void addSongToPlaylist(int playlistId, int songId) {
-        String query = "INSERT INTO playlist_songs (playlist_id, song_id) VALUES (?, ?)";
+        String query = "INSERT INTO playlist_songs (playlist_id, song_id) VALUES (" + playlistId + ", " + songId + ")";
         try (Connection conn = db.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setInt(1, playlistId);
-            ps.setInt(2, songId);
-            ps.executeUpdate();
-            System.out.println("✅ Song added to playlist!");
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(query);
+            System.out.println("✅ Song added successfully!");
         } catch (SQLException e) {
-            System.out.println("❌ Error adding song to playlist: " + e.getMessage());
+            System.out.println("⚠️ Failed to add song: " + e.getMessage());
         }
     }
 
     // ❌ حذف آهنگ از پلی‌لیست
-    public void removeSongFromPlaylist(Scanner scanner, int playlistId) {
-        String sqlList = "SELECT s.id, s.track_name FROM songs s " +
-                "JOIN playlist_songs ps ON s.id = ps.song_id WHERE ps.playlist_id = ?";
-
+    public void removeSongFromPlaylist(java.util.Scanner scanner, int playlistId) {
+        System.out.print("🎵 Enter Song ID to remove: ");
+        int songId = Integer.parseInt(scanner.nextLine());
+        String query = "DELETE FROM playlist_songs WHERE playlist_id = " + playlistId + " AND song_id = " + songId;
         try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sqlList)) {
-
-            stmt.setInt(1, playlistId);
-            ResultSet rs = stmt.executeQuery();
-
-            System.out.println("\n🎵 Songs in Playlist:");
-            while (rs.next()) {
-                System.out.println(rs.getInt("id") + ". " + rs.getString("track_name"));
-            }
-
-            rs.close();
-
-            System.out.print("👉 Enter Song ID to remove: ");
-            int songId = Integer.parseInt(scanner.nextLine());
-
-            String sqlDelete = "DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sqlDelete)) {
-                ps.setInt(1, playlistId);
-                ps.setInt(2, songId);
-                int rows = ps.executeUpdate();
-
-                if (rows > 0)
-                    System.out.println("✅ Song removed from playlist!");
-                else
-                    System.out.println("⚠️ Song not found in this playlist.");
-            }
-
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(query);
+            System.out.println("🗑️ Song removed successfully!");
         } catch (SQLException e) {
-            System.out.println("❌ Error removing song: " + e.getMessage());
+            System.out.println("⚠️ Failed to remove song: " + e.getMessage());
         }
     }
 }

@@ -4,7 +4,6 @@ import org.example.demo9.Controller.PlaylistController;
 import org.example.demo9.Controller.SignUpLogin;
 import org.example.demo9.Controller.SongController;
 import org.example.demo9.Model.util.Database;
-import org.example.demo9.Model.util.SongImporter;
 import org.example.demo9.Model.util.User;
 
 import java.sql.SQLException;
@@ -17,17 +16,12 @@ public class Main {
             SignUpLogin signUpLogin = new SignUpLogin(db.getConnection());
             PlaylistController playlistController = new PlaylistController(db);
 
-            // فقط یک بار ایمپورت آهنگ‌ها
-            String csvPath = "C:\\Users\\RGB\\Downloads\\musics.csv";
-            SongImporter.importCSV(csvPath, db.getConnection());
-            System.out.println("🎵 Songs loaded into database successfully!");
-
             Scanner scanner = new Scanner(System.in);
 
             System.out.println("*-*-* Welcome to Playlist *-*-*");
             User currentUser = null;
 
-            // 🔐 لاگین / ثبت‌نام
+
             while (currentUser == null) {
                 System.out.println("\n1️. Sign Up");
                 System.out.println("2️. Login");
@@ -57,7 +51,6 @@ public class Main {
                 }
             }
 
-            // 🎧 منوی اصلی
             boolean running = true;
             while (running) {
                 System.out.println("\n🎧 What would you like to do?");
