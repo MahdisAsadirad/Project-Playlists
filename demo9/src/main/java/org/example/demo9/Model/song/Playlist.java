@@ -5,11 +5,13 @@ import java.util.*;
 public class Playlist {
     private String name;
     private SongNode head;
+    private SongNode tail;
     private int size;
 
     public Playlist(String name) {
         this.name = name;
         this.head = null;
+        this.tail = null;
         this.size = 0;
     }
 
@@ -21,72 +23,71 @@ public class Playlist {
         return size;
     }
 
+
     public void addSong(Song song) {
         SongNode newNode = new SongNode(song);
         if (head == null) {
             head = newNode;
+            tail = newNode;
         } else {
-            SongNode currentNode = head;
-            while (currentNode.next != null) {
-                currentNode = currentNode.next;
-            }
-            currentNode.next = newNode;
+            tail.next = newNode;
+            newNode.prev = tail;
+            tail = newNode;
         }
         size++;
     }
 
+
     public boolean removeSong(String trackName) {
-        if (head == null) return false;
-        if (head.data.getTrackName().equals(trackName)) {
-            head = head.next;
-            size--;
-            return true;
-        }
-        SongNode prev = head;
-        SongNode currentNode = head.next;
-        while (currentNode != null) {
-            if (currentNode.data.getTrackName().equalsIgnoreCase(trackName)) {
-                prev.next = currentNode.next;
+        SongNode current = head;
+        while (current != null) {
+            if (current.data.getTrackName().equalsIgnoreCase(trackName)) {
+                if (current.prev != null) current.prev.next = current.next;
+                else head = current.next; // حذف اولین نود
+
+                if (current.next != null) current.next.prev = current.prev;
+                else tail = current.prev; // حذف آخرین نود
+
                 size--;
                 return true;
             }
-            prev = currentNode;
-            currentNode = currentNode.next;
+            current = current.next;
         }
         return false;
     }
 
+
     public Song findSong(String trackName) {
-        SongNode currentNode = head;
-        while (currentNode != null) {
-            if (currentNode.data.getTrackName().equalsIgnoreCase(trackName)) {
-                return currentNode.data;
-            }
-            currentNode = currentNode.next;
+        SongNode current = head;
+        while (current != null) {
+            if (current.data.getTrackName().equalsIgnoreCase(trackName)) return current.data;
+            current = current.next;
         }
         return null;
     }
 
+
     public List<Song> toList() {
         List<Song> songs = new ArrayList<>();
-        SongNode currentNode = head;
-        while (currentNode != null) {
-            songs.add(currentNode.data);
-            currentNode = currentNode.next;
+        SongNode current = head;
+        while (current != null) {
+            songs.add(current.data);
+            current = current.next;
         }
         return songs;
     }
 
     public void clear() {
         head = null;
+        tail = null;
         size = 0;
     }
+
 
     public void merge(Playlist other) {
         SongNode current = other.head;
         while (current != null) {
-            if (findSong(current.data.getTrackName()) == null)
-                addSong(current.data);
+            if (findSong(current.data.getTrackName()) == null) addSong(current.data);
             current = current.next;
         }
     }
@@ -96,16 +97,19 @@ public class Playlist {
         Playlist result = new Playlist(newName);
         List<Song> pool = new ArrayList<>();
         Set<Song> seen = new HashSet<>();
-        for (Playlist p : lists)
-            for (Song s : p.toList())
+        for (Playlist p : lists) {
+            for (Song s : p.toList()) {
                 if (!seen.contains(s)) {
                     pool.add(s);
                     seen.add(s);
                 }
+            }
+        }
         Collections.shuffle(pool);
         for (Song s : pool) result.addSong(s);
         return result;
     }
+
 
     public void sortBy(String criteria) {
         List<Song> list = toList();
@@ -131,6 +135,7 @@ public class Playlist {
         for (Song s : list) addSong(s);
     }
 
+
     public Playlist filterBy(String criteria, String value) {
         Playlist out = new Playlist(this.name + "-filtered");
         for (Song s : toList()) {
@@ -154,6 +159,7 @@ public class Playlist {
         return out;
     }
 
+
     public void likeSong(String trackName) {
         Song s = findSong(trackName);
         if (s != null) s.setLiked(true);
@@ -164,27 +170,23 @@ public class Playlist {
         if (s != null) s.setLiked(false);
     }
 
+
     public String play() {
         StringBuilder sb = new StringBuilder();
         SongNode current = head;
-
         while (current != null) {
             sb.append(current.data).append("\n");
             current = current.next;
         }
-
         return sb.toString();
     }
+
 
     public String shufflePlay() {
         List<Song> list = toList();
         Collections.shuffle(list);
-
         StringBuilder sb = new StringBuilder();
-        for (Song s : list) {
-            sb.append(s).append("\n");
-        }
-
+        for (Song s : list) sb.append(s).append("\n");
         return sb.toString();
     }
 
@@ -192,8 +194,38 @@ public class Playlist {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("Playlist '%s' (size=%d):\n", name, size));
-        for (Song s : toList()) sb.append(" ").append(s.toString()).append('\n');
+        sb.append(String.format("🎶 Playlist: '%s' | Total Songs: %d 🎶\n", name, size));
+        sb.append("------------------------------------------------------------------------------------\n");
+        sb.append(String.format("%-25s %-30s %-6s %-10s %-6s %-10s\n",
+                "Artist", "Track", "Year", "Genre", "     Len(s)", "Topic"));
+        sb.append("------------------------------------------------------------------------------------\n");
+
+        SongNode current = head;
+        while (current != null) {
+            Song s = current.data;
+            sb.append(String.format("%-25s %-30s %-6s %-15s %-6.0f %-40s\n",
+                    s.getArtistName(),
+                    s.getTrackName(),
+                    s.getReleaseDate(),
+                    s.getGenre(),
+                    s.getLength(),
+                    s.getTopic()));
+            current = current.next;
+        }
+
+        sb.append("------------------------------------------------------------------------------------\n");
+        return sb.toString();
+    }
+
+
+
+    public String playBackward() {
+        StringBuilder sb = new StringBuilder();
+        SongNode current = tail;
+        while (current != null) {
+            sb.append(current.data).append("\n");
+            current = current.prev;
+        }
         return sb.toString();
     }
 }

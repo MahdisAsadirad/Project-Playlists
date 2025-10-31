@@ -1,93 +1,57 @@
 package org.example.demo9;
 
-import org.example.demo9.Controller.PlaylistController;
-import org.example.demo9.Model.song.Playlist;
-import org.example.demo9.Model.song.PlaylistManager;
-import org.example.demo9.View.CommandView;
+import org.example.demo9.Model.SignUpLogin;
+import org.example.demo9.Model.User;
+import org.example.demo9.Model.song.*;
+import org.example.demo9.Model.util.Database;
+
+
+import java.util.*;
+
+import java.sql.*;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        PlaylistManager manager = new PlaylistManager();
-        PlaylistController controller = new PlaylistController(manager);
-        CommandView view = new CommandView(manager);
+        try {
+            Database db = new Database();
+            SignUpLogin signUpLogin = new SignUpLogin(db.getConnection());
+            Scanner scanner = new Scanner(System.in);
 
-        System.out.println(view.showMenu());
+            System.out.println("Welcome to Playlist!");
+            User currentUser = null;
 
-        while (true) {
-            String input = view.getUserCommand().trim();
-            if (input.equalsIgnoreCase("exit"))
-                break;
+            while (currentUser == null) {
+                System.out.println("1. Sign Up");
+                System.out.println("2. Login");
+                System.out.print("Choose an option: ");
+                String option = scanner.nextLine();
 
-            try {
-                String[] parts = input.split(" ", 2);
-                String command = parts[0].toLowerCase();
+                System.out.print("Username: ");
+                String username = scanner.nextLine();
+                System.out.print("Password: ");
+                String password = scanner.nextLine();
 
-                switch (command) {
-                    case "create": {
-                        controller.handleCreatePlaylist(parts[1]);
-                        view.displayMessage("Playlist created: " + parts[1]);
-                        break;
+                if (option.equals("1")) {
+                    if (signUpLogin.signUp(username, password)) {
+                        System.out.println("Sign Up successful! Now login.");
+                    } else {
+                        System.out.println("Sign Up failed! Username might exist.");
                     }
-                    case "load": {
-                        String[] args2 = parts[1].split(" ");
-                        controller.loadSongsFromCSV(args2[0], args2[1]);
-                        view.displayMessage("Loaded songs from " + args2[0]);
-                        break;
+                } else if (option.equals("2")) {
+                    currentUser = signUpLogin.login(username, password);
+                    if (currentUser != null) {
+                        System.out.println("Login successful! Welcome " + currentUser.getUsername());
+                    } else {
+                        System.out.println("Login failed! Try again.");
                     }
-                    case "list": {
-                        for (Playlist p : manager.allPlaylists()) {
-                            view.displayMessage(p.getName());
-                        }
-                        break;
-                    }
-                    case "show": {
-                        Playlist p = manager.getPlaylist(parts[1]);
-                        view.displayPlaylist(p);
-                        break;
-                    }
-                    case "play": {
-                        String[] args2 = parts[1].split(" ");
-                        String name = args2[0];
-                        boolean shuffle = args2.length > 1 && args2[1].equalsIgnoreCase("shuffle");
-                        controller.handlePlay(name, shuffle);
-                        break;
-                    }
-                    case "sort": {
-                        String[] args2 = parts[1].split(" ");
-                        controller.handleSort(args2[0], args2[1]);
-                        view.displayMessage("Sorted playlist: " + args2[0]);
-                        break;
-                    }
-                    case "filter": {
-                        String[] args2 = parts[1].split(" ");
-                        Playlist filtered = controller.handleFilter(args2[0], args2[1], args2[2]);
-                        view.displayPlaylist(filtered);
-                        break;
-                    }
-                    case "like": {
-                        String[] args2 = parts[1].split(" ");
-                        controller.handleLike(args2[0], args2[1]);
-                        view.displayMessage("Liked " + args2[1]);
-                        break;
-                    }
-                    case "unlike": {
-                        String[] args2 = parts[1].split(" ");
-                        controller.handleUnlike(args2[0], args2[1]);
-                        view.displayMessage("Unliked " + args2[1]);
-                        break;
-                    }
-                    case "liked": {
-                        Playlist liked = manager.getLikedSongsPlaylist();
-                        view.displayPlaylist(liked);
-                        break;
-                    }
-                    default:
-                        view.displayError("Unknown command: " + command);
                 }
-
-            } catch (Exception e) {
-                view.displayError("Error: " + e.getMessage());
             }
+
+            scanner.close();
+            db.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }
