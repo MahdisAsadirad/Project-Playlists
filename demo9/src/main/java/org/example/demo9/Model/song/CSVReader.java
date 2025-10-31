@@ -11,15 +11,16 @@ public class CSVReader {
             br.readLine();
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",", -1);
-                if (values.length >= 6) {
-                    String artist = values[0].trim();
-                    String track = values[1].trim();
-                    String release = values[2].trim();
-                    String genre = values[3].trim();
-                    double length = Double.parseDouble(values[4].trim());
-                    String topic = values[5].trim();
+                if (values.length >= 7) {
+                    int id = Integer.parseInt(values[0]);
+                    String artist = values[1].trim();
+                    String track = values[2].trim();
+                    String release = values[3].trim();
+                    String genre = values[4].trim();
+                    double length = Double.parseDouble(values[5].trim());
+                    String topic = values[6].trim();
 
-                    songs.add(new Song(artist, track, release, genre, length, topic));
+                    songs.add(new Song(id,artist, track, release, genre, length, topic));
                 }
             }
         } catch (IOException e) {

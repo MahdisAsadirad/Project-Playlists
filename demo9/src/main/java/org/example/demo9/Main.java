@@ -3,6 +3,7 @@ package org.example.demo9;
 import org.example.demo9.Controller.PlaylistController;
 import org.example.demo9.Controller.SignUpLogin;
 import org.example.demo9.Controller.SongController;
+import org.example.demo9.Model.song.Playlist;
 import org.example.demo9.Model.util.Database;
 import org.example.demo9.Model.util.User;
 
@@ -63,6 +64,7 @@ public class Main {
                 System.out.println("7️. Like / Dislike Song");
                 System.out.println("8️. Play Playlist");
                 System.out.println("9️. Play Playlist (Shuffle)");
+                System.out.println("10. Show song from playlist");
                 System.out.println("0️. Logout / Exit");
                 System.out.print("👉 Enter your choice: ");
 
@@ -112,6 +114,30 @@ public class Main {
                             System.out.println("⚠️ Invalid option!");
                         }
                     }
+
+                    case "10" -> {
+                        playlistController.showPlaylists(currentUser);
+                        System.out.print("🎧 Enter playlist ID to view songs: ");
+                        int playlistId = Integer.parseInt(scanner.nextLine());
+
+
+                        Playlist selectedPlaylist = new Playlist(playlistId, "Temporary", currentUser.getId());
+
+                        try {
+
+                            selectedPlaylist.loadSongsFromDatabase(db.getConnection());
+
+                            System.out.println(selectedPlaylist.toString());
+
+                            if (selectedPlaylist.getSize() == 0) {
+                                System.out.println("📭 This playlist is empty!");
+                            }
+
+                        } catch (SQLException e) {
+                            System.out.println("⚠️ Error loading songs: " + e.getMessage());
+                        }
+                    }
+
 
                     case "0" -> {
                         System.out.println("👋 Goodbye, " + currentUser.getUsername() + "!");

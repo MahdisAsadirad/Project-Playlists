@@ -14,7 +14,7 @@ public class SongController {
         this.db = db;
     }
 
-    // 🎵 نمایش تمام آهنگ‌ها
+
     public void showAllSongs() {
         String query = "SELECT id, artist_name, track_name, release_date, genre, len, topic FROM songs";
         try (Connection conn = db.getConnection();

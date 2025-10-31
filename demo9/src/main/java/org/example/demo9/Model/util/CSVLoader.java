@@ -16,18 +16,19 @@ public class CSVLoader {
             while ((line = br.readLine()) != null) {
 
                 String[] parts = splitCSV(line);
-                if (parts.length < 6) continue;
-                String artist = parts[0];
-                String track = parts[1];
-                String date = parts[2];
-                String genre = parts[3];
+                if (parts.length < 7) continue;
+                int id = Integer.parseInt(parts[0]);
+                String artist = parts[1];
+                String track = parts[2];
+                String date = parts[3];
+                String genre = parts[4];
                 double len = 0;
                 try {
                     len = Double.parseDouble(parts[4]);
                 } catch (NumberFormatException e) {
                 }
                 String topic = parts[5];
-                out.add(new Song(artist, track, date, genre, len, topic));
+                out.add(new Song(id,artist, track, date, genre, len, topic));
             }
         }
         return out;

@@ -3,6 +3,7 @@ package org.example.demo9.Model.song;
 import java.util.Objects;
 
 public class Song {
+    private int id;
     private String artistName;
     private String trackName;
     private String releaseDate;
@@ -11,7 +12,8 @@ public class Song {
     private String topic;
     private boolean liked;
 
-    public Song(String artistName, String trackName, String releaseDate, String genre, double length, String topic) {
+    public Song(int id,String artistName, String trackName, String releaseDate, String genre, double length, String topic) {
+        this.id=id;
         this.artistName = artistName;
         this.trackName = trackName;
         this.releaseDate = releaseDate;
@@ -19,6 +21,10 @@ public class Song {
         this.length = length;
         this.topic = topic;
         this.liked = false;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getArtistName() {
