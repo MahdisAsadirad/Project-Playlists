@@ -8,9 +8,9 @@ public class CSVReader {
         List<Song> songs = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
-            br.readLine(); // رد کردن هدر CSV
+            br.readLine();
             while ((line = br.readLine()) != null) {
-                String[] values = line.split(",", -1); // -1 برای حفظ خالی‌ها
+                String[] values = line.split(",", -1);
                 if (values.length >= 6) {
                     String artist = values[0].trim();
                     String track = values[1].trim();

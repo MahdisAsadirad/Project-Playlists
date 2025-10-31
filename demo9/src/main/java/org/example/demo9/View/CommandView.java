@@ -1,20 +1,12 @@
 package org.example.demo9.View;
 
 import org.example.demo9.Model.song.Playlist;
-import org.example.demo9.Model.song.PlaylistManager;
 import org.example.demo9.Model.song.Song;
 
 import java.util.Scanner;
 
 public class CommandView {
     private Scanner scanner = new Scanner(System.in);
-    private PlaylistManager manager;
-
-
-    public CommandView(PlaylistManager manager) {
-        this.manager = manager;
-    }
-
 
     public String showMenu() {
         StringBuilder sb = new StringBuilder();

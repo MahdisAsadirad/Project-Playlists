@@ -79,5 +79,19 @@ public class PlaylistController {
             System.out.println("❌ Error deleting playlist: " + e.getMessage());
         }
     }
+
+    public  void showAllSongs(Connection conn) throws SQLException {
+        String query = "SELECT * FROM songs LIMIT 20"; // برای تست 20 تا اول رو نشون بده
+        PreparedStatement ps = conn.prepareStatement(query);
+        var rs = ps.executeQuery();
+
+        System.out.println("\n🎶 Available Songs:");
+        while (rs.next()) {
+            System.out.println(rs.getInt("id") + ". " +
+                    rs.getString("artist_name") + " - " +
+                    rs.getString("track_name") + " (" + rs.getString("genre") + ")");
+        }
+    }
+
 }
 

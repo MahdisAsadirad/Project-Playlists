@@ -2,7 +2,9 @@ package org.example.demo9;
 
 import org.example.demo9.Controller.PlaylistController;
 import org.example.demo9.Controller.SignUpLogin;
+import org.example.demo9.Controller.SongController;
 import org.example.demo9.Model.util.Database;
+import org.example.demo9.Model.util.SongImporter;
 import org.example.demo9.Model.util.User;
 
 import java.sql.SQLException;
@@ -14,12 +16,18 @@ public class Main {
             Database db = new Database();
             SignUpLogin signUpLogin = new SignUpLogin(db.getConnection());
             PlaylistController playlistController = new PlaylistController(db);
+
+            // فقط یک بار ایمپورت آهنگ‌ها
+            String csvPath = "C:\\Users\\RGB\\Downloads\\musics.csv";
+            SongImporter.importCSV(csvPath, db.getConnection());
+            System.out.println("🎵 Songs loaded into database successfully!");
+
             Scanner scanner = new Scanner(System.in);
 
             System.out.println("*-*-* Welcome to Playlist *-*-*");
             User currentUser = null;
 
-
+            // 🔐 لاگین / ثبت‌نام
             while (currentUser == null) {
                 System.out.println("\n1️. Sign Up");
                 System.out.println("2️. Login");
@@ -49,7 +57,7 @@ public class Main {
                 }
             }
 
-
+            // 🎧 منوی اصلی
             boolean running = true;
             while (running) {
                 System.out.println("\n🎧 What would you like to do?");
@@ -66,9 +74,9 @@ public class Main {
                 System.out.print("👉 Enter your choice: ");
 
                 String choice = scanner.nextLine();
+                SongController songController = new SongController(db);
 
                 switch (choice) {
-
                     case "1" -> {
                         boolean playlistMenu = true;
                         while (playlistMenu) {
@@ -80,7 +88,6 @@ public class Main {
                             System.out.print("👉 Enter your choice: ");
 
                             String subChoice = scanner.nextLine();
-
                             switch (subChoice) {
                                 case "1" -> playlistController.showPlaylists(currentUser);
                                 case "2" -> playlistController.createPlaylist(currentUser, scanner);
@@ -91,19 +98,33 @@ public class Main {
                         }
                     }
 
+                    case "2" -> {
+                        playlistController.showPlaylists(currentUser);
+                        System.out.print("🎧 Enter playlist ID to manage songs: ");
+                        int playlistId = Integer.parseInt(scanner.nextLine());
 
-                    case "2" -> System.out.println("Adding or removing song...");
-                    case "3" -> System.out.println("Merging playlists...");
-                    case "4" -> System.out.println("Performing shuffle merge...");
-                    case "5" -> System.out.println("Sorting playlist...");
-                    case "6" -> System.out.println("Filtering playlist...");
-                    case "7" -> System.out.println("❤Toggling like/dislike...");
-                    case "8" -> System.out.println("▶Playing playlist...");
-                    case "9" -> System.out.println("Playing playlist (shuffle)...");
+                        System.out.println("\n1. ➕ Add Song");
+                        System.out.println("2. ❌ Remove Song");
+                        System.out.print("Choose: ");
+                        String sub = scanner.nextLine();
+
+                        if (sub.equals("1")) {
+                            songController.showAllSongs();
+                            System.out.print("🎵 Enter Song ID to add: ");
+                            int songId = Integer.parseInt(scanner.nextLine());
+                            songController.addSongToPlaylist(playlistId, songId);
+                        } else if (sub.equals("2")) {
+                            songController.removeSongFromPlaylist(scanner, playlistId);
+                        } else {
+                            System.out.println("⚠️ Invalid option!");
+                        }
+                    }
+
                     case "0" -> {
                         System.out.println("👋 Goodbye, " + currentUser.getUsername() + "!");
                         running = false;
                     }
+
                     default -> System.out.println("⚠️ Invalid choice! Please try again.");
                 }
             }
