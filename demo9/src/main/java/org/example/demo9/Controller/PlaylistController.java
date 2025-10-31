@@ -1,11 +1,7 @@
 package org.example.demo9.Controller;
 
 import org.example.demo9.Model.util.Database;
-<<<<<<< HEAD
 import org.example.demo9.Model.util.User;
-=======
-import org.example.demo9.Model.song.User;
->>>>>>> Mahdis
 
 import java.sql.*;
 import java.util.Scanner;
@@ -17,7 +13,6 @@ public class PlaylistController {
         this.conn = db.getConnection();
     }
 
-<<<<<<< HEAD
 
     public void createPlaylist(User user, Scanner scanner) {
         try {
@@ -30,20 +25,6 @@ public class PlaylistController {
             stmt.setString(2, name);
             stmt.executeUpdate();
 
-=======
-    // ایجاد پلی‌لیست جدید
-    public void createPlaylist(User user, Scanner scanner) {
-        try {
-            System.out.print("🎵 Enter new playlist name: ");
-            String name = scanner.nextLine();
-
-            String sql = "INSERT INTO playlists (user_id, name) VALUES (?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, user.getId());
-            stmt.setString(2, name);
-            stmt.executeUpdate();
-
->>>>>>> Mahdis
             System.out.println("✅ Playlist '" + name + "' created successfully!");
             stmt.close();
         } catch (SQLException e) {
@@ -51,7 +32,6 @@ public class PlaylistController {
         }
     }
 
-<<<<<<< HEAD
 
     public void showPlaylists(User user) {
         try {
@@ -76,35 +56,7 @@ public class PlaylistController {
             System.out.println("❌ Error fetching playlists: " + e.getMessage());
         }
     }
-    
-=======
-    // نمایش لیست پلی‌لیست‌ها
-    public void showPlaylists(User user) {
-        try {
-            String sql = "SELECT id, name FROM playlists WHERE user_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, user.getId());
-            ResultSet rs = stmt.executeQuery();
 
-            System.out.println("\n🎧 Your Playlists:");
-            boolean hasPlaylists = false;
-            while (rs.next()) {
-                System.out.println(" - [" + rs.getInt("id") + "] " + rs.getString("name"));
-                hasPlaylists = true;
-            }
-
-            if (!hasPlaylists)
-                System.out.println("(No playlists yet!)");
-
-            rs.close();
-            stmt.close();
-        } catch (SQLException e) {
-            System.out.println("❌ Error fetching playlists: " + e.getMessage());
-        }
-    }
-
-    // حذف پلی‌لیست
->>>>>>> Mahdis
     public void deletePlaylist(User user, Scanner scanner) {
         try {
             showPlaylists(user);
@@ -128,3 +80,4 @@ public class PlaylistController {
         }
     }
 }
+

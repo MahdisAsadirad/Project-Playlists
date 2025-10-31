@@ -3,11 +3,7 @@ package org.example.demo9;
 import org.example.demo9.Controller.PlaylistController;
 import org.example.demo9.Controller.SignUpLogin;
 import org.example.demo9.Model.util.Database;
-<<<<<<< HEAD
 import org.example.demo9.Model.util.User;
-=======
-import org.example.demo9.Model.song.User;
->>>>>>> Mahdis
 
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -25,11 +21,7 @@ public class Main {
 
 
             while (currentUser == null) {
-<<<<<<< HEAD
                 System.out.println("\n1️. Sign Up");
-=======
-                System.out.println("1️. Sign Up");
->>>>>>> Mahdis
                 System.out.println("2️. Login");
                 System.out.print("Choose an option: ");
                 String option = scanner.nextLine();
