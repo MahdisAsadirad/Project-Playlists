@@ -1,8 +1,9 @@
 package org.example.demo9;
 
+import org.example.demo9.Controller.PlaylistController;
 import org.example.demo9.Controller.SignUpLogin;
-import org.example.demo9.Model.song.User;
 import org.example.demo9.Model.util.Database;
+import org.example.demo9.Model.song.User;
 
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -12,15 +13,16 @@ public class Main {
         try {
             Database db = new Database();
             SignUpLogin signUpLogin = new SignUpLogin(db.getConnection());
+            PlaylistController playlistController = new PlaylistController(db);
             Scanner scanner = new Scanner(System.in);
 
-            System.out.println("Welcome to Playlist 🎵");
+            System.out.println("*-*-* Welcome to Playlist *-*-*");
             User currentUser = null;
 
 
             while (currentUser == null) {
-                System.out.println("1.Sign Up");
-                System.out.println("2️.Login");
+                System.out.println("1️. Sign Up");
+                System.out.println("2️. Login");
                 System.out.print("Choose an option: ");
                 String option = scanner.nextLine();
 
@@ -51,7 +53,7 @@ public class Main {
             boolean running = true;
             while (running) {
                 System.out.println("\n🎧 What would you like to do?");
-                System.out.println("1️. Create Playlist");
+                System.out.println("1️. Playlist Management");
                 System.out.println("2️. Add / Remove Song from Playlist");
                 System.out.println("3️. Merge Two Playlists");
                 System.out.println("4️. Shuffle Merge");
@@ -66,12 +68,35 @@ public class Main {
                 String choice = scanner.nextLine();
 
                 switch (choice) {
-                    case "1" -> System.out.println("Creating a new playlist...");
+
+                    case "1" -> {
+                        boolean playlistMenu = true;
+                        while (playlistMenu) {
+                            System.out.println("\n🎵 Playlist Menu:");
+                            System.out.println("1️. Show Playlists");
+                            System.out.println("2️. Create Playlist");
+                            System.out.println("3️. Delete Playlist");
+                            System.out.println("0️. Back to Main Menu");
+                            System.out.print("👉 Enter your choice: ");
+
+                            String subChoice = scanner.nextLine();
+
+                            switch (subChoice) {
+                                case "1" -> playlistController.showPlaylists(currentUser);
+                                case "2" -> playlistController.createPlaylist(currentUser, scanner);
+                                case "3" -> playlistController.deletePlaylist(currentUser, scanner);
+                                case "0" -> playlistMenu = false;
+                                default -> System.out.println("⚠️ Invalid choice! Try again.");
+                            }
+                        }
+                    }
+
+
                     case "2" -> System.out.println("Adding or removing song...");
                     case "3" -> System.out.println("Merging playlists...");
                     case "4" -> System.out.println("Performing shuffle merge...");
                     case "5" -> System.out.println("Sorting playlist...");
-                    case "6" -> System.out.println("🎚Filtering playlist...");
+                    case "6" -> System.out.println("Filtering playlist...");
                     case "7" -> System.out.println("❤Toggling like/dislike...");
                     case "8" -> System.out.println("▶Playing playlist...");
                     case "9" -> System.out.println("Playing playlist (shuffle)...");

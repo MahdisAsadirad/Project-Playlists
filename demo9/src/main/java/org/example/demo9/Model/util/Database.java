@@ -14,7 +14,7 @@ public class Database {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection(URL, USER, PASS);
-            System.out.println("Connected to Database successfully!");
+            System.out.println("Connected to Database successfully!\n");
         } catch (ClassNotFoundException e) {
             System.out.println("❌ MySQL Driver not found!");
         }
