@@ -1,93 +1,93 @@
 package org.example.demo9;
 
-import org.example.demo9.Controller.PlaylistController;
-import org.example.demo9.Model.song.Playlist;
-import org.example.demo9.Model.song.PlaylistManager;
-import org.example.demo9.View.CommandView;
+import org.example.demo9.Controller.SignUpLogin;
+import org.example.demo9.Model.song.User;
+import org.example.demo9.Model.util.Database;
+
+import java.sql.SQLException;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        PlaylistManager manager = new PlaylistManager();
-        PlaylistController controller = new PlaylistController(manager);
-        CommandView view = new CommandView(manager);
+        try {
+            Database db = new Database();
+            SignUpLogin signUpLogin = new SignUpLogin(db.getConnection());
+            Scanner scanner = new Scanner(System.in);
 
-        System.out.println(view.showMenu());
+            System.out.println("Welcome to Playlist 🎵");
+            User currentUser = null;
 
-        while (true) {
-            String input = view.getUserCommand().trim();
-            if (input.equalsIgnoreCase("exit"))
-                break;
 
-            try {
-                String[] parts = input.split(" ", 2);
-                String command = parts[0].toLowerCase();
+            while (currentUser == null) {
+                System.out.println("1.Sign Up");
+                System.out.println("2️.Login");
+                System.out.print("Choose an option: ");
+                String option = scanner.nextLine();
 
-                switch (command) {
-                    case "create": {
-                        controller.handleCreatePlaylist(parts[1]);
-                        view.displayMessage("Playlist created: " + parts[1]);
-                        break;
+                System.out.print("Username: ");
+                String username = scanner.nextLine();
+                System.out.print("Password: ");
+                String password = scanner.nextLine();
+
+                if (option.equals("1")) {
+                    if (signUpLogin.signUp(username, password)) {
+                        System.out.println("✅ Sign Up successful! Now login.");
+                    } else {
+                        System.out.println("⚠️ Sign Up failed! Username might already exist.");
                     }
-                    case "load": {
-                        String[] args2 = parts[1].split(" ");
-                        controller.loadSongsFromCSV(args2[0], args2[1]);
-                        view.displayMessage("Loaded songs from " + args2[0]);
-                        break;
+                } else if (option.equals("2")) {
+                    currentUser = signUpLogin.login(username, password);
+                    if (currentUser != null) {
+                        System.out.println("🎉 Login successful! Welcome, " + currentUser.getUsername() + "!");
+                    } else {
+                        System.out.println("❌ Login failed! Try again.");
                     }
-                    case "list": {
-                        for (Playlist p : manager.allPlaylists()) {
-                            view.displayMessage(p.getName());
-                        }
-                        break;
-                    }
-                    case "show": {
-                        Playlist p = manager.getPlaylist(parts[1]);
-                        view.displayPlaylist(p);
-                        break;
-                    }
-                    case "play": {
-                        String[] args2 = parts[1].split(" ");
-                        String name = args2[0];
-                        boolean shuffle = args2.length > 1 && args2[1].equalsIgnoreCase("shuffle");
-                        controller.handlePlay(name, shuffle);
-                        break;
-                    }
-                    case "sort": {
-                        String[] args2 = parts[1].split(" ");
-                        controller.handleSort(args2[0], args2[1]);
-                        view.displayMessage("Sorted playlist: " + args2[0]);
-                        break;
-                    }
-                    case "filter": {
-                        String[] args2 = parts[1].split(" ");
-                        Playlist filtered = controller.handleFilter(args2[0], args2[1], args2[2]);
-                        view.displayPlaylist(filtered);
-                        break;
-                    }
-                    case "like": {
-                        String[] args2 = parts[1].split(" ");
-                        controller.handleLike(args2[0], args2[1]);
-                        view.displayMessage("Liked " + args2[1]);
-                        break;
-                    }
-                    case "unlike": {
-                        String[] args2 = parts[1].split(" ");
-                        controller.handleUnlike(args2[0], args2[1]);
-                        view.displayMessage("Unliked " + args2[1]);
-                        break;
-                    }
-                    case "liked": {
-                        Playlist liked = manager.getLikedSongsPlaylist();
-                        view.displayPlaylist(liked);
-                        break;
-                    }
-                    default:
-                        view.displayError("Unknown command: " + command);
+                } else {
+                    System.out.println("Invalid option!");
                 }
-
-            } catch (Exception e) {
-                view.displayError("Error: " + e.getMessage());
             }
+
+
+            boolean running = true;
+            while (running) {
+                System.out.println("\n🎧 What would you like to do?");
+                System.out.println("1️. Create Playlist");
+                System.out.println("2️. Add / Remove Song from Playlist");
+                System.out.println("3️. Merge Two Playlists");
+                System.out.println("4️. Shuffle Merge");
+                System.out.println("5️. Sort Playlist");
+                System.out.println("6️. Filter Playlist");
+                System.out.println("7️. Like / Dislike Song");
+                System.out.println("8️. Play Playlist");
+                System.out.println("9️. Play Playlist (Shuffle)");
+                System.out.println("0️. Logout / Exit");
+                System.out.print("👉 Enter your choice: ");
+
+                String choice = scanner.nextLine();
+
+                switch (choice) {
+                    case "1" -> System.out.println("Creating a new playlist...");
+                    case "2" -> System.out.println("Adding or removing song...");
+                    case "3" -> System.out.println("Merging playlists...");
+                    case "4" -> System.out.println("Performing shuffle merge...");
+                    case "5" -> System.out.println("Sorting playlist...");
+                    case "6" -> System.out.println("🎚Filtering playlist...");
+                    case "7" -> System.out.println("❤Toggling like/dislike...");
+                    case "8" -> System.out.println("▶Playing playlist...");
+                    case "9" -> System.out.println("Playing playlist (shuffle)...");
+                    case "0" -> {
+                        System.out.println("👋 Goodbye, " + currentUser.getUsername() + "!");
+                        running = false;
+                    }
+                    default -> System.out.println("⚠️ Invalid choice! Please try again.");
+                }
+            }
+
+            scanner.close();
+            db.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }
