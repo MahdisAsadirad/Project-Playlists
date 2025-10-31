@@ -1,6 +1,10 @@
 package org.example.demo9.Controller;
 
+<<<<<<< HEAD
 import org.example.demo9.Model.util.User;
+=======
+import org.example.demo9.Model.song.User;
+>>>>>>> Mahdis
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,7 +19,11 @@ public class SignUpLogin {
         this.conn = conn;
     }
 
+<<<<<<< HEAD
     // ثبت نام
+=======
+
+>>>>>>> Mahdis
     public boolean signUp(String username, String password) throws SQLException {
         String query = "INSERT INTO users(username, password) VALUES (?, ?)";
         PreparedStatement ps = conn.prepareStatement(query);
@@ -24,7 +32,11 @@ public class SignUpLogin {
         return ps.executeUpdate() > 0;
     }
 
+<<<<<<< HEAD
     // ورود
+=======
+
+>>>>>>> Mahdis
     public User login(String username, String password) throws SQLException {
         String query = "SELECT * FROM users WHERE username = ? AND password = ?";
         PreparedStatement ps = conn.prepareStatement(query);
