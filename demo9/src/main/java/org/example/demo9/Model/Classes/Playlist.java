@@ -226,14 +226,13 @@ public class Playlist {
         }
     }
 
-    // ✅ بارگذاری آهنگ‌ها از دیتابیس
+    // ✅ بارگذاری آهنگ‌ها از دیتابیس - اصلاح شده برای جاوا 11
     public void loadSongsFromDatabase(Connection conn) throws SQLException {
-        String query = """
-                SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic
-                FROM songs s
-                JOIN playlist_songs ps ON s.id = ps.song_id
-                WHERE ps.playlist_id = ?
-                """;
+        // جایگزینی Text Block با String معمولی
+        String query = "SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic " +
+                "FROM songs s " +
+                "JOIN playlist_songs ps ON s.id = ps.song_id " +
+                "WHERE ps.playlist_id = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, this.id);

@@ -32,7 +32,6 @@ public class LoginController {
 
     @FXML
     public void initialize() {
-        // اضافه کردن استایل هنگام هاور
         loginButton.setOnMouseEntered(e -> loginButton.setStyle("-fx-background-color: #5a6fd8; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-width: 300; -fx-pref-height: 45; -fx-background-radius: 8;"));
         loginButton.setOnMouseExited(e -> loginButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-width: 300; -fx-pref-height: 45; -fx-background-radius: 8;"));
 
@@ -86,7 +85,7 @@ public class LoginController {
 
     private void loadMainDashboard(User user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/sections/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Dashboard.fxml"));
             Parent root = loader.load();
 
             DashboardController controller = loader.getController();
@@ -98,6 +97,7 @@ public class LoginController {
 
         } catch (Exception e) {
             showError("Error loading dashboard: " + e.getMessage());
+            e.printStackTrace(); // برای دیباگ بهتر
         }
     }
 

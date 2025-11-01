@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class LikedSongsController implements Initializable {
@@ -33,18 +35,18 @@ public class LikedSongsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // می‌توانید استایل‌های اضافی اینجا اضافه کنید
     }
 
     private void loadLikedSongs() {
         likedSongsContainer.getChildren().clear();
 
-        String query = """
-            SELECT s.id, s.track_name, s.artist_name, s.genre, s.release_date, s.len, s.topic
-            FROM liked_songs ls
-            JOIN songs s ON ls.song_id = s.id
-            WHERE ls.user_id = ?
-            ORDER BY ls.created_at DESC
-            """;
+        // جایگزینی Text Block با String معمولی
+        String query = "SELECT s.id, s.track_name, s.artist_name, s.genre, s.release_date, s.len, s.topic " +
+                "FROM liked_songs ls " +
+                "JOIN songs s ON ls.song_id = s.id " +
+                "WHERE ls.user_id = ? " +
+                "ORDER BY ls.created_at DESC";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -82,11 +84,11 @@ public class LikedSongsController implements Initializable {
         HBox card = new HBox(15);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600;");
 
-
+        // آیکون قلب
         Label heartIcon = new Label("❤️");
         heartIcon.setStyle("-fx-font-size: 20;");
 
-
+        // اطلاعات آهنگ
         VBox songInfo = new VBox(5);
         songInfo.setPrefWidth(400);
 
@@ -151,7 +153,7 @@ public class LikedSongsController implements Initializable {
         dialog.setTitle("Add to Playlist");
         dialog.setHeaderText("Select a playlist to add this song to");
 
-        java.util.List<String> playlists = getUserPlaylists();
+        List<String> playlists = getUserPlaylists();
         dialog.getItems().addAll(playlists);
 
         dialog.showAndWait().ifPresent(playlistName -> {
@@ -159,8 +161,8 @@ public class LikedSongsController implements Initializable {
         });
     }
 
-    private java.util.List<String> getUserPlaylists() {
-        java.util.List<String> playlists = new java.util.ArrayList<>();
+    private List<String> getUserPlaylists() {
+        List<String> playlists = new ArrayList<>();
         String sql = "SELECT name FROM playlists WHERE user_id = ?";
 
         try (Connection conn = db.getConnection();

@@ -7,7 +7,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 
@@ -34,11 +33,8 @@ public class PlaylistsController {
 
     @FXML
     public void initialize() {
-
-        DashboardController dashboardController = (DashboardController) playlistsContainer.getScene().getWindow().getUserData();
-        if (dashboardController != null) {
-            setCurrentUser(dashboardController.getCurrentUser());
-        }
+        // اینجا نمی‌توانیم از getScene() استفاده کنیم چون هنوز کامپوننت به صحنه اضافه نشده
+        // کاربر از طریق DashboardController تنظیم خواهد شد
     }
 
     private void loadPlaylists() {
@@ -71,22 +67,18 @@ public class PlaylistsController {
         card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20; -fx-border-color: #e0e0e0; -fx-border-radius: 10;");
         card.setPrefWidth(600);
 
-
         Label icon = new Label("🎵");
         icon.setStyle("-fx-font-size: 24;");
-
 
         VBox info = new VBox(5);
         Label nameLabel = new Label(playlistName);
         nameLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #333;");
-
 
         int songCount = getSongCount(playlistId);
         Label countLabel = new Label(songCount + " songs");
         countLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 14;");
 
         info.getChildren().addAll(nameLabel, countLabel);
-
 
         HBox actions = new HBox(10);
 
@@ -188,6 +180,7 @@ public class PlaylistsController {
             PlaylistSongsController controller = loader.getController();
             controller.setPlaylistInfo(playlistId, playlistName, currentUser);
 
+            // پیدا کردن contentArea از طریق صحنه
             StackPane contentArea = (StackPane) playlistsContainer.getScene().lookup("#contentArea");
             if (contentArea != null) {
                 contentArea.getChildren().setAll(songsSection);

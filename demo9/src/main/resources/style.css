@@ -1,18 +1,17 @@
-/* style.css */
+
 .root {
     -fx-font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* استایل دکمه‌های سایدبار */
 .sidebar-button {
     -fx-background-color: transparent;
     -fx-text-fill: #333;
-    -fx-font-size: 14;
-    -fx-pref-width: 100%;
+    -fx-font-size: 14px;
     -fx-alignment: center-left;
     -fx-padding: 12 15;
     -fx-border-radius: 0;
     -fx-background-radius: 0;
+    -fx-border-width: 0;
 }
 
 .sidebar-button:hover {
@@ -20,12 +19,10 @@
     -fx-text-fill: #333;
 }
 
-.sidebar-button:pressed {
-    -fx-background-color: #667eea;
-    -fx-text-fill: white;
+.button {
+    -fx-cursor: hand;
 }
 
-/* استایل کارت‌ها */
 .playlist-card {
     -fx-background-color: white;
     -fx-background-radius: 10;
@@ -42,7 +39,6 @@
     -fx-padding: 15;
 }
 
-/* استایل دکمه‌های action */
 .primary-button {
     -fx-background-color: #667eea;
     -fx-text-fill: white;
@@ -79,173 +75,21 @@
     -fx-background-color: #218838;
 }
 
-.warning-button {
-    -fx-background-color: #e67e22;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8;
-    -fx-padding: 10 20;
-}
-
-.warning-button:hover {
-    -fx-background-color: #d35400;
-}
-
-.info-button {
-    -fx-background-color: #3498db;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8;
-    -fx-padding: 10 20;
-}
-
-.info-button:hover {
-    -fx-background-color: #2980b9;
-}
-
-/* استایل input fields */
-.modern-input {
-    -fx-background-color: white;
-    -fx-border-color: #ddd;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-padding: 12;
-    -fx-font-size: 14;
-}
-
-.modern-input:focused {
-    -fx-border-color: #667eea;
-    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.3), 10, 0, 0, 0);
-}
-
-/* استایل combo boxes */
-.combo-box {
-    -fx-background-color: white;
-    -fx-border-color: #ddd;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-}
-
-.combo-box .list-cell {
-    -fx-padding: 8 12;
-}
-
-.combo-box .list-view {
-    -fx-background-color: white;
-    -fx-border-color: #ddd;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-}
-
-/* استایل radio buttons */
-.radio-button {
-    -fx-text-fill: #333;
-    -fx-font-size: 14;
-}
-
-.radio-button .radio {
-    -fx-border-color: #667eea;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
-}
-
-.radio-button:selected .radio {
-    -fx-background-color: #667eea;
-}
-
-/* استایل scrollbars */
-.scroll-pane {
-    -fx-background-color: transparent;
-}
-
-.scroll-pane .viewport {
-    -fx-background-color: transparent;
-}
-
-.scroll-bar:horizontal, .scroll-bar:vertical {
-    -fx-background-color: transparent;
-}
-
-.scroll-bar:horizontal .track, .scroll-bar:vertical .track {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-}
-
-.scroll-bar:horizontal .thumb, .scroll-bar:vertical .thumb {
-    -fx-background-color: #c0c0c0;
-    -fx-background-radius: 5;
-}
-
-.scroll-bar:horizontal .thumb:hover, .scroll-bar:vertical .thumb:hover {
-    -fx-background-color: #a0a0a0;
-}
-
-/* استایل لیست ویو */
-.list-view {
-    -fx-background-color: white;
-    -fx-border-color: #ddd;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-}
-
-.list-view .list-cell {
-    -fx-padding: 10;
-    -fx-border-color: #f0f0f0;
-    -fx-border-width: 0 0 1 0;
-}
-
-.list-view .list-cell:filled:hover {
-    -fx-background-color: #f8f9fa;
-}
-
-.list-view .list-cell:filled:selected {
-    -fx-background-color: #667eea;
-    -fx-text-fill: white;
-}
-
-/* استایل جداول */
-.table-view {
-    -fx-background-color: white;
-    -fx-border-color: #e0e0e0;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-}
-
-.table-view .column-header {
-    -fx-background-color: #667eea;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-}
-
-.table-view .table-row-cell:even {
-    -fx-background-color: #f8f9fa;
-}
-
-.table-view .table-row-cell:odd {
-    -fx-background-color: white;
-}
-
-.table-view .table-row-cell:selected {
-    -fx-background-color: #667eea;
-    -fx-text-fill: white;
-}
-
-/* استایل labels */
 .title-label {
-    -fx-font-size: 24;
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
     -fx-text-fill: #333;
 }
 
 .subtitle-label {
-    -fx-font-size: 16;
+    -fx-font-size: 10px;
     -fx-font-weight: bold;
     -fx-text-fill: #333;
 }
 
 .info-label {
     -fx-text-fill: #666;
-    -fx-font-size: 14;
+    -fx-font-size: 14px;
 }
 
 .success-label {
@@ -256,4 +100,25 @@
 .error-label {
     -fx-text-fill: #e74c3c;
     -fx-font-weight: bold;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.content-area {
+    -fx-background-color: #f8f9fa;
+}
+.sidebar {
+    -fx-background-color: white;
+    -fx-padding: 20;
+    -fx-pref-width: 300;
+}
+
+.user-section {
+    -fx-padding: 20 0 0 0;
 }

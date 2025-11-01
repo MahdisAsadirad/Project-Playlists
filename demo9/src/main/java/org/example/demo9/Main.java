@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/views/sections/Login.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/views/Login.fxml"));
         primaryStage.setTitle("🎵 Music Playlist Manager");
         primaryStage.setScene(new Scene(root, 500, 600));
         primaryStage.setMinWidth(700);

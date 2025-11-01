@@ -54,14 +54,13 @@ public class PlaylistSongsController implements Initializable {
     private void loadSongs() {
         songsContainer.getChildren().clear();
 
-        String query = """
-            SELECT s.id, s.track_name, s.artist_name, s.genre, s.release_date, u.username 
-            FROM playlist_songs ps 
-            JOIN songs s ON ps.song_id = s.id 
-            JOIN users u ON ps.user_id = u.id 
-            WHERE ps.playlist_id = ?
-            ORDER BY s.track_name
-            """;
+        // جایگزینی Text Block با String معمولی
+        String query = "SELECT s.id, s.track_name, s.artist_name, s.genre, s.release_date, u.username " +
+                "FROM playlist_songs ps " +
+                "JOIN songs s ON ps.song_id = s.id " +
+                "JOIN users u ON ps.user_id = u.id " +
+                "WHERE ps.playlist_id = ? " +
+                "ORDER BY s.track_name";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -124,36 +123,39 @@ public class PlaylistSongsController implements Initializable {
     }
 
     @FXML
-    private void handleAddSong() throws SQLException {
-
-        showAddSongDialog();
+    private void handleAddSong() {
+        try {
+            showAddSongDialog();
+        } catch (SQLException e) {
+            showError("Error showing add song dialog: " + e.getMessage());
+        }
     }
 
     @FXML
     private void handleBack() {
         try {
-
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/sections/PlaylistsSection.fxml"));
             VBox playlistsSection = loader.load();
 
             PlaylistsController controller = loader.getController();
             controller.setCurrentUser(currentUser);
 
-
-            StackPane contentArea = (StackPane) songsContainer.getParent().getParent().getParent();
-            contentArea.getChildren().setAll(playlistsSection);
+            // پیدا کردن contentArea از طریق صحنه
+            StackPane contentArea = (StackPane) songsContainer.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(playlistsSection);
+            }
 
         } catch (Exception e) {
             showError("Error going back: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private void showAddSongDialog() throws SQLException {
-
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add Song to Playlist");
         dialog.setHeaderText("Select a song to add to " + playlistName);
-
 
         VBox songsList = new VBox(10);
         ScrollPane scrollPane = new ScrollPane(songsList);
@@ -183,13 +185,10 @@ public class PlaylistSongsController implements Initializable {
 
                 Button addButton = new Button("Add");
                 addButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 12;");
-                addButton.setOnAction(e -> {
-                    try {
-                        addSongToPlaylist(rs.getInt("id"));
-                    } catch (SQLException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                });
+
+                // ذخیره songId در یک متغیر نهایی برای استفاده در lambda
+                final int currentSongId = rs.getInt("id");
+                addButton.setOnAction(e -> addSongToPlaylist(currentSongId));
 
                 songItem.getChildren().addAll(songInfo, addButton);
                 songsList.getChildren().add(songItem);
@@ -197,6 +196,7 @@ public class PlaylistSongsController implements Initializable {
 
         } catch (SQLException e) {
             showError("Error loading available songs: " + e.getMessage());
+            throw e;
         }
     }
 

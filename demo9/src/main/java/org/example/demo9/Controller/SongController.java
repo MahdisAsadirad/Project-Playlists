@@ -34,7 +34,6 @@ public class SongController {
         }
     }
 
-
     public void removeSongFromPlaylist(int playlistId, int songId) {
         String query = "DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?";
         try (Connection conn = db.getConnection();
@@ -102,9 +101,7 @@ public class SongController {
             conn.setAutoCommit(false);
 
             try {
-
                 int newPlaylistId = createNewPlaylist(conn, user.getId(), newName);
-
 
                 Playlist firstPlaylist = loadPlaylistFromDatabase(firstId, user.getId(), conn);
                 Playlist secondPlaylist = loadPlaylistFromDatabase(secondId, user.getId(), conn);
@@ -115,7 +112,7 @@ public class SongController {
 
                 savePlaylistToDatabase(mergedPlaylist, user.getId(), conn);
 
-                //  حذف پلی‌لیست‌های قدیمی
+                // حذف پلی‌لیست‌های قدیمی
                 deletePlaylistCompletely(conn, firstId, user.getId());
                 deletePlaylistCompletely(conn, secondId, user.getId());
 
@@ -166,7 +163,6 @@ public class SongController {
         }
     }
 
-
     public void shufflePlaylists(User user, Scanner scanner) {
         System.out.println("\nShuffle Merge Multiple Playlists");
         showUserPlaylists(user.getId());
@@ -210,10 +206,10 @@ public class SongController {
                     return;
                 }
 
-                //  ایجاد پلی‌لیست شافل شده
+                // ایجاد پلی‌لیست شافل شده
                 Playlist shuffledPlaylist = createShufflePlaylist(sourcePlaylists, newName);
 
-                //  ذخیره در دیتابیس
+                // ذخیره در دیتابیس
                 int newPlaylistId = saveShuffleToDatabase(conn, user.getId(), shuffledPlaylist, sourcePlaylists);
                 shuffledPlaylist.setId(newPlaylistId);
 
@@ -230,6 +226,7 @@ public class SongController {
             System.out.println("Error creating shuffled playlist: " + e.getMessage());
         }
     }
+
     private Playlist createShufflePlaylist(List<Playlist> sourcePlaylists, String newName) {
         Playlist shuffledPlaylist = new Playlist(newName);
 
@@ -254,7 +251,6 @@ public class SongController {
         return shuffledPlaylist;
     }
 
-
     private int saveShuffleToDatabase(Connection conn, int userId, Playlist shuffledPlaylist,
                                       List<Playlist> sourcePlaylists) throws SQLException {
 
@@ -274,7 +270,6 @@ public class SongController {
             }
         }
 
-
         String insertSourceSql = "INSERT INTO shuffled_playlist_sources (shuffled_playlist_id, original_playlist_id) VALUES (?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertSourceSql)) {
             for (Playlist sourcePlaylist : sourcePlaylists) {
@@ -285,7 +280,7 @@ public class SongController {
             stmt.executeBatch();
         }
 
-
+        // ذخیره آهنگ‌ها با موقعیت‌های شافل شد
         String insertSongSql = "INSERT INTO shuffled_playlist_songs (shuffled_playlist_id, song_id, user_id, position) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertSongSql)) {
             List<Song> songs = shuffledPlaylist.toList();
@@ -302,20 +297,18 @@ public class SongController {
         return shuffledPlaylistId;
     }
 
-
     public void showShufflePlaylists(User user) {
-        String sql = """
-                SELECT sp.id, sp.name, sp.created_at, 
-                       COUNT(sps.song_id) as song_count,
-                       GROUP_CONCAT(DISTINCT p.name) as source_playlists
-                FROM shuffled_playlists sp
-                LEFT JOIN shuffled_playlist_songs sps ON sp.id = sps.shuffled_playlist_id
-                LEFT JOIN shuffled_playlist_sources spsrc ON sp.id = spsrc.shuffled_playlist_id
-                LEFT JOIN playlists p ON spsrc.original_playlist_id = p.id
-                WHERE sp.user_id = ?
-                GROUP BY sp.id, sp.name, sp.created_at
-                ORDER BY sp.created_at DESC
-                """;
+        // جایگزینی Text Block با String معمولی
+        String sql = "SELECT sp.id, sp.name, sp.created_at, " +
+                "COUNT(sps.song_id) as song_count, " +
+                "GROUP_CONCAT(DISTINCT p.name) as source_playlists " +
+                "FROM shuffled_playlists sp " +
+                "LEFT JOIN shuffled_playlist_songs sps ON sp.id = sps.shuffled_playlist_id " +
+                "LEFT JOIN shuffled_playlist_sources spsrc ON sp.id = spsrc.shuffled_playlist_id " +
+                "LEFT JOIN playlists p ON spsrc.original_playlist_id = p.id " +
+                "WHERE sp.user_id = ? " +
+                "GROUP BY sp.id, sp.name, sp.created_at " +
+                "ORDER BY sp.created_at DESC";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -345,18 +338,15 @@ public class SongController {
         }
     }
 
-
     public void showShuffleSongs(int shuffledPlaylistId) {
-        String sql = """
-                
-                    SELECT s.id, s.track_name, s.artist_name, s.genre, 
-                       sps.position, u.username
-                FROM shuffled_playlist_songs sps
-                JOIN songs s ON sps.song_id = s.id
-                JOIN users u ON sps.user_id = u.id
-                WHERE sps.shuffled_playlist_id = ?
-                ORDER BY sps.position
-                """;
+        // جایگزینی Text Block با String معمولی
+        String sql = "SELECT s.id, s.track_name, s.artist_name, s.genre, " +
+                "sps.position, u.username " +
+                "FROM shuffled_playlist_songs sps " +
+                "JOIN songs s ON sps.song_id = s.id " +
+                "JOIN users u ON sps.user_id = u.id " +
+                "WHERE sps.shuffled_playlist_id = ? " +
+                "ORDER BY sps.position";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -379,7 +369,6 @@ public class SongController {
         } catch (SQLException e) {
             System.out.println("Error loading shuffled playlist songs: " + e.getMessage());
         }
-
     }
 
     public void sortPlaylist(User user, Scanner scanner) {
@@ -398,13 +387,18 @@ public class SongController {
 
         String criteria;
         switch (choice) {
-            case "1" -> criteria = "track name";
-            case "2" -> criteria = "artist name";
-            case "3" -> criteria = "release date";
-            default -> {
+            case "1":
+                criteria = "track name";
+                break;
+            case "2":
+                criteria = "artist name";
+                break;
+            case "3":
+                criteria = "release date";
+                break;
+            default:
                 System.out.println("Invalid choice!");
                 return;
-            }
         }
 
         try (Connection conn = db.getConnection()) {
@@ -429,7 +423,6 @@ public class SongController {
             System.out.println("Error sorting playlist: " + e.getMessage());
         }
     }
-
 
     private Playlist loadPlaylistFromDatabase(int playlistId, int userId, Connection conn) throws SQLException {
         String sql = "SELECT name FROM playlists WHERE id = ? AND user_id = ?";
@@ -511,26 +504,25 @@ public class SongController {
         String displayCriteria;
 
         switch (choice) {
-            case "1" -> {
+            case "1":
                 criteria = "genre";
                 displayCriteria = "Genre";
-            }
-            case "2" -> {
+                break;
+            case "2":
                 criteria = "artist_name";
                 displayCriteria = "Artist Name";
-            }
-            case "3" -> {
+                break;
+            case "3":
                 criteria = "release_date";
                 displayCriteria = "Release Year";
-            }
-            case "4" -> {
+                break;
+            case "4":
                 criteria = "topic";
                 displayCriteria = "Topic";
-            }
-            default -> {
+                break;
+            default:
                 System.out.println("Invalid choice!");
                 return;
-            }
         }
 
         System.out.print("Enter " + displayCriteria + " to filter by: ");
@@ -591,17 +583,23 @@ public class SongController {
             boolean matches = false;
 
             switch (criteria.toLowerCase()) {
-                case "genre" -> matches = current.getData().getGenre().equalsIgnoreCase(filterValue);
-                case "artist_name" -> matches = current.getData().getArtistName().equalsIgnoreCase(filterValue);
-                case "release_date" -> {
+                case "genre":
+                    matches = current.getData().getGenre().equalsIgnoreCase(filterValue);
+                    break;
+                case "artist_name":
+                    matches = current.getData().getArtistName().equalsIgnoreCase(filterValue);
+                    break;
+                case "release_date":
                     try {
                         int filterYear = Integer.parseInt(filterValue);
                         matches = (current.getData().getReleaseDate() == filterYear);
                     } catch (NumberFormatException e) {
                         matches = false;
                     }
-                }
-                case "topic" -> matches = current.getData().getTopic().equalsIgnoreCase(filterValue);
+                    break;
+                case "topic":
+                    matches = current.getData().getTopic().equalsIgnoreCase(filterValue);
+                    break;
             }
 
             if (matches) {
@@ -652,18 +650,17 @@ public class SongController {
     }
 
     public void showFilteredPlaylists(User user) {
-        String sql = """
-                SELECT fp.id, fp.name, fp.filter_criteria, fp.filter_value, 
-                       fp.created_at, COUNT(fps.song_id) as song_count,
-                       p.name as original_playlist, u.username
-                FROM filtered_playlists fp
-                LEFT JOIN filtered_playlist_songs fps ON fp.id = fps.filtered_playlist_id
-                LEFT JOIN playlists p ON fp.original_playlist_id = p.id
-                LEFT JOIN users u ON fp.user_id = u.id
-                WHERE fp.user_id = ?
-                GROUP BY fp.id, fp.name, fp.filter_criteria, fp.filter_value, fp.created_at, p.name, u.username
-                ORDER BY fp.created_at DESC
-                """;
+        // جایگزینی Text Block با String معمولی
+        String sql = "SELECT fp.id, fp.name, fp.filter_criteria, fp.filter_value, " +
+                "fp.created_at, COUNT(fps.song_id) as song_count, " +
+                "p.name as original_playlist, u.username " +
+                "FROM filtered_playlists fp " +
+                "LEFT JOIN filtered_playlist_songs fps ON fp.id = fps.filtered_playlist_id " +
+                "LEFT JOIN playlists p ON fp.original_playlist_id = p.id " +
+                "LEFT JOIN users u ON fp.user_id = u.id " +
+                "WHERE fp.user_id = ? " +
+                "GROUP BY fp.id, fp.name, fp.filter_criteria, fp.filter_value, fp.created_at, p.name, u.username " +
+                "ORDER BY fp.created_at DESC";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -698,15 +695,14 @@ public class SongController {
     }
 
     public void showFilteredSongs(int filteredPlaylistId) {
-        String sql = """
-                SELECT s.id, s.track_name, s.artist_name, s.genre, s.release_date,
-                       fps.position, u.username
-                FROM filtered_playlist_songs fps
-                JOIN songs s ON fps.song_id = s.id
-                JOIN users u ON fps.user_id = u.id
-                WHERE fps.filtered_playlist_id = ?
-                ORDER BY fps.position
-                """;
+        // جایگزینی Text Block با String معمولی
+        String sql = "SELECT s.id, s.track_name, s.artist_name, s.genre, s.release_date, " +
+                "fps.position, u.username " +
+                "FROM filtered_playlist_songs fps " +
+                "JOIN songs s ON fps.song_id = s.id " +
+                "JOIN users u ON fps.user_id = u.id " +
+                "WHERE fps.filtered_playlist_id = ? " +
+                "ORDER BY fps.position";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -798,13 +794,12 @@ public class SongController {
     }
 
     public void showLikedSongs(User user) {
-        String sql = """
-            SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic
-            FROM liked_songs ls
-            JOIN songs s ON ls.song_id = s.id
-            WHERE ls.user_id = ?
-            ORDER BY ls.created_at DESC
-            """;
+        // جایگزینی Text Block با String معمولی
+        String sql = "SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic " +
+                "FROM liked_songs ls " +
+                "JOIN songs s ON ls.song_id = s.id " +
+                "WHERE ls.user_id = ? " +
+                "ORDER BY ls.created_at DESC";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -928,5 +923,3 @@ public class SongController {
         }
     }
 }
-
-

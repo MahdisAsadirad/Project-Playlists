@@ -24,44 +24,54 @@ public class DashboardController {
     private Map<String, Parent> loadedSections = new HashMap<>();
     private Button activeButton;
 
+    private final String defaultStyle = "sidebar-button";
+    private final String activeStyle = "sidebar-button:selected";
+
     public void setCurrentUser(User user) {
         this.currentUser = user;
-        userLabel.setText("" + user.getUsername());
+        userLabel.setText("👤 " + user.getUsername());
         initializeSidebar();
         showPlaylistsSection();
     }
 
     private void initializeSidebar() {
-
-        String defaultStyle = "-fx-background-color: transparent; -fx-text-fill: #333; -fx-font-size: 14; -fx-pref-width: 100%; -fx-alignment: center-left; -fx-padding: 12 15;";
-        String activeStyle = "-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 14; -fx-pref-width: 100%; -fx-alignment: center-left; -fx-padding: 12 15;";
-
-        playlistsBtn.setStyle(activeStyle);
-        activeButton = playlistsBtn;
-
-
         Button[] buttons = {playlistsBtn, songsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn};
+
         for (Button btn : buttons) {
+            btn.getStyleClass().clear();
+            btn.getStyleClass().add("sidebar-button");
+
+
             btn.setOnMouseEntered(e -> {
                 if (btn != activeButton) {
-                    btn.setStyle("-fx-background-color: #f8f9fa; -fx-text-fill: #333; -fx-font-size: 14; -fx-pref-width: 100%; -fx-alignment: center-left; -fx-padding: 12 15;");
+                    btn.setStyle("-fx-background-color: #f8f9fa;");
                 }
             });
 
             btn.setOnMouseExited(e -> {
                 if (btn != activeButton) {
-                    btn.setStyle(defaultStyle);
+                    btn.setStyle("-fx-background-color: transparent;");
                 }
             });
         }
+
+
+        setActiveButton(playlistsBtn);
     }
 
     private void setActiveButton(Button button) {
+
         if (activeButton != null) {
-            activeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #333; -fx-font-size: 14; -fx-pref-width: 100%; -fx-alignment: center-left; -fx-padding: 12 15;");
+            activeButton.getStyleClass().clear();
+            activeButton.getStyleClass().add("sidebar-button");
+            activeButton.setStyle("-fx-background-color: transparent;");
         }
+
+
         activeButton = button;
-        activeButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 14; -fx-pref-width: 100%; -fx-alignment: center-left; -fx-padding: 12 15;");
+        activeButton.getStyleClass().clear();
+        activeButton.getStyleClass().add("sidebar-button");
+        activeButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white;");
     }
 
     @FXML
@@ -110,19 +120,42 @@ public class DashboardController {
         try {
             Parent section = loadedSections.get(sectionName);
             if (section == null) {
-                section = FXMLLoader.load(getClass().getResource("/views/sections/" + sectionName + ".fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/sections/" + sectionName + ".fxml"));
+                section = loader.load();
+
+
+                Object controller = loader.getController();
+                if (controller instanceof PlaylistsController) {
+                    ((PlaylistsController) controller).setCurrentUser(currentUser);
+                } else if (controller instanceof SongsController) {
+                    ((SongsController) controller).setCurrentUser(currentUser);
+                } else if (controller instanceof MergeController) {
+                    ((MergeController) controller).setCurrentUser(currentUser);
+                } else if (controller instanceof ShuffleController) {
+                    ((ShuffleController) controller).setCurrentUser(currentUser);
+                } else if (controller instanceof FilterController) {
+                    ((FilterController) controller).setCurrentUser(currentUser);
+                } else if (controller instanceof SortController) {
+                    ((SortController) controller).setCurrentUser(currentUser);
+                } else if (controller instanceof LikedSongsController) {
+                    ((LikedSongsController) controller).setCurrentUser(currentUser);
+                }
+
                 loadedSections.put(sectionName, section);
             }
             contentArea.getChildren().setAll(section);
         } catch (Exception e) {
             e.printStackTrace();
+            Label errorLabel = new Label("Error loading " + sectionName);
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 16; -fx-padding: 20;");
+            contentArea.getChildren().setAll(errorLabel);
         }
     }
 
     @FXML
     private void handleLogout() {
         try {
-            Parent loginRoot = FXMLLoader.load(getClass().getResource("/views/sections/Login.fxml"));
+            Parent loginRoot = FXMLLoader.load(getClass().getResource("/views/Login.fxml"));
             Stage stage = (Stage) sidebar.getScene().getWindow();
             stage.setScene(new Scene(loginRoot, 900, 600));
             stage.setTitle("🎵 Music Playlist Manager");
