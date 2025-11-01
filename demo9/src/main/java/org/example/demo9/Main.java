@@ -94,7 +94,7 @@ public class Main {
 
                     case "2" -> {
                         playlistController.showPlaylists(currentUser);
-                        System.out.print("🎧 Enter playlist ID to manage songs: ");
+                        System.out.print("Enter playlist ID to manage songs: ");
                         int playlistId = Integer.parseInt(scanner.nextLine());
 
                         System.out.println("\n1. + Add Song");
@@ -114,6 +114,10 @@ public class Main {
                         } else {
                             System.out.println("Invalid option!");
                         }
+                    }
+
+                    case "3" -> {
+                        songController.mergePlaylists(currentUser, scanner);
                     }
 
                     case "10" -> {

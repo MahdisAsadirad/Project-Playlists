@@ -17,19 +17,32 @@ public class PlaylistController {
         System.out.print("Enter new playlist name: ");
         String name = scanner.nextLine();
 
-        String sql = "INSERT INTO playlists (user_id, name) VALUES (?, ?)";
+
+        String checkSql = "SELECT COUNT(*) FROM playlists WHERE user_id = ? AND name = ?";
         try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
 
-            stmt.setInt(1, user.getId());
-            stmt.setString(2, name);
-            stmt.executeUpdate();
+            checkStmt.setInt(1, user.getId());
+            checkStmt.setString(2, name);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                System.out.println("Error: A playlist with this name already exists!");
+                return;
+            }
 
-            System.out.println("Playlist '" + name + "' created successfully!");
+            String insertSql = "INSERT INTO playlists (user_id, name) VALUES (?, ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(insertSql)) {
+                stmt.setInt(1, user.getId());
+                stmt.setString(2, name);
+                stmt.executeUpdate();
+                System.out.println("✅ Playlist '" + name + "' created successfully!");
+            }
+
         } catch (SQLException e) {
             System.out.println("Error creating playlist: " + e.getMessage());
         }
     }
+
 
     public void showPlaylists(User user) {
         String sql = "SELECT id, name FROM playlists WHERE user_id = ?";
@@ -74,6 +87,28 @@ public class PlaylistController {
 
         } catch (SQLException e) {
             System.out.println("Error deleting playlist: " + e.getMessage());
+        }
+    }
+
+
+    public void showUserPlaylists(int userId) throws SQLException {
+        String sql = "SELECT id, name FROM playlists WHERE user_id = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("\nYour Playlists:");
+            boolean hasPlaylists = false;
+            while (rs.next()) {
+                System.out.println(" - [" + rs.getInt("id") + "] " + rs.getString("name"));
+                hasPlaylists = true;
+            }
+
+            if (!hasPlaylists) {
+                System.out.println("(No playlists yet!)");
+            }
         }
     }
 }
