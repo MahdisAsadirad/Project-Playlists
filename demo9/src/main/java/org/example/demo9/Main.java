@@ -3,7 +3,6 @@ package org.example.demo9;
 import org.example.demo9.Controller.PlaylistController;
 import org.example.demo9.Controller.SignUpLogin;
 import org.example.demo9.Controller.SongController;
-import org.example.demo9.Model.song.Playlist;
 import org.example.demo9.Model.util.Database;
 import org.example.demo9.Model.util.User;
 
@@ -14,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             Database db = new Database();
-            SignUpLogin signUpLogin = new SignUpLogin(db.getConnection());
+            SignUpLogin signUpLogin = new SignUpLogin(db);
             PlaylistController playlistController = new PlaylistController(db);
 
             Scanner scanner = new Scanner(System.in);
@@ -36,9 +35,9 @@ public class Main {
 
                 if (option.equals("1")) {
                     if (signUpLogin.signUp(username, password)) {
-                        System.out.println("✅ Sign Up successful! Now login.");
+                        System.out.println("Sign Up successful! Now login.");
                     } else {
-                        System.out.println("⚠️ Sign Up failed! Username might already exist.");
+                        System.out.println("Sign Up failed! Username might already exist.");
                     }
                 } else if (option.equals("2")) {
                     currentUser = signUpLogin.login(username, password);
@@ -88,7 +87,7 @@ public class Main {
                                 case "2" -> playlistController.createPlaylist(currentUser, scanner);
                                 case "3" -> playlistController.deletePlaylist(currentUser, scanner);
                                 case "0" -> playlistMenu = false;
-                                default -> System.out.println("⚠️ Invalid choice! Try again.");
+                                default -> System.out.println("Invalid choice! Try again.");
                             }
                         }
                     }
@@ -98,8 +97,8 @@ public class Main {
                         System.out.print("🎧 Enter playlist ID to manage songs: ");
                         int playlistId = Integer.parseInt(scanner.nextLine());
 
-                        System.out.println("\n1. ➕ Add Song");
-                        System.out.println("2. ❌ Remove Song");
+                        System.out.println("\n1. + Add Song");
+                        System.out.println("2. - Remove Song");
                         System.out.print("Choose: ");
                         String sub = scanner.nextLine();
 
@@ -107,35 +106,21 @@ public class Main {
                             songController.showAllSongs();
                             System.out.print("🎵 Enter Song ID to add: ");
                             int songId = Integer.parseInt(scanner.nextLine());
-                            songController.addSongToPlaylist(playlistId, songId);
+                            songController.addSongToPlaylist(playlistId, songId, currentUser.getId());
                         } else if (sub.equals("2")) {
-                            songController.removeSongFromPlaylist(scanner, playlistId);
+                            System.out.print("🎵 Enter Song ID to remove: ");
+                            int songId = Integer.parseInt(scanner.nextLine());
+                            songController.removeSongFromPlaylist(playlistId, songId);
                         } else {
-                            System.out.println("⚠️ Invalid option!");
+                            System.out.println("Invalid option!");
                         }
                     }
 
                     case "10" -> {
                         playlistController.showPlaylists(currentUser);
-                        System.out.print("🎧 Enter playlist ID to view songs: ");
+                        System.out.print("Enter playlist ID to view songs: ");
                         int playlistId = Integer.parseInt(scanner.nextLine());
-
-
-                        Playlist selectedPlaylist = new Playlist(playlistId, "Temporary", currentUser.getId());
-
-                        try {
-
-                            selectedPlaylist.loadSongsFromDatabase(db.getConnection());
-
-                            System.out.println(selectedPlaylist.toString());
-
-                            if (selectedPlaylist.getSize() == 0) {
-                                System.out.println("📭 This playlist is empty!");
-                            }
-
-                        } catch (SQLException e) {
-                            System.out.println("⚠️ Error loading songs: " + e.getMessage());
-                        }
+                        songController.showSongsInPlaylist(playlistId);
                     }
 
 
@@ -144,12 +129,9 @@ public class Main {
                         running = false;
                     }
 
-                    default -> System.out.println("⚠️ Invalid choice! Please try again.");
+                    default -> System.out.println("Invalid choice! Please try again.");
                 }
             }
-
-            scanner.close();
-            db.close();
 
         } catch (SQLException e) {
             e.printStackTrace();
