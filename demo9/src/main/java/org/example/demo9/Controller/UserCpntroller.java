@@ -8,10 +8,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class SignUpLogin {
+public class UserCpntroller {
     private final Database db;
 
-    public SignUpLogin(Database db) {
+    public UserCpntroller(Database db) {
         this.db = db;
     }
 
@@ -41,4 +41,5 @@ public class SignUpLogin {
             return null;
         }
     }
+
 }

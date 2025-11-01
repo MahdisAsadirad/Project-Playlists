@@ -173,7 +173,7 @@ public class Playlist {
         }
     }
 
-    // به جای این:
+
     public Playlist mergeAndCreateNew(Playlist other, String newName) {
         Playlist mergedPlaylist = new Playlist(newName);
 
@@ -193,4 +193,14 @@ public class Playlist {
 
         return mergedPlaylist;
     }
+
+//    public void addAllSongs(List<Song> songs) {
+//        for (Song song : songs) {
+//            this.addSong(song);
+//        }
+//    }
+//
+//    public Set<Song> getUniqueSongs() {
+//        return new HashSet<>(this.toList());
+//    }
 }

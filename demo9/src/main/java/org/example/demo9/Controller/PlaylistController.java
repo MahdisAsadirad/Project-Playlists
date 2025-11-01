@@ -91,24 +91,24 @@ public class PlaylistController {
     }
 
 
-    public void showUserPlaylists(int userId) throws SQLException {
-        String sql = "SELECT id, name FROM playlists WHERE user_id = ?";
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-
-            System.out.println("\nYour Playlists:");
-            boolean hasPlaylists = false;
-            while (rs.next()) {
-                System.out.println(" - [" + rs.getInt("id") + "] " + rs.getString("name"));
-                hasPlaylists = true;
-            }
-
-            if (!hasPlaylists) {
-                System.out.println("(No playlists yet!)");
-            }
-        }
-    }
+//    public void showUserPlaylists(int userId) throws SQLException {
+//        String sql = "SELECT id, name FROM playlists WHERE user_id = ?";
+//        try (Connection conn = db.getConnection();
+//             PreparedStatement stmt = conn.prepareStatement(sql)) {
+//
+//            stmt.setInt(1, userId);
+//            ResultSet rs = stmt.executeQuery();
+//
+//            System.out.println("\nYour Playlists:");
+//            boolean hasPlaylists = false;
+//            while (rs.next()) {
+//                System.out.println(" - [" + rs.getInt("id") + "] " + rs.getString("name"));
+//                hasPlaylists = true;
+//            }
+//
+//            if (!hasPlaylists) {
+//                System.out.println("(No playlists yet!)");
+//            }
+//        }
+//    }
 }

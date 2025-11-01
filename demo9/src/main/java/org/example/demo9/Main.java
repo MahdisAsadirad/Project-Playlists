@@ -1,7 +1,7 @@
 package org.example.demo9;
 
 import org.example.demo9.Controller.PlaylistController;
-import org.example.demo9.Controller.SignUpLogin;
+import org.example.demo9.Controller.UserCpntroller;
 import org.example.demo9.Controller.SongController;
 import org.example.demo9.Model.util.Database;
 import org.example.demo9.Model.util.User;
@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             Database db = new Database();
-            SignUpLogin signUpLogin = new SignUpLogin(db);
+            UserCpntroller signUpLogin = new UserCpntroller(db);
             PlaylistController playlistController = new PlaylistController(db);
 
             Scanner scanner = new Scanner(System.in);
@@ -56,14 +56,15 @@ public class Main {
                 System.out.println("\n🎧 What would you like to do?");
                 System.out.println("1️. Playlist Management");
                 System.out.println("2️. Add / Remove Song from Playlist");
-                System.out.println("3️. Merge Two Playlists");
-                System.out.println("4️. Shuffle Merge");
-                System.out.println("5️. Sort Playlist");
-                System.out.println("6️. Filter Playlist");
-                System.out.println("7️. Like / Dislike Song");
-                System.out.println("8️. Play Playlist");
-                System.out.println("9️. Play Playlist (Shuffle)");
-                System.out.println("10. Show song from playlist");
+                System.out.println("3. Show song from playlist");
+                System.out.println("4. Merge Two Playlists");
+                System.out.println("5. Shuffle Merge Playlists");
+                System.out.println("6. Show Shuffled Playlists");
+                System.out.println("7. Sort Playlist");
+                System.out.println("8. Filter Playlist");
+                System.out.println("9. Like / Dislike Song");
+                System.out.println("10. Play Playlist");
+                System.out.println("11 Play Playlist (Shuffle)");
                 System.out.println("0️. Logout / Exit");
                 System.out.print("👉 Enter your choice: ");
 
@@ -117,14 +118,27 @@ public class Main {
                     }
 
                     case "3" -> {
-                        songController.mergePlaylists(currentUser, scanner);
-                    }
-
-                    case "10" -> {
                         playlistController.showPlaylists(currentUser);
                         System.out.print("Enter playlist ID to view songs: ");
                         int playlistId = Integer.parseInt(scanner.nextLine());
                         songController.showSongsInPlaylist(playlistId);
+                    }
+
+                    case "4" -> {
+                        songController.mergePlaylists(currentUser, scanner);
+                    }
+
+                    case "5" -> {
+                        songController.shufflePlaylists(currentUser, scanner);
+                    }
+
+                    case "6" -> {
+                        songController.showShufflePlaylists(currentUser);
+                        System.out.print("Enter shuffled playlist ID to view songs (or 0 to go back): ");
+                        int shuffledId = Integer.parseInt(scanner.nextLine());
+                        if (shuffledId != 0) {
+                            songController.showShuffleSongs(shuffledId);
+                        }
                     }
 
 

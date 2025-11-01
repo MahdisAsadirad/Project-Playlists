@@ -5,10 +5,10 @@ import org.example.demo9.Model.util.User;
 import org.example.demo9.Model.song.Playlist;
 import org.example.demo9.Model.song.Song;
 import org.example.demo9.Controller.SongController;
-import java.util.List;
+
+import java.util.*;
 
 import java.sql.*;
-import java.util.Scanner;
 
 public class SongController {
     private final Database db;
@@ -130,21 +130,21 @@ public class SongController {
             conn.setAutoCommit(false);
 
             try {
-                // 1. ایجاد پلی‌لیست جدید در دیتابیس
+                //  ایجاد پلی‌لیست جدید در دیتابیس
                 int newPlaylistId = createNewPlaylist(conn, user.getId(), newName);
 
-                // 2. بارگذاری پلی‌لیست‌های قدیمی از دیتابیس
+                //  بارگذاری پلی‌لیست‌های قدیمی از دیتابیس
                 Playlist firstPlaylist = loadPlaylistFromDatabase(firstId, user.getId(), conn);
                 Playlist secondPlaylist = loadPlaylistFromDatabase(secondId, user.getId(), conn);
 
-                // 3. ادغام واقعی در سطح لیست پیوندی
-                Playlist mergedPlaylist = firstPlaylist.mergeAndCreateNew(secondPlaylist, newName);
+                // ادغام
+                Playlist mergedPlaylist = secondPlaylist.mergeAndCreateNew(firstPlaylist, newName);
                 mergedPlaylist.setId(newPlaylistId);
 
-                // 4. ذخیره پلی‌لیست ادغام شده در دیتابیس
+                //  ذخیره پلی‌لیست ادغام شده در دیتابیس
                 savePlaylistToDatabase(mergedPlaylist, user.getId(), conn);
 
-                // 5. حذف پلی‌لیست‌های قدیمی
+                //  حذف پلی‌لیست‌های قدیمی
                 deletePlaylistCompletely(conn, firstId, user.getId());
                 deletePlaylistCompletely(conn, secondId, user.getId());
 
@@ -157,7 +157,7 @@ public class SongController {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error merging playlists: " + e.getMessage());
+            System.out.println("Error merging playlists: " + e.getMessage());
         }
     }
 
@@ -202,41 +202,41 @@ public class SongController {
 
 
     // انتقال آهنگ‌های یک پلی‌لیست به پلی‌لیست جدید
-    private void movePlaylistSongs(Connection conn, int sourcePlaylistId, int targetPlaylistId, int userId) throws SQLException {
-        String selectSql = "SELECT song_id FROM playlist_songs WHERE playlist_id = ?";
-        String insertSql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
+//    private void movePlaylistSongs(Connection conn, int sourcePlaylistId, int targetPlaylistId, int userId) throws SQLException {
+//        String selectSql = "SELECT song_id FROM playlist_songs WHERE playlist_id = ?";
+//        String insertSql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
+//
+//        try (PreparedStatement selectStmt = conn.prepareStatement(selectSql);
+//             PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+//
+//            selectStmt.setInt(1, sourcePlaylistId);
+//            ResultSet rs = selectStmt.executeQuery();
+//
+//            while (rs.next()) {
+//                int songId = rs.getInt("song_id");
+//
+//                // بررسی تکراری نبودن آهنگ در پلی‌لیست مقصد
+//                if (!isSongInPlaylist(conn, targetPlaylistId, songId)) {
+//                    insertStmt.setInt(1, targetPlaylistId);
+//                    insertStmt.setInt(2, songId);
+//                    insertStmt.setInt(3, userId);
+//                    insertStmt.executeUpdate();
+//                }
+//            }
+//        }
+//    }
 
-        try (PreparedStatement selectStmt = conn.prepareStatement(selectSql);
-             PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
 
-            selectStmt.setInt(1, sourcePlaylistId);
-            ResultSet rs = selectStmt.executeQuery();
-
-            while (rs.next()) {
-                int songId = rs.getInt("song_id");
-
-                // بررسی تکراری نبودن آهنگ در پلی‌لیست مقصد
-                if (!isSongInPlaylist(conn, targetPlaylistId, songId)) {
-                    insertStmt.setInt(1, targetPlaylistId);
-                    insertStmt.setInt(2, songId);
-                    insertStmt.setInt(3, userId);
-                    insertStmt.executeUpdate();
-                }
-            }
-        }
-    }
-
-
-    // بررسی وجود آهنگ در پلی‌لیست
-    private boolean isSongInPlaylist(Connection conn, int playlistId, int songId) throws SQLException {
-        String sql = "SELECT 1 FROM playlist_songs WHERE playlist_id = ? AND song_id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, playlistId);
-            stmt.setInt(2, songId);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next();
-        }
-    }
+//    // بررسی وجود آهنگ در پلی‌لیست
+//    private boolean isSongInPlaylist(Connection conn, int playlistId, int songId) throws SQLException {
+//        String sql = "SELECT 1 FROM playlist_songs WHERE playlist_id = ? AND song_id = ?";
+//        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+//            stmt.setInt(1, playlistId);
+//            stmt.setInt(2, songId);
+//            ResultSet rs = stmt.executeQuery();
+//            return rs.next();
+//        }
+//    }
 
     //حذف کامل یک پلی لیست
     private void deletePlaylistCompletely(Connection conn, int playlistId, int userId) throws SQLException {
@@ -267,7 +267,7 @@ public class SongController {
 
             if (rs.next()) {
                 Playlist playlist = new Playlist(playlistId, rs.getString("name"), userId);
-                playlist.loadSongsFromDatabase(conn); // این متد باید در Playlist تعریف شود
+                playlist.loadSongsFromDatabase(conn);
                 return playlist;
             }
             throw new SQLException("Playlist not found");
@@ -277,8 +277,7 @@ public class SongController {
 
      //ذخیره پلی‌لیست ادغام شده در دیتابیس
     private void savePlaylistToDatabase(Playlist playlist, int userId, Connection conn) throws SQLException {
-        // آهنگ‌ها از قبل در movePlaylistSongs ذخیره شده‌اند
-        // اینجا فقط برای اطمینان دوباره ذخیره می‌کنیم
+
         String deleteSql = "DELETE FROM playlist_songs WHERE playlist_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(deleteSql)) {
             stmt.setInt(1, playlist.getId());
@@ -298,4 +297,215 @@ public class SongController {
             stmt.executeBatch();
         }
     }
+
+    public void shufflePlaylists(User user, Scanner scanner) {
+        System.out.println("\nShuffle Merge Multiple Playlists");
+        showUserPlaylists(user.getId());
+
+        System.out.print("Enter playlist IDs to shuffle merge (comma-separated): ");
+        String[] playlistIdsStr = scanner.nextLine().split(",");
+
+        if (playlistIdsStr.length < 2) {
+            System.out.println("*** Please enter at least 2 playlist IDs!!! ***");
+            return;
+        }
+
+        System.out.print("Enter name for shuffled playlist: ");
+        String newName = scanner.nextLine();
+
+        try (Connection conn = db.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                List<Playlist> sourcePlaylists = new ArrayList<>();
+                Set<Integer> processedPlaylistIds = new HashSet<>();
+
+                for (String playlistIdStr : playlistIdsStr) {
+                    int playlistId = Integer.parseInt(playlistIdStr.trim());
+                    if (processedPlaylistIds.contains(playlistId)) {
+                        System.out.println("⚠️ Skipping duplicate playlist ID: " + playlistId);
+                        continue;
+                    }
+
+                    Playlist playlist = loadPlaylistFromDatabase(playlistId, user.getId(), conn);
+                    if (playlist != null) {
+                        sourcePlaylists.add(playlist);
+                        processedPlaylistIds.add(playlistId);
+                    } else {
+                        System.out.println("playlist not found or access denied: " + playlistId);
+                    }
+                }
+
+                if (sourcePlaylists.size() < 2) {
+                    System.out.println("❌ Need at least 2 valid playlists to merge!");
+                    return;
+                }
+
+                //  ایجاد پلی‌لیست شافل شده
+                Playlist shuffledPlaylist = createShufflePlaylist(sourcePlaylists, newName);
+
+                //  ذخیره در دیتابیس
+                int newPlaylistId = saveShuffleToDatabase(conn, user.getId(), shuffledPlaylist, sourcePlaylists);
+                shuffledPlaylist.setId(newPlaylistId);
+
+                conn.commit();
+                System.out.println(" Shuffled playlist '" + newName + "' created successfully!");
+                System.out.println("Merged " + sourcePlaylists.size() + " playlists with " + shuffledPlaylist.getSize() + " unique songs ^-^");
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error creating shuffled playlist: " + e.getMessage());
+        }
+    }
+
+    private Playlist createShufflePlaylist(List<Playlist> sourcePlaylists, String newName) {
+        Playlist shuffledPlaylist = new Playlist(newName);
+
+        Set<Song> uniqueSongs = new HashSet<>();
+        for (Playlist playlist : sourcePlaylists) {
+            List<Song> songs = playlist.toList();
+            uniqueSongs.addAll(songs);
+        }
+
+        // تبدیل به لیست و شافل کردن
+        List<Song> songList = new ArrayList<>(uniqueSongs);
+        Collections.shuffle(songList);
+
+        // اضافه کردن به پلی‌لیست جدید
+        for (Song song : songList) {
+            shuffledPlaylist.addSong(song);
+        }
+
+        return shuffledPlaylist;
+    }
+
+    private int saveShuffleToDatabase(Connection conn, int userId, Playlist shuffledPlaylist,
+                                               List<Playlist> sourcePlaylists) throws SQLException {
+
+        String insertPlaylistSql = "INSERT INTO shuffled_playlists (user_id, name) VALUES (?, ?)";
+        int shuffledPlaylistId;
+
+        try (PreparedStatement stmt = conn.prepareStatement(insertPlaylistSql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, userId);
+            stmt.setString(2, shuffledPlaylist.getName());
+            stmt.executeUpdate();
+
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                shuffledPlaylistId = rs.getInt(1);
+            } else {
+                throw new SQLException("Failed to create shuffled playlist!");
+            }
+        }
+
+
+        String insertSourceSql = "INSERT INTO shuffled_playlist_sources (shuffled_playlist_id, original_playlist_id) VALUES (?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(insertSourceSql)) {
+            for (Playlist sourcePlaylist : sourcePlaylists) {
+                stmt.setInt(1, shuffledPlaylistId);
+                stmt.setInt(2, sourcePlaylist.getId());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        }
+
+        //  ذخیره آهنگ‌ها با موقعیت‌های شافل شد
+        String insertSongSql = "INSERT INTO shuffled_playlist_songs (shuffled_playlist_id, song_id, user_id, position) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(insertSongSql)) {
+            List<Song> songs = shuffledPlaylist.toList();
+            for (int i = 0; i < songs.size(); i++) {
+                stmt.setInt(1, shuffledPlaylistId);
+                stmt.setInt(2, songs.get(i).getId());
+                stmt.setInt(3, userId);
+                stmt.setInt(4, i);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        }
+
+        return shuffledPlaylistId;
+    }
+
+
+    public void showShufflePlaylists(User user) {
+        String sql = """
+            SELECT sp.id, sp.name, sp.created_at, 
+                   COUNT(sps.song_id) as song_count,
+                   GROUP_CONCAT(DISTINCT p.name) as source_playlists
+            FROM shuffled_playlists sp
+            LEFT JOIN shuffled_playlist_songs sps ON sp.id = sps.shuffled_playlist_id
+            LEFT JOIN shuffled_playlist_sources spsrc ON sp.id = spsrc.shuffled_playlist_id
+            LEFT JOIN playlists p ON spsrc.original_playlist_id = p.id
+            WHERE sp.user_id = ?
+            GROUP BY sp.id, sp.name, sp.created_at
+            ORDER BY sp.created_at DESC
+            """;
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, user.getId());
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("\nYour Shuffled Playlists:");
+            boolean hasPlaylists = false;
+
+            while (rs.next()) {
+                System.out.printf(" - [%d] %s (%d songs)%n",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getInt("song_count"));
+                System.out.printf("   Sources: %s%n", rs.getString("source_playlists"));
+                System.out.println();
+                hasPlaylists = true;
+            }
+
+            if (!hasPlaylists) {
+                System.out.println("(No shuffled playlists yet!)");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Error loading shuffled playlists: " + e.getMessage());
+        }
+    }
+
+
+    public void showShuffleSongs(int shuffledPlaylistId) {
+        String sql = """
+            SELECT s.id, s.track_name, s.artist_name, s.genre, 
+                   sps.position, u.username
+            FROM shuffled_playlist_songs sps
+            JOIN songs s ON sps.song_id = s.id
+            JOIN users u ON sps.user_id = u.id
+            WHERE sps.shuffled_playlist_id = ?
+            ORDER BY sps.position
+            """;
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, shuffledPlaylistId);
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("\n🎶 Songs in Shuffled Playlist:");
+            int position = 1;
+            while (rs.next()) {
+                System.out.printf("%d. %s - %s (%s) | Position: %d | Added by: %s%n",
+                        position++,
+                        rs.getString("artist_name"),
+                        rs.getString("track_name"),
+                        rs.getString("genre"),
+                        rs.getInt("position"),
+                        rs.getString("username"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error loading shuffled playlist songs: " + e.getMessage());
+        }
+    }
 }
+
