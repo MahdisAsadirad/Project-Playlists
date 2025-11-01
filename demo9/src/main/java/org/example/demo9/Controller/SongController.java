@@ -4,7 +4,6 @@ import org.example.demo9.Model.util.Database;
 import org.example.demo9.Model.util.User;
 import org.example.demo9.Model.song.Playlist;
 import org.example.demo9.Model.song.Song;
-import org.example.demo9.Controller.SongController;
 
 import java.util.*;
 
@@ -15,34 +14,6 @@ public class SongController {
 
     public SongController(Database db) {
         this.db = db;
-    }
-
-    public void showAllSongs() {
-        String query = "SELECT id, artist_name, track_name, release_date, genre, len, topic FROM songs";
-        try (Connection conn = db.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            System.out.println("\n -*-*-*-*- All Songs in Library -*-*-*-*-");
-            System.out.printf("%-5s | %-25s | %-35s | %-6s | %-10s | %-6s | %-10s%n",
-                    "ID", "Artist", "Track", "Year", "Genre", "Len", "Topic");
-            System.out.println("-----------------------------------------------------------------------------------------------");
-
-            while (rs.next()) {
-                System.out.printf("%-5d | %-25s | %-35s | %-6d | %-10s | %-6d | %-10s%n",
-                        rs.getInt("id"),
-                        rs.getString("artist_name"),
-                        rs.getString("track_name"),
-                        rs.getInt("release_date"),
-                        rs.getString("genre"),
-                        rs.getInt("len"),
-                        rs.getString("topic"));
-            }
-            System.out.println("-----------------------------------------------------------------------------------------------");
-
-        } catch (SQLException e) {
-            System.out.println("Error while loading songs: " + e.getMessage());
-        }
     }
 
     public void addSongToPlaylist(int playlistId, int songId, int userId) {
@@ -176,44 +147,6 @@ public class SongController {
             }
         }
     }
-
-
-    // انتقال آهنگ‌های یک پلی‌لیست به پلی‌لیست جدید
-//    private void movePlaylistSongs(Connection conn, int sourcePlaylistId, int targetPlaylistId, int userId) throws SQLException {
-//        String selectSql = "SELECT song_id FROM playlist_songs WHERE playlist_id = ?";
-//        String insertSql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
-//
-//        try (PreparedStatement selectStmt = conn.prepareStatement(selectSql);
-//             PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-//
-//            selectStmt.setInt(1, sourcePlaylistId);
-//            ResultSet rs = selectStmt.executeQuery();
-//
-//            while (rs.next()) {
-//                int songId = rs.getInt("song_id");
-//
-//                // بررسی تکراری نبودن آهنگ در پلی‌لیست مقصد
-//                if (!isSongInPlaylist(conn, targetPlaylistId, songId)) {
-//                    insertStmt.setInt(1, targetPlaylistId);
-//                    insertStmt.setInt(2, songId);
-//                    insertStmt.setInt(3, userId);
-//                    insertStmt.executeUpdate();
-//                }
-//            }
-//        }
-//    }
-
-
-//    // بررسی وجود آهنگ در پلی‌لیست
-//    private boolean isSongInPlaylist(Connection conn, int playlistId, int songId) throws SQLException {
-//        String sql = "SELECT 1 FROM playlist_songs WHERE playlist_id = ? AND song_id = ?";
-//        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-//            stmt.setInt(1, playlistId);
-//            stmt.setInt(2, songId);
-//            ResultSet rs = stmt.executeQuery();
-//            return rs.next();
-//        }
-//    }
 
     //حذف کامل یک پلی لیست
     private void deletePlaylistCompletely(Connection conn, int playlistId, int userId) throws SQLException {
@@ -814,6 +747,191 @@ public class SongController {
                 return "Topic";
             default:
                 return criteria;
+        }
+    }
+
+    public void likeSong(User user, int songId) {
+        String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
+        String insertSql = "INSERT INTO liked_songs (user_id, song_id) VALUES (?, ?)";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql);
+             PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+
+            // بررسی وجود لایک
+            checkStmt.setInt(1, user.getId());
+            checkStmt.setInt(2, songId);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                System.out.println("You've already liked this song!");
+                return;
+            }
+
+            // اضافه کردن لایک
+            insertStmt.setInt(1, user.getId());
+            insertStmt.setInt(2, songId);
+            insertStmt.executeUpdate();
+
+            System.out.println("❤️ Song added to your liked songs!");
+
+        } catch (SQLException e) {
+            System.out.println("Error liking song: " + e.getMessage());
+        }
+    }
+
+    public void unlikeSong(User user, int songId) {
+        String sql = "DELETE FROM liked_songs WHERE user_id = ? AND song_id = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, user.getId());
+            stmt.setInt(2, songId);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) {
+                System.out.println("💔 Song removed from your liked songs!");
+            } else {
+                System.out.println("Song not found in your liked songs!");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error unliking song: " + e.getMessage());
+        }
+    }
+
+    public void showLikedSongs(User user) {
+        String sql = """
+            SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic
+            FROM liked_songs ls
+            JOIN songs s ON ls.song_id = s.id
+            WHERE ls.user_id = ?
+            ORDER BY ls.created_at DESC
+            """;
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, user.getId());
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("\n❤️ Your Liked Songs:");
+            boolean hasLikedSongs = false;
+            int count = 1;
+
+            while (rs.next()) {
+                System.out.printf("%d. %s - %s (%d) | Genre: %s | Length: %.0fs | Topic: %s%n",
+                        count++,
+                        rs.getString("artist_name"),
+                        rs.getString("track_name"),
+                        rs.getInt("release_date"),
+                        rs.getString("genre"),
+                        rs.getDouble("len"),
+                        rs.getString("topic"));
+                hasLikedSongs = true;
+            }
+
+            if (!hasLikedSongs) {
+                System.out.println("You haven't liked any songs yet!");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error loading liked songs: " + e.getMessage());
+        }
+    }
+
+    public void toggleLikeStatus(User user, Scanner scanner) {
+        System.out.println("\n❤️ Like/Unlike Song");
+        showAllSongs();
+
+        System.out.print("Enter Song ID to like/unlike: ");
+        int songId = Integer.parseInt(scanner.nextLine());
+
+        // بررسی وضعیت فعلی لایک
+        String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+
+            checkStmt.setInt(1, user.getId());
+            checkStmt.setInt(2, songId);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                // اگر لایک شده، دیسلایک کن
+                unlikeSong(user, songId);
+            } else {
+                // اگر لایک نشده، لایک کن
+                likeSong(user, songId);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error toggling like status: " + e.getMessage());
+        }
+    }
+
+    // به‌روزرسانی متد showAllSongs برای نمایش وضعیت لایک
+    public void showAllSongs() {
+        String query = "SELECT id, artist_name, track_name, release_date, genre, len, topic FROM songs";
+        try (Connection conn = db.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            System.out.println("\n -*-*-*-*- All Songs in Library -*-*-*-*-");
+            System.out.printf("%-5s | %-25s | %-35s | %-6s | %-10s | %-6s | %-10s%n",
+                    "ID", "Artist", "Track", "Year", "Genre", "Len", "Topic");
+            System.out.println("-----------------------------------------------------------------------------------------------");
+
+            while (rs.next()) {
+                System.out.printf("%-5d | %-25s | %-35s | %-6d | %-10s | %-6d | %-10s%n",
+                        rs.getInt("id"),
+                        rs.getString("artist_name"),
+                        rs.getString("track_name"),
+                        rs.getInt("release_date"),
+                        rs.getString("genre"),
+                        rs.getInt("len"),
+                        rs.getString("topic"));
+            }
+            System.out.println("-----------------------------------------------------------------------------------------------");
+
+        } catch (SQLException e) {
+            System.out.println("Error while loading songs: " + e.getMessage());
+        }
+    }
+
+    // متد برای بررسی وضعیت لایک آهنگ‌ها هنگام بارگذاری
+    public void checkLikedStatus(User user, List<Song> songs) {
+        if (songs.isEmpty()) return;
+
+        String sql = "SELECT song_id FROM liked_songs WHERE user_id = ? AND song_id IN (";
+        StringBuilder placeholders = new StringBuilder();
+        for (int i = 0; i < songs.size(); i++) {
+            placeholders.append("?");
+            if (i < songs.size() - 1) placeholders.append(",");
+        }
+        sql += placeholders + ")";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, user.getId());
+            for (int i = 0; i < songs.size(); i++) {
+                stmt.setInt(i + 2, songs.get(i).getId());
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            Set<Integer> likedSongIds = new HashSet<>();
+            while (rs.next()) {
+                likedSongIds.add(rs.getInt("song_id"));
+            }
+
+            // تنظیم وضعیت لایک برای آهنگ‌ها
+            for (Song song : songs) {
+                song.setLiked(likedSongIds.contains(song.getId()));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error checking liked status: " + e.getMessage());
         }
     }
 }

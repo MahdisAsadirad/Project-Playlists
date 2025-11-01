@@ -12,8 +12,64 @@ public class Song {
     private String topic;
     private boolean liked;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
+
+    public String getTrackName() {
+        return trackName;
+    }
+
+    public void setTrackName(String trackName) {
+        this.trackName = trackName;
+    }
+
+    public int getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(int releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public double getLength() {
+        return length;
+    }
+
+    public void setLength(double length) {
+        this.length = length;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
     public Song(int id, String artistName, String trackName, int releaseDate, String genre, double length, String topic) {
-        this.id=id;
+        this.id = id;
         this.artistName = artistName;
         this.trackName = trackName;
         this.releaseDate = releaseDate;
@@ -23,34 +79,7 @@ public class Song {
         this.liked = false;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getArtistName() {
-        return artistName;
-    }
-
-    public String getTrackName() {
-        return trackName;
-    }
-
-    public int getReleaseDate() {
-        return releaseDate;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public double getLength() {
-        return length;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
+    // Getter and Setter methods...
     public boolean isLiked() {
         return liked;
     }
@@ -59,38 +88,11 @@ public class Song {
         this.liked = liked;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setArtistName(String artistName) {
-        this.artistName = artistName;
-    }
-
-    public void setTrackName(String trackName) {
-        this.trackName = trackName;
-    }
-
-    public void setReleaseDate(int releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public void setLength(double length) {
-        this.length = length;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
     @Override
     public String toString() {
-        return trackName + ",    by " + artistName + " (" + releaseDate + "),     Genre: " + genre + ",   Length: " + length + "s,    Topic: " + topic;
+        String likeStatus = liked ? "❤️" : "♡";
+        return likeStatus + " " + trackName + ",    by " + artistName + " (" + releaseDate + "),     Genre: " + genre + ",   Length: " + length + "s,    Topic: " + topic;
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -105,5 +107,4 @@ public class Song {
     public int hashCode() {
         return Objects.hash(trackName.toLowerCase(), artistName.toLowerCase());
     }
-
 }

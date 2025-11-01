@@ -64,8 +64,7 @@ public class Main {
                 System.out.println("7. Sort Playlist");
                 System.out.println("8. Filter Playlist");
                 System.out.println("9. Like / Dislike Song");
-                System.out.println("10. Play Playlist");
-                System.out.println("11 Play Playlist (Shuffle)");
+
                 System.out.println("0️. Logout / Exit");
                 System.out.print("👉 Enter your choice: ");
 
@@ -168,6 +167,21 @@ public class Main {
                         }
                     }
 
+                    case "9" -> {
+                        System.out.println("\n❤Like/Dislike Menu:");
+                        System.out.println("1. Show All Songs & Toggle Like");
+                        System.out.println("2. Show My Liked Songs");
+                        System.out.print("Choose: ");
+                        String likeChoice = scanner.nextLine();
+
+                        if (likeChoice.equals("1")) {
+                            songController.toggleLikeStatus(currentUser, scanner);
+                        } else if (likeChoice.equals("2")) {
+                            songController.showLikedSongs(currentUser);
+                        } else {
+                            System.out.println("Invalid option!");
+                        }
+                    }
 
                     case "0" -> {
                         System.out.println("👋 Goodbye, " + currentUser.getUsername() + "!");

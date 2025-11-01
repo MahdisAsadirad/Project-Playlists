@@ -89,7 +89,7 @@ public class Playlist {
                         rs.getInt("id"),
                         rs.getString("artist_name"),
                         rs.getString("track_name"),
-                        rs.getInt("release_date"), // تبدیل int به String
+                        rs.getInt("release_date"),
                         rs.getString("genre"),
                         rs.getDouble("len"),
                         rs.getString("topic")
