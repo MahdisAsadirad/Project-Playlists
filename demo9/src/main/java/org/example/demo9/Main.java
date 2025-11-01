@@ -1,7 +1,7 @@
 package org.example.demo9;
 
 import org.example.demo9.Controller.PlaylistController;
-import org.example.demo9.Controller.UserCpntroller;
+import org.example.demo9.Controller.UserController;
 import org.example.demo9.Controller.SongController;
 import org.example.demo9.Model.util.Database;
 import org.example.demo9.Model.util.User;
@@ -13,7 +13,8 @@ public class Main {
     public static void main(String[] args) {
         try {
             Database db = new Database();
-            UserCpntroller signUpLogin = new UserCpntroller(db);
+            UserController signUpLogin = new UserController(db);
+
             PlaylistController playlistController = new PlaylistController(db);
 
             Scanner scanner = new Scanner(System.in);
@@ -138,6 +139,8 @@ public class Main {
                         int shuffledId = Integer.parseInt(scanner.nextLine());
                         if (shuffledId != 0) {
                             songController.showShuffleSongs(shuffledId);
+
+                            songController.showSongsInPlaylist(shuffledId);
                         }
                     }
 
