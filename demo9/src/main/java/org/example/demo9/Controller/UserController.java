@@ -1,7 +1,7 @@
 package org.example.demo9.Controller;
 
 import org.example.demo9.Model.util.Database;
-import org.example.demo9.Model.util.User;
+import org.example.demo9.Model.Classes.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

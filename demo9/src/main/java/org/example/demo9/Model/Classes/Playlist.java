@@ -1,4 +1,4 @@
-package org.example.demo9.Model.song;
+package org.example.demo9.Model.Classes;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,9 +10,10 @@ public class Playlist {
     private int id;
     private final int userId;
     private final String name;
-    private SongNode head;
+    public SongNode head;
     private SongNode tail;
     private int size;
+
 
 
     public Playlist(int id, String name, int userId) {
@@ -34,7 +35,7 @@ public class Playlist {
     }
 
     public void setId(int id) {
-        this.id = userId;
+        this.id = id;
     }
 
     public int getUserId() {
@@ -47,6 +48,10 @@ public class Playlist {
 
     public int getSize() {
         return size;
+    }
+
+    public SongNode getHead() {
+        return head;
     }
 
     public void addSong(Song song) {
@@ -71,7 +76,42 @@ public class Playlist {
         }
         return songs;
     }
+    public boolean containsSong(Song song) {
+        SongNode current = head;
+        while (current != null) {
+            if (current.data.equals(song)) {
+                return true;
+            }
+            current = current.next;
+        }
+        return false;
+    }
 
+    // ✅ اضافه کردن متد mergeAndCreateNew بدون آهنگ‌های تکراری
+    public Playlist mergeAndCreateNew(Playlist other, String newName) {
+        Playlist mergedPlaylist = new Playlist(newName);
+        Set<Song> uniqueSongs = new HashSet<>();
+
+        // اضافه کردن آهنگ‌های پلی‌لیست اول
+        SongNode current = this.head;
+        while (current != null) {
+            if (uniqueSongs.add(current.data)) { // اگر آهنگ تکراری نبود اضافه کن
+                mergedPlaylist.addSong(current.data);
+            }
+            current = current.next;
+        }
+
+        // اضافه کردن آهنگ‌های پلی‌لیست دوم
+        current = other.head;
+        while (current != null) {
+            if (uniqueSongs.add(current.data)) { // اگر آهنگ تکراری نبود اضافه کن
+                mergedPlaylist.addSong(current.data);
+            }
+            current = current.next;
+        }
+
+        return mergedPlaylist;
+    }
     public void loadSongsFromDatabase(Connection conn) throws SQLException {
         String query = """
                 SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic
@@ -97,27 +137,6 @@ public class Playlist {
                 addSong(song);
             }
         }
-    }
-
-
-    public Playlist mergeAndCreateNew(Playlist other, String newName) {
-        Playlist mergedPlaylist = new Playlist(newName);
-
-        // اضافه کردن آهنگ‌های پلی‌لیست اول (this)
-        SongNode current = this.head;
-        while (current != null) {
-            mergedPlaylist.addSong(current.data);
-            current = current.next;
-        }
-
-        // اضافه کردن آهنگ‌های پلی‌لیست دوم (other)
-        current = other.head;
-        while (current != null) {
-            mergedPlaylist.addSong(current.data);
-            current = current.next;
-        }
-
-        return mergedPlaylist;
     }
 
     public void sortLinkedlistBy(String criteria) {

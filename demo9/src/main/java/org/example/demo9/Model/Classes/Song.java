@@ -1,4 +1,4 @@
-package org.example.demo9.Model.song;
+package org.example.demo9.Model.Classes;
 
 import java.util.Objects;
 

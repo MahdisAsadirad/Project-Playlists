@@ -1,4 +1,4 @@
-package org.example.demo9.Model.util;
+package org.example.demo9.Model.Classes;
 
 public class User {
     private int id;

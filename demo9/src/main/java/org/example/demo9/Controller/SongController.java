@@ -1,9 +1,10 @@
 package org.example.demo9.Controller;
 
+import org.example.demo9.Model.Classes.SongNode;
 import org.example.demo9.Model.util.Database;
-import org.example.demo9.Model.util.User;
-import org.example.demo9.Model.song.Playlist;
-import org.example.demo9.Model.song.Song;
+import org.example.demo9.Model.Classes.User;
+import org.example.demo9.Model.Classes.Playlist;
+import org.example.demo9.Model.Classes.Song;
 
 import java.util.*;
 
@@ -230,27 +231,30 @@ public class SongController {
             System.out.println("Error creating shuffled playlist: " + e.getMessage());
         }
     }
-
     private Playlist createShufflePlaylist(List<Playlist> sourcePlaylists, String newName) {
         Playlist shuffledPlaylist = new Playlist(newName);
 
-        Set<Song> uniqueSongs = new HashSet<>();
+        Playlist tempList = new Playlist("temp");
         for (Playlist playlist : sourcePlaylists) {
-            List<Song> songs = playlist.toList();
-            uniqueSongs.addAll(songs);
+            SongNode current = playlist.getHead();  // ✅ استفاده از getter
+            while (current != null) {
+                if (!tempList.containsSong(current.data)) {
+                    tempList.addSong(current.data);
+                }
+                current = current.next;
+            }
         }
 
-        // تبدیل به لیست و شافل کردن
-        List<Song> songList = new ArrayList<>(uniqueSongs);
-        Collections.shuffle(songList);
+        List<Song> songsArray = tempList.toList();
+        Collections.shuffle(songsArray);
 
-        // اضافه کردن به پلی‌لیست جدید
-        for (Song song : songList) {
+        for (Song song : songsArray) {
             shuffledPlaylist.addSong(song);
         }
 
         return shuffledPlaylist;
     }
+    // متد کمکی برای بررسی وجود آهنگ در Linked List
 
     private int saveShuffleToDatabase(Connection conn, int userId, Playlist shuffledPlaylist,
                                       List<Playlist> sourcePlaylists) throws SQLException {
@@ -583,33 +587,33 @@ public class SongController {
         }
     }
 
-    private Playlist createFilteredPlaylist(Playlist originalPlaylist, String criteria, String filterValue, String newName) {
+    private Playlist createFilteredPlaylist(Playlist originalPlaylist, String criteria,
+                                            String filterValue, String newName) {
         Playlist filteredPlaylist = new Playlist(newName);
-        List<Song> allSongs = originalPlaylist.toList();
 
-        for (Song song : allSongs) {
+        // پیمایش مستقیم روی Linked List
+        SongNode current = originalPlaylist.head;
+        while (current != null) {
             boolean matches = false;
 
             switch (criteria.toLowerCase()) {
-                case "genre" ->
-                        matches = song.getGenre().equalsIgnoreCase(filterValue);
-                case "artist_name" ->
-                        matches = song.getArtistName().equalsIgnoreCase(filterValue);
+                case "genre" -> matches = current.data.getGenre().equalsIgnoreCase(filterValue);
+                case "artist_name" -> matches = current.data.getArtistName().equalsIgnoreCase(filterValue);
                 case "release_date" -> {
                     try {
                         int filterYear = Integer.parseInt(filterValue);
-                        matches = (song.getReleaseDate() == filterYear);
+                        matches = (current.data.getReleaseDate() == filterYear);
                     } catch (NumberFormatException e) {
                         matches = false;
                     }
                 }
-                case "topic" ->
-                        matches = song.getTopic().equalsIgnoreCase(filterValue);
+                case "topic" -> matches = current.data.getTopic().equalsIgnoreCase(filterValue);
             }
 
             if (matches) {
-                filteredPlaylist.addSong(song);
+                filteredPlaylist.addSong(current.data);
             }
+            current = current.next;
         }
 
         return filteredPlaylist;
