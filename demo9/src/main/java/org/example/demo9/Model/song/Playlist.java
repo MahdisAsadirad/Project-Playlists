@@ -7,9 +7,9 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class Playlist {
-    private int id;
-    private int userId;
-    private String name;
+    private final int id;
+    private final int userId;
+    private final String name;
     private SongNode head;
     private SongNode tail;
     private int size;

@@ -5,27 +5,18 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Database {
-    private Connection conn;
     private static final String URL = "jdbc:mysql://localhost:3306/Playlist";
     private static final String USER = "root";
     private static final String PASS = "";
 
-    public Database() throws SQLException {
+    public Connection getConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            Connection conn = DriverManager.getConnection(URL, USER, PASS);
+            conn.setAutoCommit(true);
+            return conn;
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException("❌ Database connection failed: " + e.getMessage(), e);
         }
-
-        conn = DriverManager.getConnection(URL, USER, PASS);
-    }
-
-    public Connection getConnection() {
-        return conn;
-    }
-
-    public void close() throws SQLException {
-        if (conn != null) conn.close();
     }
 }
-
