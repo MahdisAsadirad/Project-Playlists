@@ -34,7 +34,7 @@ public class Playlist {
     }
 
     public void setId(int id) {
-        this.id=userId;
+        this.id = userId;
     }
 
     public int getUserId() {
@@ -89,7 +89,7 @@ public class Playlist {
                         rs.getInt("id"),
                         rs.getString("artist_name"),
                         rs.getString("track_name"),
-                        rs.getString("release_date"),
+                        rs.getInt("release_date"), // تبدیل int به String
                         rs.getString("genre"),
                         rs.getDouble("len"),
                         rs.getString("topic")
@@ -203,7 +203,7 @@ public class Playlist {
                 return Comparator.comparing(Song::getArtistName, String.CASE_INSENSITIVE_ORDER);
             case "release date":
             case "release_date":
-                return Comparator.comparing(Song::getReleaseDate, String.CASE_INSENSITIVE_ORDER);
+                return Comparator.comparingInt(Song::getReleaseDate);
             default:
                 return Comparator.comparing(Song::getTrackName, String.CASE_INSENSITIVE_ORDER);
         }

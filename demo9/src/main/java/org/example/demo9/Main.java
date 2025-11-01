@@ -147,6 +147,26 @@ public class Main {
                     case "7" -> {
                         songController.sortPlaylist(currentUser, scanner);
                     }
+                    case "8" -> {
+                        System.out.println("\n🎛Filter Options:");
+                        System.out.println("1. Create Filtered Playlist");
+                        System.out.println("2. Show My Filtered Playlists");
+                        System.out.print("Choose: ");
+                        String filterChoice = scanner.nextLine();
+
+                        if (filterChoice.equals("1")) {
+                            songController.filterPlaylist(currentUser, scanner);
+                        } else if (filterChoice.equals("2")) {
+                            songController.showFilteredPlaylists(currentUser);
+                            System.out.print("Enter filtered playlist ID to view songs (or 0 to go back): ");
+                            int filteredId = Integer.parseInt(scanner.nextLine());
+                            if (filteredId != 0) {
+                                songController.showFilteredSongs(filteredId);
+                            }
+                        } else {
+                            System.out.println("Invalid option!");
+                        }
+                    }
 
 
                     case "0" -> {

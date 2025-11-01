@@ -6,13 +6,13 @@ public class Song {
     private int id;
     private String artistName;
     private String trackName;
-    private String releaseDate;
+    private int releaseDate;
     private String genre;
     private double length;
     private String topic;
     private boolean liked;
 
-    public Song(int id,String artistName, String trackName, String releaseDate, String genre, double length, String topic) {
+    public Song(int id, String artistName, String trackName, int releaseDate, String genre, double length, String topic) {
         this.id=id;
         this.artistName = artistName;
         this.trackName = trackName;
@@ -35,7 +35,7 @@ public class Song {
         return trackName;
     }
 
-    public String getReleaseDate() {
+    public int getReleaseDate() {
         return releaseDate;
     }
 
@@ -71,7 +71,7 @@ public class Song {
         this.trackName = trackName;
     }
 
-    public void setReleaseDate(String releaseDate) {
+    public void setReleaseDate(int releaseDate) {
         this.releaseDate = releaseDate;
     }
 

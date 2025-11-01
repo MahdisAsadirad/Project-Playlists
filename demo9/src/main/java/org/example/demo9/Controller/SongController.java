@@ -555,6 +555,267 @@ public class SongController {
             System.out.println("Error loading playlists: " + e.getMessage());
         }
     }
+
+    public void filterPlaylist(User user, Scanner scanner) {
+        System.out.println("\n🎵 Filter Playlist");
+        showUserPlaylists(user.getId());
+
+        System.out.print("Enter playlist ID to filter: ");
+        int playlistId = Integer.parseInt(scanner.nextLine());
+
+        System.out.println("\nFilter by:");
+        System.out.println("1. Genre");
+        System.out.println("2. Artist Name");
+        System.out.println("3. Release Year");
+        System.out.println("4. Topic");
+        System.out.print("Choose criteria: ");
+        String choice = scanner.nextLine();
+
+        String criteria;
+        String displayCriteria;
+
+        switch (choice) {
+            case "1" -> {
+                criteria = "genre";
+                displayCriteria = "Genre";
+            }
+            case "2" -> {
+                criteria = "artist_name";
+                displayCriteria = "Artist Name";
+            }
+            case "3" -> {
+                criteria = "release_date";
+                displayCriteria = "Release Year";
+            }
+            case "4" -> {
+                criteria = "topic";
+                displayCriteria = "Topic";
+            }
+            default -> {
+                System.out.println("Invalid choice!");
+                return;
+            }
+        }
+
+        System.out.print("Enter " + displayCriteria + " to filter by: ");
+        String filterValue = scanner.nextLine();
+
+        System.out.print("Enter name for filtered playlist: ");
+        String newPlaylistName = scanner.nextLine();
+
+        try (Connection conn = db.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                // بارگذاری پلی‌لیست اصلی
+                Playlist originalPlaylist = loadPlaylistFromDatabase(playlistId, user.getId(), conn);
+
+                if (originalPlaylist == null) {
+                    System.out.println("Playlist not found or access denied!");
+                    return;
+                }
+
+                // ایجاد پلی‌لیست فیلتر شده
+                Playlist filteredPlaylist = createFilteredPlaylist(originalPlaylist, criteria, filterValue, newPlaylistName);
+
+                if (filteredPlaylist.getSize() == 0) {
+                    System.out.println("❌ No songs found matching the filter criteria!");
+                    return;
+                }
+
+                // ذخیره پلی‌لیست فیلتر شده در دیتابیس
+                int newPlaylistId = saveFilteredPlaylistToDatabase(conn, user.getId(), filteredPlaylist,
+                        playlistId, criteria, filterValue);
+                filteredPlaylist.setId(newPlaylistId);
+
+                conn.commit();
+
+                System.out.println("\n✅ Filtered playlist created successfully!");
+                System.out.println("📊 Filtered by: " + displayCriteria + " = '" + filterValue + "'");
+                System.out.println("🎵 Found " + filteredPlaylist.getSize() + " songs");
+                System.out.println("🔗 Original playlist: " + originalPlaylist.getName());
+                System.out.println("💾 Saved as: " + newPlaylistName);
+
+                // نمایش آهنگ‌های فیلتر شده
+                System.out.println("\n🎶 Filtered Songs:");
+                System.out.println(filteredPlaylist);
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error filtering playlist: " + e.getMessage());
+        }
+    }
+
+    private Playlist createFilteredPlaylist(Playlist originalPlaylist, String criteria, String filterValue, String newName) {
+        Playlist filteredPlaylist = new Playlist(newName);
+        List<Song> allSongs = originalPlaylist.toList();
+
+        for (Song song : allSongs) {
+            boolean matches = false;
+
+            switch (criteria.toLowerCase()) {
+                case "genre" ->
+                        matches = song.getGenre().equalsIgnoreCase(filterValue);
+                case "artist_name" ->
+                        matches = song.getArtistName().equalsIgnoreCase(filterValue);
+                case "release_date" -> {
+                    try {
+                        int filterYear = Integer.parseInt(filterValue);
+                        matches = (song.getReleaseDate() == filterYear);
+                    } catch (NumberFormatException e) {
+                        matches = false;
+                    }
+                }
+                case "topic" ->
+                        matches = song.getTopic().equalsIgnoreCase(filterValue);
+            }
+
+            if (matches) {
+                filteredPlaylist.addSong(song);
+            }
+        }
+
+        return filteredPlaylist;
+    }
+
+    private int saveFilteredPlaylistToDatabase(Connection conn, int userId, Playlist filteredPlaylist,
+                                               int originalPlaylistId, String criteria, String filterValue) throws SQLException {
+
+        // ذخیره اطلاعات پلی‌لیست فیلتر شده
+        String insertPlaylistSql = "INSERT INTO filtered_playlists (user_id, name, original_playlist_id, filter_criteria, filter_value) VALUES (?, ?, ?, ?, ?)";
+        int filteredPlaylistId;
+
+        try (PreparedStatement stmt = conn.prepareStatement(insertPlaylistSql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, userId);
+            stmt.setString(2, filteredPlaylist.getName());
+            stmt.setInt(3, originalPlaylistId);
+            stmt.setString(4, criteria);
+            stmt.setString(5, filterValue);
+            stmt.executeUpdate();
+
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                filteredPlaylistId = rs.getInt(1);
+            } else {
+                throw new SQLException("Failed to create filtered playlist!");
+            }
+        }
+
+        // ذخیره آهنگ‌های پلی‌لیست فیلتر شده
+        String insertSongSql = "INSERT INTO filtered_playlist_songs (filtered_playlist_id, song_id, user_id, position) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(insertSongSql)) {
+            List<Song> songs = filteredPlaylist.toList();
+            for (int i = 0; i < songs.size(); i++) {
+                stmt.setInt(1, filteredPlaylistId);
+                stmt.setInt(2, songs.get(i).getId());
+                stmt.setInt(3, userId);
+                stmt.setInt(4, i);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        }
+
+        return filteredPlaylistId;
+    }
+
+    public void showFilteredPlaylists(User user) {
+        String sql = """
+                SELECT fp.id, fp.name, fp.filter_criteria, fp.filter_value, 
+                       fp.created_at, COUNT(fps.song_id) as song_count,
+                       p.name as original_playlist, u.username
+                FROM filtered_playlists fp
+                LEFT JOIN filtered_playlist_songs fps ON fp.id = fps.filtered_playlist_id
+                LEFT JOIN playlists p ON fp.original_playlist_id = p.id
+                LEFT JOIN users u ON fp.user_id = u.id
+                WHERE fp.user_id = ?
+                GROUP BY fp.id, fp.name, fp.filter_criteria, fp.filter_value, fp.created_at, p.name, u.username
+                ORDER BY fp.created_at DESC
+                """;
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, user.getId());
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("\n🎛️ Your Filtered Playlists:");
+            boolean hasPlaylists = false;
+
+            while (rs.next()) {
+                System.out.printf(" - [%d] %s (%d songs)%n",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getInt("song_count"));
+                System.out.printf("   🎯 Filter: %s = '%s'%n",
+                        getCriteriaDisplayName(rs.getString("filter_criteria")),
+                        rs.getString("filter_value"));
+                System.out.printf("   📁 Source: %s%n", rs.getString("original_playlist"));
+                System.out.printf("   👤 Created by: %s%n", rs.getString("username"));
+                System.out.println();
+                hasPlaylists = true;
+            }
+
+            if (!hasPlaylists) {
+                System.out.println("(No filtered playlists yet!)");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Error loading filtered playlists: " + e.getMessage());
+        }
+    }
+
+    public void showFilteredSongs(int filteredPlaylistId) {
+        String sql = """
+                SELECT s.id, s.track_name, s.artist_name, s.genre, s.release_date,
+                       fps.position, u.username
+                FROM filtered_playlist_songs fps
+                JOIN songs s ON fps.song_id = s.id
+                JOIN users u ON fps.user_id = u.id
+                WHERE fps.filtered_playlist_id = ?
+                ORDER BY fps.position
+                """;
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, filteredPlaylistId);
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("\n🎶 Songs in Filtered Playlist:");
+            int position = 1;
+            while (rs.next()) {
+                System.out.printf("%d. %s - %s (%s, %s) | Added by: %s%n",
+                        position++,
+                        rs.getString("artist_name"),
+                        rs.getString("track_name"),
+                        rs.getString("genre"),
+                        rs.getString("release_date"),
+                        rs.getString("username"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Error loading filtered playlist songs: " + e.getMessage());
+        }
+    }
+
+    private String getCriteriaDisplayName(String criteria) {
+        switch (criteria) {
+            case "genre":
+                return "Genre";
+            case "artist_name":
+                return "Artist";
+            case "release_date":
+                return "Release Year";
+            case "topic":
+                return "Topic";
+            default:
+                return criteria;
+        }
+    }
 }
 
 
