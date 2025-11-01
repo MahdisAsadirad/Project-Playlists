@@ -238,10 +238,10 @@ public class SongController {
         for (Playlist playlist : sourcePlaylists) {
             SongNode current = playlist.getHead();  // ✅ استفاده از getter
             while (current != null) {
-                if (!tempList.containsSong(current.data)) {
-                    tempList.addSong(current.data);
+                if (!tempList.containsSong(current.getData())) {
+                    tempList.addSong(current.getData());
                 }
-                current = current.next;
+                current = current.getNext();
             }
         }
 
@@ -597,23 +597,23 @@ public class SongController {
             boolean matches = false;
 
             switch (criteria.toLowerCase()) {
-                case "genre" -> matches = current.data.getGenre().equalsIgnoreCase(filterValue);
-                case "artist_name" -> matches = current.data.getArtistName().equalsIgnoreCase(filterValue);
+                case "genre" -> matches = current.getData().getGenre().equalsIgnoreCase(filterValue);
+                case "artist_name" -> matches = current.getData().getArtistName().equalsIgnoreCase(filterValue);
                 case "release_date" -> {
                     try {
                         int filterYear = Integer.parseInt(filterValue);
-                        matches = (current.data.getReleaseDate() == filterYear);
+                        matches = (current.getData().getReleaseDate() == filterYear);
                     } catch (NumberFormatException e) {
                         matches = false;
                     }
                 }
-                case "topic" -> matches = current.data.getTopic().equalsIgnoreCase(filterValue);
+                case "topic" -> matches = current.getData().getTopic().equalsIgnoreCase(filterValue);
             }
 
             if (matches) {
-                filteredPlaylist.addSong(current.data);
+                filteredPlaylist.addSong(current.getData());
             }
-            current = current.next;
+            current = current.getNext();
         }
 
         return filteredPlaylist;

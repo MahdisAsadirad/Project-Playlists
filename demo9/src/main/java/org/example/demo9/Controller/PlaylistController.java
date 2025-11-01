@@ -1,5 +1,4 @@
 package org.example.demo9.Controller;
-
 import org.example.demo9.Model.util.Database;
 import org.example.demo9.Model.Classes.User;
 
@@ -12,6 +11,8 @@ public class PlaylistController {
     public PlaylistController(Database db) {
         this.db = db;
     }
+
+
 
     public void createPlaylist(User user, Scanner scanner) {
         System.out.print("Enter new playlist name: ");
