@@ -102,10 +102,10 @@ public class SongController {
             conn.setAutoCommit(false);
 
             try {
-                //  ایجاد پلی‌لیست جدید در دیتابیس
+
                 int newPlaylistId = createNewPlaylist(conn, user.getId(), newName);
 
-                //  بارگذاری پلی‌لیست‌های قدیمی از دیتابیس
+
                 Playlist firstPlaylist = loadPlaylistFromDatabase(firstId, user.getId(), conn);
                 Playlist secondPlaylist = loadPlaylistFromDatabase(secondId, user.getId(), conn);
 
@@ -113,7 +113,6 @@ public class SongController {
                 Playlist mergedPlaylist = secondPlaylist.mergeAndCreateNew(firstPlaylist, newName);
                 mergedPlaylist.setId(newPlaylistId);
 
-                //  ذخیره پلی‌لیست ادغام شده در دیتابیس
                 savePlaylistToDatabase(mergedPlaylist, user.getId(), conn);
 
                 //  حذف پلی‌لیست‌های قدیمی
@@ -236,7 +235,7 @@ public class SongController {
 
         Playlist tempList = new Playlist("temp");
         for (Playlist playlist : sourcePlaylists) {
-            SongNode current = playlist.getHead();  // ✅ استفاده از getter
+            SongNode current = playlist.getHead();
             while (current != null) {
                 if (!tempList.containsSong(current.getData())) {
                     tempList.addSong(current.getData());
@@ -254,7 +253,7 @@ public class SongController {
 
         return shuffledPlaylist;
     }
-    // متد کمکی برای بررسی وجود آهنگ در Linked List
+
 
     private int saveShuffleToDatabase(Connection conn, int userId, Playlist shuffledPlaylist,
                                       List<Playlist> sourcePlaylists) throws SQLException {
@@ -286,7 +285,7 @@ public class SongController {
             stmt.executeBatch();
         }
 
-        //  ذخیره آهنگ‌ها با موقعیت‌های شافل شد
+
         String insertSongSql = "INSERT INTO shuffled_playlist_songs (shuffled_playlist_id, song_id, user_id, position) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertSongSql)) {
             List<Song> songs = shuffledPlaylist.toList();
@@ -431,7 +430,7 @@ public class SongController {
         }
     }
 
-    // متدهای کمکی که از قبل وجود دارند...
+
     private Playlist loadPlaylistFromDatabase(int playlistId, int userId, Connection conn) throws SQLException {
         String sql = "SELECT name FROM playlists WHERE id = ? AND user_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -544,7 +543,6 @@ public class SongController {
             conn.setAutoCommit(false);
 
             try {
-                // بارگذاری پلی‌لیست اصلی
                 Playlist originalPlaylist = loadPlaylistFromDatabase(playlistId, user.getId(), conn);
 
                 if (originalPlaylist == null) {
@@ -552,7 +550,6 @@ public class SongController {
                     return;
                 }
 
-                // ایجاد پلی‌لیست فیلتر شده
                 Playlist filteredPlaylist = createFilteredPlaylist(originalPlaylist, criteria, filterValue, newPlaylistName);
 
                 if (filteredPlaylist.getSize() == 0) {
@@ -560,7 +557,6 @@ public class SongController {
                     return;
                 }
 
-                // ذخیره پلی‌لیست فیلتر شده در دیتابیس
                 int newPlaylistId = saveFilteredPlaylistToDatabase(conn, user.getId(), filteredPlaylist,
                         playlistId, criteria, filterValue);
                 filteredPlaylist.setId(newPlaylistId);
@@ -573,7 +569,6 @@ public class SongController {
                 System.out.println("🔗 Original playlist: " + originalPlaylist.getName());
                 System.out.println("💾 Saved as: " + newPlaylistName);
 
-                // نمایش آهنگ‌های فیلتر شده
                 System.out.println("\n🎶 Filtered Songs:");
                 System.out.println(filteredPlaylist);
 
@@ -591,7 +586,6 @@ public class SongController {
                                             String filterValue, String newName) {
         Playlist filteredPlaylist = new Playlist(newName);
 
-        // پیمایش مستقیم روی Linked List
         SongNode current = originalPlaylist.head;
         while (current != null) {
             boolean matches = false;
@@ -622,7 +616,6 @@ public class SongController {
     private int saveFilteredPlaylistToDatabase(Connection conn, int userId, Playlist filteredPlaylist,
                                                int originalPlaylistId, String criteria, String filterValue) throws SQLException {
 
-        // ذخیره اطلاعات پلی‌لیست فیلتر شده
         String insertPlaylistSql = "INSERT INTO filtered_playlists (user_id, name, original_playlist_id, filter_criteria, filter_value) VALUES (?, ?, ?, ?, ?)";
         int filteredPlaylistId;
 
@@ -642,7 +635,6 @@ public class SongController {
             }
         }
 
-        // ذخیره آهنگ‌های پلی‌لیست فیلتر شده
         String insertSongSql = "INSERT INTO filtered_playlist_songs (filtered_playlist_id, song_id, user_id, position) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertSongSql)) {
             List<Song> songs = filteredPlaylist.toList();
@@ -852,7 +844,6 @@ public class SongController {
         System.out.print("Enter Song ID to like/unlike: ");
         int songId = Integer.parseInt(scanner.nextLine());
 
-        // بررسی وضعیت فعلی لایک
         String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
         try (Connection conn = db.getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
@@ -903,7 +894,6 @@ public class SongController {
         }
     }
 
-    // متد برای بررسی وضعیت لایک آهنگ‌ها هنگام بارگذاری
     public void checkLikedStatus(User user, List<Song> songs) {
         if (songs.isEmpty()) return;
 
@@ -929,7 +919,6 @@ public class SongController {
                 likedSongIds.add(rs.getInt("song_id"));
             }
 
-            // تنظیم وضعیت لایک برای آهنگ‌ها
             for (Song song : songs) {
                 song.setLiked(likedSongIds.contains(song.getId()));
             }

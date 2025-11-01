@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.demo9.Controller.SongsController"
+      spacing="20" style="-fx-padding: 30;">
+
+    <Label text="🎵 Songs Library" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+
+    <VBox spacing="15">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Search:" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="searchField" promptText="Search by track name, artist, or genre..." prefWidth="300"/>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox fx:id="songsContainer" spacing="10">
+                <!-- تمام آهنگ‌ها اینجا نمایش داده می‌شوند -->
+            </VBox>
+        </ScrollPane>
+    </VBox>
+
+</VBox>

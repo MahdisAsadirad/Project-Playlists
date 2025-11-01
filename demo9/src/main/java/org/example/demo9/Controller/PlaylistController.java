@@ -13,7 +13,6 @@ public class PlaylistController {
     }
 
 
-
     public void createPlaylist(User user, Scanner scanner) {
         System.out.print("Enter new playlist name: ");
         String name = scanner.nextLine();

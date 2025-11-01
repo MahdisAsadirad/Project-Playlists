@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.demo9.Controller.PlaylistSongsController"
+      spacing="20" style="-fx-padding: 30;">
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Button fx:id="backButton" text="← Back" onAction="#handleBack"/>
+        <Label fx:id="playlistTitleLabel" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="addSongButton" text="+ Add Song" onAction="#handleAddSong"/>
+    </HBox>
+
+    <Separator style="-fx-background-color: #e0e0e0;"/>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+        <VBox fx:id="songsContainer" spacing="10">
+            <!-- آهنگ‌ها به صورت داینامیک اینجا اضافه می‌شوند -->
+        </VBox>
+    </ScrollPane>
+
+</VBox>

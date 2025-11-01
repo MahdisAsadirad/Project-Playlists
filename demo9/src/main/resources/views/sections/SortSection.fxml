@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.demo9.Controller.SortController"
+      spacing="20" style="-fx-padding: 30;">
+
+    <Label text="⚙️ Sort Playlist" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+
+    <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
+        <Label text="Sort songs in a playlist:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <VBox spacing="5">
+                <Label text="Select Playlist:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="playlistCombo" prefWidth="200"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Sort By:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="sortCriteriaCombo" prefWidth="150"/>
+            </VBox>
+        </HBox>
+
+        <VBox spacing="10">
+            <Label text="Sort Order:" style="-fx-font-weight: bold;"/>
+            <HBox spacing="20">
+                <RadioButton fx:id="ascendingRadio" text="Ascending" selected="true">
+                    <toggleGroup>
+                        <ToggleGroup fx:id="sortOrderGroup"/>
+                    </toggleGroup>
+                </RadioButton>
+                <RadioButton fx:id="descendingRadio" text="Descending" toggleGroup="$sortOrderGroup"/>
+            </HBox>
+        </VBox>
+
+        <Button fx:id="sortButton" text="Sort Playlist" prefWidth="120"/>
+    </VBox>
+
+    <VBox fx:id="resultContainer" spacing="10">
+        <!-- نتایج اینجا نمایش داده می‌شود -->
+    </VBox>
+
+</VBox>

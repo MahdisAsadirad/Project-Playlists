@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.demo9.Controller.MergeController"
+      spacing="20" style="-fx-padding: 30;">
+
+    <Label text="🔄 Merge Playlists" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+
+    <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
+        <Label text="Select two playlists to merge:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <VBox spacing="5">
+                <Label text="First Playlist:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="firstPlaylistCombo" prefWidth="200"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Second Playlist:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="secondPlaylistCombo" prefWidth="200"/>
+            </VBox>
+        </HBox>
+
+        <VBox spacing="5">
+            <Label text="New Playlist Name:" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="newPlaylistNameField" promptText="Enter name for merged playlist" prefWidth="300"/>
+        </VBox>
+
+        <Button fx:id="mergeButton" text="Merge Playlists" prefWidth="150"/>
+    </VBox>
+
+    <VBox fx:id="resultContainer" spacing="10">
+        <!-- نتایج اینجا نمایش داده می‌شود -->
+    </VBox>
+
+</VBox>

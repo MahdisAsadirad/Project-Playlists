@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.paint.Color?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.demo9.Controller.LoginController"
+            style="-fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);">
+
+    <center>
+        <VBox alignment="CENTER" spacing="20" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 40;">
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+
+            <Label text="🎵 Music Playlist Manager" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #333;">
+                <font>
+                    <Font name="System Bold" size="28.0" />
+                </font>
+            </Label>
+
+            <Label text="Welcome Back!" style="-fx-font-size: 16; -fx-text-fill: #666;"/>
+
+            <VBox spacing="15" alignment="CENTER_LEFT" style="-fx-pref-width: 300;">
+                <Label text="Username" style="-fx-font-weight: bold; -fx-text-fill: #333;"/>
+                <TextField fx:id="usernameField" promptText="Enter your username"
+                           style="-fx-pref-height: 40; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #ddd;"/>
+
+                <Label text="Password" style="-fx-font-weight: bold; -fx-text-fill: #333;"/>
+                <PasswordField fx:id="passwordField" promptText="Enter your password"
+                               style="-fx-pref-height: 40; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #ddd;"/>
+
+                <Label fx:id="errorLabel" style="-fx-text-fill: #e74c3c; -fx-font-size: 12;" visible="false"/>
+            </VBox>
+
+            <VBox spacing="10" alignment="CENTER">
+                <Button text="Login" fx:id="loginButton"
+                        style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-width: 300; -fx-pref-height: 45; -fx-background-radius: 8;"
+                        onAction="#handleLogin"/>
+
+                <Button text="Sign Up" fx:id="signupButton"
+                        style="-fx-background-color: transparent; -fx-text-fill: #667eea; -fx-font-weight: bold; -fx-border-color: #667eea; -fx-pref-width: 300; -fx-pref-height: 45; -fx-background-radius: 8; -fx-border-radius: 8;"
+                        onAction="#handleSignup"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
