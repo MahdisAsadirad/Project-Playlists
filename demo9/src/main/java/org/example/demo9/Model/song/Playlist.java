@@ -62,34 +62,6 @@ public class Playlist {
         size++;
     }
 
-    public boolean removeSong(String trackName) {
-        SongNode current = head;
-        while (current != null) {
-            if (current.data.getTrackName().equalsIgnoreCase(trackName)) {
-                if (current.prev != null) current.prev.next = current.next;
-                else head = current.next;
-
-                if (current.next != null) current.next.prev = current.prev;
-                else tail = current.prev;
-
-                size--;
-                return true;
-            }
-            current = current.next;
-        }
-        return false;
-    }
-
-    public Song findSong(String trackName) {
-        SongNode current = head;
-        while (current != null) {
-            if (current.data.getTrackName().equalsIgnoreCase(trackName))
-                return current.data;
-            current = current.next;
-        }
-        return null;
-    }
-
     public List<Song> toList() {
         List<Song> songs = new ArrayList<>();
         SongNode current = head;
@@ -98,118 +70,6 @@ public class Playlist {
             current = current.next;
         }
         return songs;
-    }
-
-    public void clear() {
-        head = null;
-        tail = null;
-        size = 0;
-    }
-
-    public void merge(Playlist other) {
-        SongNode current = other.head;
-        while (current != null) {
-            if (findSong(current.data.getTrackName()) == null)
-                addSong(current.data);
-            current = current.next;
-        }
-    }
-
-    public static Playlist shuffleMerge(List<Playlist> lists, String newName) {
-        Playlist result = new Playlist(newName);
-        List<Song> pool = new ArrayList<>();
-        Set<Song> seen = new HashSet<>();
-        for (Playlist p : lists) {
-            for (Song s : p.toList()) {
-                if (seen.add(s)) pool.add(s);
-            }
-        }
-        Collections.shuffle(pool);
-        for (Song s : pool) result.addSong(s);
-        return result;
-    }
-
-    public void sortBy(String criteria) {
-        List<Song> list = toList();
-        Comparator<Song> cmp;
-        switch (criteria.toLowerCase()) {
-            case "track name":
-            case "track_name":
-                cmp = Comparator.comparing(Song::getTrackName, String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "artist name":
-            case "artist_name":
-                cmp = Comparator.comparing(Song::getArtistName, String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "release date":
-            case "release_date":
-                cmp = Comparator.comparing(Song::getReleaseDate, String.CASE_INSENSITIVE_ORDER);
-                break;
-            default:
-                return;
-        }
-        list.sort(cmp);
-        clear();
-        for (Song s : list) addSong(s);
-    }
-
-    public Playlist filterBy(String criteria, String value) {
-        Playlist out = new Playlist(this.name + "-filtered");
-        for (Song s : toList()) {
-            switch (criteria.toLowerCase()) {
-                case "genre":
-                    if (s.getGenre().equalsIgnoreCase(value)) out.addSong(s);
-                    break;
-                case "artist":
-                    if (s.getArtistName().equalsIgnoreCase(value)) out.addSong(s);
-                    break;
-                case "year":
-                    if (s.getReleaseDate().equalsIgnoreCase(value)) out.addSong(s);
-                    break;
-                case "topic":
-                    if (s.getTopic().equalsIgnoreCase(value)) out.addSong(s);
-                    break;
-            }
-        }
-        return out;
-    }
-
-    public void likeSong(String trackName) {
-        Song s = findSong(trackName);
-        if (s != null) s.setLiked(true);
-    }
-
-    public void unlikeSong(String trackName) {
-        Song s = findSong(trackName);
-        if (s != null) s.setLiked(false);
-    }
-
-    public String play() {
-        StringBuilder sb = new StringBuilder();
-        SongNode current = head;
-        while (current != null) {
-            sb.append(current.data).append("\n");
-            current = current.next;
-        }
-        return sb.toString();
-    }
-
-    public String playBackward() {
-        StringBuilder sb = new StringBuilder();
-        SongNode current = tail;
-        while (current != null) {
-            sb.append(current.data).append("\n");
-            current = current.prev;
-        }
-        return sb.toString();
-    }
-
-    public String shufflePlay() {
-        List<Song> list = toList();
-        Collections.shuffle(list);
-        StringBuilder sb = new StringBuilder();
-        for (Song s : list) sb.append(s).append("\n");
-        return sb.toString();
     }
 
     public void loadSongsFromDatabase(Connection conn) throws SQLException {
@@ -239,23 +99,7 @@ public class Playlist {
         }
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("🎶 Playlist: ").append(name)
-                .append(" (").append(size).append(" songs)\n\n");
 
-        SongNode current = head;
-        int i = 1;
-        while (current != null) {
-            sb.append(i++).append(". ").append(current.data.toString()).append("\n");
-            current = current.next;
-        }
-        sb.append("------------------------------------------------------------------------------------\n");
-        return sb.toString();
-    }
-
-    // به جای این:
     public Playlist mergeAndCreateNew(Playlist other, String newName) {
         Playlist mergedPlaylist = new Playlist(newName);
 
@@ -274,6 +118,111 @@ public class Playlist {
         }
 
         return mergedPlaylist;
+    }
+
+    public void sortLinkedlistBy(String criteria) {
+        if (head == null || head.next == null) {
+            return; // لیست خالی یا فقط یک عنصر
+        }
+
+        // استفاده از Merge Sort برای لیست پیوندی
+        head = mergeSort(head, criteria);
+
+        // به روز رسانی tail بعد از سورت
+        tail = head;
+        while (tail != null && tail.next != null) {
+            tail = tail.next;
+        }
+    }
+
+    private SongNode mergeSort(SongNode start, String criteria) {
+        if (start == null || start.next == null) {
+            return start;
+        }
+
+        // پیدا کردن وسط لیست
+        SongNode middle = getMiddle(start);
+        SongNode nextOfMiddle = middle.next;
+        middle.next = null;
+
+        // سورت بازگشتی دو نیمه
+        SongNode left = mergeSort(start, criteria);
+        SongNode right = mergeSort(nextOfMiddle, criteria);
+
+        // ادغام دو نیمه سورت شده
+        return merge(left, right, criteria);
+    }
+
+    private SongNode getMiddle(SongNode start) {
+        if (start == null) return null;
+
+        SongNode slow = start;
+        SongNode fast = start.next;
+
+        while (fast != null) {
+            fast = fast.next;
+            if (fast != null) {
+                slow = slow.next;
+                fast = fast.next;
+            }
+        }
+        return slow;
+    }
+
+    private SongNode merge(SongNode left, SongNode right, String criteria) {
+        if (left == null) return right;
+        if (right == null) return left;
+
+        SongNode result;
+        Comparator<Song> comparator = getComparator(criteria);
+
+        if (comparator.compare(left.data, right.data) <= 0) {
+            result = left;
+            result.next = merge(left.next, right, criteria);
+            if (result.next != null) {
+                result.next.prev = result;
+            }
+        } else {
+            result = right;
+            result.next = merge(left, right.next, criteria);
+            if (result.next != null) {
+                result.next.prev = result;
+            }
+        }
+        result.prev = null;
+        return result;
+    }
+
+    private Comparator<Song> getComparator(String criteria) {
+        switch (criteria.toLowerCase()) {
+            case "track name":
+            case "track_name":
+                return Comparator.comparing(Song::getTrackName, String.CASE_INSENSITIVE_ORDER);
+            case "artist name":
+            case "artist_name":
+                return Comparator.comparing(Song::getArtistName, String.CASE_INSENSITIVE_ORDER);
+            case "release date":
+            case "release_date":
+                return Comparator.comparing(Song::getReleaseDate, String.CASE_INSENSITIVE_ORDER);
+            default:
+                return Comparator.comparing(Song::getTrackName, String.CASE_INSENSITIVE_ORDER);
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("🎶 Playlist: ").append(name)
+                .append(" (").append(size).append(" songs)\n\n");
+
+        SongNode current = head;
+        int i = 1;
+        while (current != null) {
+            sb.append(i++).append(". ").append(current.data.toString()).append("\n");
+            current = current.next;
+        }
+        sb.append("------------------------------------------------------------------------------------\n");
+        return sb.toString();
     }
 }
 

@@ -136,6 +136,10 @@ public class Main {
                         }
                     }
 
+                    case "7" -> {
+                        songController.sortPlaylist(currentUser, scanner);
+                    }
+
 
 
                     case "0" -> {
