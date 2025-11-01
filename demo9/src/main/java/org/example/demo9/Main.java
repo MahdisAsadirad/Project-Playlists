@@ -132,7 +132,7 @@ public class Main {
                         System.out.print("Enter shuffled playlist ID to view songs (or 0 to go back): ");
                         int shuffledId = Integer.parseInt(scanner.nextLine());
                         if (shuffledId != 0) {
-                            songController.showShuffleSongsFromPlaylists(shuffledId);
+                            songController.showSongsInPlaylist(shuffledId);
                         }
                     }
 

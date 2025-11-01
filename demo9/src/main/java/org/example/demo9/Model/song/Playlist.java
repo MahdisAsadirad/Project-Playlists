@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class Playlist {
-    private final int id;
+    private int id;
     private final int userId;
     private final String name;
     private SongNode head;
@@ -31,6 +31,10 @@ public class Playlist {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id=userId;
     }
 
     public int getUserId() {
@@ -250,4 +254,26 @@ public class Playlist {
         sb.append("------------------------------------------------------------------------------------\n");
         return sb.toString();
     }
+
+    // به جای این:
+    public Playlist mergeAndCreateNew(Playlist other, String newName) {
+        Playlist mergedPlaylist = new Playlist(newName);
+
+        // اضافه کردن آهنگ‌های پلی‌لیست اول (this)
+        SongNode current = this.head;
+        while (current != null) {
+            mergedPlaylist.addSong(current.data);
+            current = current.next;
+        }
+
+        // اضافه کردن آهنگ‌های پلی‌لیست دوم (other)
+        current = other.head;
+        while (current != null) {
+            mergedPlaylist.addSong(current.data);
+            current = current.next;
+        }
+
+        return mergedPlaylist;
+    }
 }
+
