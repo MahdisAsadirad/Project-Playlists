@@ -59,9 +59,36 @@ public class Song {
         this.liked = liked;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
+
+    public void setTrackName(String trackName) {
+        this.trackName = trackName;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public void setLength(double length) {
+        this.length = length;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
     @Override
     public String toString() {
-        return "🎵 " + trackName + " by " + artistName + " (" + releaseDate + "), Genre: " + genre + ", Length: " + length + "s, Topic: " + topic;
+        return trackName + ",    by " + artistName + " (" + releaseDate + "),     Genre: " + genre + ",   Length: " + length + "s,    Topic: " + topic;
     }
 
 
@@ -78,4 +105,5 @@ public class Song {
     public int hashCode() {
         return Objects.hash(trackName.toLowerCase(), artistName.toLowerCase());
     }
+
 }

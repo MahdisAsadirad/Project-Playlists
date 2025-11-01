@@ -34,7 +34,7 @@ public class Playlist {
     }
 
     public void setId(int id) {
-        this.id = id;
+        this.id=userId;
     }
 
     public int getUserId() {
@@ -62,57 +62,6 @@ public class Playlist {
         size++;
     }
 
-    public void addSong(Song song, int userId, Connection conn) throws SQLException {
-        // ابتدا به لیست پیوندی اضافه کن
-        addSong(song); // از متد ساده‌تر استفاده می‌کنیم
-
-        // سپس به دیتابیس اضافه کن
-        String query = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, this.id);
-            stmt.setInt(2, song.getId());
-            stmt.setInt(3, userId);
-            stmt.executeUpdate();
-        }
-    }
-
-    public boolean removeSong(String trackName, Connection conn) throws SQLException {
-        SongNode current = head;
-        while (current != null) {
-            if (current.data.getTrackName().equalsIgnoreCase(trackName)) {
-                if (current.prev != null) current.prev.next = current.next;
-                else head = current.next;
-
-                if (current.next != null) current.next.prev = current.prev;
-                else tail = current.prev;
-
-                size--;
-
-
-                String query = "DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?";
-                try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                    stmt.setInt(1, this.id);
-                    stmt.setInt(2, current.data.getId());
-                    stmt.executeUpdate();
-                }
-                return true;
-            }
-            current = current.next;
-        }
-        return false;
-    }
-
-
-    public Song findSong(String trackName) {
-        SongNode current = head;
-        while (current != null) {
-            if (current.data.getTrackName().equalsIgnoreCase(trackName))
-                return current.data;
-            current = current.next;
-        }
-        return null;
-    }
-
     public List<Song> toList() {
         List<Song> songs = new ArrayList<>();
         SongNode current = head;
@@ -123,36 +72,13 @@ public class Playlist {
         return songs;
     }
 
-    public void clear() {
-        head = null;
-        tail = null;
-        size = 0;
-    }
-
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("🎶 Playlist: ").append(name)
-                .append(" (").append(size).append(" songs)\n\n");
-
-        SongNode current = head;
-        int i = 1;
-        while (current != null) {
-            sb.append(i++).append(". ").append(current.data.toString()).append("\n");
-            current = current.next;
-        }
-        sb.append("------------------------------------------------------------------------------------\n");
-        return sb.toString();
-    }
-
     public void loadSongsFromDatabase(Connection conn) throws SQLException {
         String query = """
-            SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic
-            FROM songs s
-            JOIN playlist_songs ps ON s.id = ps.song_id
-            WHERE ps.playlist_id = ?
-            """;
+                SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic
+                FROM songs s
+                JOIN playlist_songs ps ON s.id = ps.song_id
+                WHERE ps.playlist_id = ?
+                """;
 
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, this.id);
@@ -168,7 +94,7 @@ public class Playlist {
                         rs.getDouble("len"),
                         rs.getString("topic")
                 );
-                this.addSong(song); // اضافه کردن به لیست پیوندی
+                addSong(song);
             }
         }
     }
@@ -194,13 +120,109 @@ public class Playlist {
         return mergedPlaylist;
     }
 
-//    public void addAllSongs(List<Song> songs) {
-//        for (Song song : songs) {
-//            this.addSong(song);
-//        }
-//    }
-//
-//    public Set<Song> getUniqueSongs() {
-//        return new HashSet<>(this.toList());
-//    }
+    public void sortLinkedlistBy(String criteria) {
+        if (head == null || head.next == null) {
+            return; // لیست خالی یا فقط یک عنصر
+        }
+
+        // استفاده از Merge Sort برای لیست پیوندی
+        head = mergeSort(head, criteria);
+
+        // به روز رسانی tail بعد از سورت
+        tail = head;
+        while (tail != null && tail.next != null) {
+            tail = tail.next;
+        }
+    }
+
+    private SongNode mergeSort(SongNode start, String criteria) {
+        if (start == null || start.next == null) {
+            return start;
+        }
+
+        // پیدا کردن وسط لیست
+        SongNode middle = getMiddle(start);
+        SongNode nextOfMiddle = middle.next;
+        middle.next = null;
+
+        // سورت بازگشتی دو نیمه
+        SongNode left = mergeSort(start, criteria);
+        SongNode right = mergeSort(nextOfMiddle, criteria);
+
+        // ادغام دو نیمه سورت شده
+        return merge(left, right, criteria);
+    }
+
+    private SongNode getMiddle(SongNode start) {
+        if (start == null) return null;
+
+        SongNode slow = start;
+        SongNode fast = start.next;
+
+        while (fast != null) {
+            fast = fast.next;
+            if (fast != null) {
+                slow = slow.next;
+                fast = fast.next;
+            }
+        }
+        return slow;
+    }
+
+    private SongNode merge(SongNode left, SongNode right, String criteria) {
+        if (left == null) return right;
+        if (right == null) return left;
+
+        SongNode result;
+        Comparator<Song> comparator = getComparator(criteria);
+
+        if (comparator.compare(left.data, right.data) <= 0) {
+            result = left;
+            result.next = merge(left.next, right, criteria);
+            if (result.next != null) {
+                result.next.prev = result;
+            }
+        } else {
+            result = right;
+            result.next = merge(left, right.next, criteria);
+            if (result.next != null) {
+                result.next.prev = result;
+            }
+        }
+        result.prev = null;
+        return result;
+    }
+
+    private Comparator<Song> getComparator(String criteria) {
+        switch (criteria.toLowerCase()) {
+            case "track name":
+            case "track_name":
+                return Comparator.comparing(Song::getTrackName, String.CASE_INSENSITIVE_ORDER);
+            case "artist name":
+            case "artist_name":
+                return Comparator.comparing(Song::getArtistName, String.CASE_INSENSITIVE_ORDER);
+            case "release date":
+            case "release_date":
+                return Comparator.comparing(Song::getReleaseDate, String.CASE_INSENSITIVE_ORDER);
+            default:
+                return Comparator.comparing(Song::getTrackName, String.CASE_INSENSITIVE_ORDER);
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("🎶 Playlist: ").append(name)
+                .append(" (").append(size).append(" songs)\n\n");
+
+        SongNode current = head;
+        int i = 1;
+        while (current != null) {
+            sb.append(i++).append(". ").append(current.data.toString()).append("\n");
+            current = current.next;
+        }
+        sb.append("------------------------------------------------------------------------------------\n");
+        return sb.toString();
+    }
 }
+
