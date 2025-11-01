@@ -56,14 +56,15 @@ public class Main {
                 System.out.println("\n🎧 What would you like to do?");
                 System.out.println("1️. Playlist Management");
                 System.out.println("2️. Add / Remove Song from Playlist");
-                System.out.println("3️. Merge Two Playlists");
-                System.out.println("4️. Shuffle Merge");
-                System.out.println("5️. Sort Playlist");
-                System.out.println("6️. Filter Playlist");
-                System.out.println("7️. Like / Dislike Song");
-                System.out.println("8️. Play Playlist");
-                System.out.println("9️. Play Playlist (Shuffle)");
-                System.out.println("10. Show song from playlist");
+                System.out.println("3. Show song from playlist");
+                System.out.println("4. Merge Two Playlists");
+                System.out.println("5. Shuffle Merge Playlists");
+                System.out.println("6. Show Shuffled Playlists");
+                System.out.println("7. Sort Playlist");
+                System.out.println("8. Filter Playlist");
+                System.out.println("9. Like / Dislike Song");
+                System.out.println("10. Play Playlist");
+                System.out.println("11. Play Playlist (Shuffle)");
                 System.out.println("0️. Logout / Exit");
                 System.out.print("👉 Enter your choice: ");
 
@@ -115,13 +116,26 @@ public class Main {
                             System.out.println("Invalid option!");
                         }
                     }
-
-                    case "10" -> {
+                    case "3" -> {
                         playlistController.showPlaylists(currentUser);
                         System.out.print("Enter playlist ID to view songs: ");
                         int playlistId = Integer.parseInt(scanner.nextLine());
                         songController.showSongsInPlaylist(playlistId);
                     }
+
+                    case "5" -> {
+                        songController.shufflePlaylists(currentUser, scanner);
+                    }
+
+                    case "6" -> {
+                        songController.showShufflePlaylists(currentUser);
+                        System.out.print("Enter shuffled playlist ID to view songs (or 0 to go back): ");
+                        int shuffledId = Integer.parseInt(scanner.nextLine());
+                        if (shuffledId != 0) {
+                            songController.showShuffleSongsFromPlaylists(shuffledId);
+                        }
+                    }
+
 
 
                     case "0" -> {
