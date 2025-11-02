@@ -15,20 +15,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
-public class SongsController implements Initializable {
-    @FXML private VBox songsContainer;
+public class DiscoverSongsController implements Initializable {
+    @FXML private VBox discoverSongsContainer;
     @FXML private TextField searchField;
+    @FXML private ComboBox<String> genreFilter;
+    @FXML private ComboBox<String> artistFilter;
 
     private User currentUser;
     private Database db;
 
-    public SongsController() {
+    public DiscoverSongsController() {
         this.db = new Database();
     }
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
         loadAllSongs();
+        setupFilters();
     }
 
     @Override
@@ -37,10 +40,52 @@ public class SongsController implements Initializable {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             searchSongs(newValue);
         });
+
+        genreFilter.setPromptText("Filter by Genre");
+        artistFilter.setPromptText("Filter by Artist");
+
+        genreFilter.setOnAction(e -> filterSongs());
+        artistFilter.setOnAction(e -> filterSongs());
+    }
+
+    private void setupFilters() {
+        // پر کردن فیلتر ژانر
+        String genreSql = "SELECT DISTINCT genre FROM songs ORDER BY genre";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(genreSql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            genreFilter.getItems().clear();
+            genreFilter.getItems().add("All Genres");
+            while (rs.next()) {
+                genreFilter.getItems().add(rs.getString("genre"));
+            }
+            genreFilter.setValue("All Genres");
+
+        } catch (SQLException e) {
+            showError("Error loading genres: " + e.getMessage());
+        }
+
+        // پر کردن فیلتر آرتیست
+        String artistSql = "SELECT DISTINCT artist_name FROM songs ORDER BY artist_name";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(artistSql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            artistFilter.getItems().clear();
+            artistFilter.getItems().add("All Artists");
+            while (rs.next()) {
+                artistFilter.getItems().add(rs.getString("artist_name"));
+            }
+            artistFilter.setValue("All Artists");
+
+        } catch (SQLException e) {
+            showError("Error loading artists: " + e.getMessage());
+        }
     }
 
     private void loadAllSongs() {
-        songsContainer.getChildren().clear();
+        discoverSongsContainer.getChildren().clear();
 
         String query = "SELECT id, track_name, artist_name, genre, release_date, len, topic FROM songs ORDER BY track_name";
 
@@ -49,7 +94,7 @@ public class SongsController implements Initializable {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                addSongCard(rs.getInt("id"),
+                addDiscoverSongCard(rs.getInt("id"),
                         rs.getString("track_name"),
                         rs.getString("artist_name"),
                         rs.getString("genre"),
@@ -63,7 +108,8 @@ public class SongsController implements Initializable {
         }
     }
 
-    private void addSongCard(int songId, String trackName, String artistName, String genre, int releaseDate, double length, String topic) {
+    private void addDiscoverSongCard(int songId, String trackName, String artistName,
+                                     String genre, int releaseDate, double length, String topic) {
         HBox card = new HBox(15);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600;");
 
@@ -86,24 +132,26 @@ public class SongsController implements Initializable {
 
         songInfo.getChildren().addAll(trackLabel, artistLabel, detailsLabel);
 
-
+        // دکمه‌های action
         HBox actions = new HBox(10);
 
-        Button likeButton = new Button("❤");
-        likeButton.setStyle("-fx-background-color: transparent; -fx-font-size: 16;");
+        // دکمه لایک
+        Button likeButton = new Button("♡");
+        likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
 
-
+        // بررسی وضعیت لایک
         checkAndUpdateLikeButton(likeButton, songId);
 
         likeButton.setOnAction(e -> toggleLikeSong(songId, likeButton));
 
+        // دکمه اضافه به پلی‌لیست
         Button addToPlaylistButton = new Button("Add to Playlist");
         addToPlaylistButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
         addToPlaylistButton.setOnAction(e -> showAddToPlaylistDialog(songId));
 
         actions.getChildren().addAll(likeButton, addToPlaylistButton);
         card.getChildren().addAll(icon, songInfo, actions);
-        songsContainer.getChildren().add(card);
+        discoverSongsContainer.getChildren().add(card);
     }
 
     private void checkAndUpdateLikeButton(Button likeButton, int songId) {
@@ -117,53 +165,12 @@ public class SongsController implements Initializable {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next() && rs.getInt(1) > 0) {
-                likeButton.setText("❤");
+                likeButton.setText("❤️");
                 likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
-            } else {
-                likeButton.setText("♡");
-                likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
             }
 
         } catch (SQLException e) {
             System.out.println("Error checking like status: " + e.getMessage());
-        }
-    }
-
-
-    private void searchSongs(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            loadAllSongs();
-            return;
-        }
-
-        songsContainer.getChildren().clear();
-
-        String sql = "SELECT id, track_name, artist_name, genre, release_date, len, topic FROM songs " +
-                "WHERE track_name LIKE ? OR artist_name LIKE ? OR genre LIKE ? " +
-                "ORDER BY track_name";
-
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            String searchTerm = "%" + query + "%";
-            stmt.setString(1, searchTerm);
-            stmt.setString(2, searchTerm);
-            stmt.setString(3, searchTerm);
-
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                addSongCard(rs.getInt("id"),
-                        rs.getString("track_name"),
-                        rs.getString("artist_name"),
-                        rs.getString("genre"),
-                        rs.getInt("release_date"),
-                        rs.getDouble("len"),
-                        rs.getString("topic"));
-            }
-
-        } catch (SQLException e) {
-            showError("Error searching songs: " + e.getMessage());
         }
     }
 
@@ -190,15 +197,16 @@ public class SongsController implements Initializable {
                     showSuccess("Song removed from liked songs!");
                 }
             } else {
+                // لایک کردن
                 String insertSql = "INSERT INTO liked_songs (user_id, song_id) VALUES (?, ?)";
                 try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                     insertStmt.setInt(1, currentUser.getId());
                     insertStmt.setInt(2, songId);
                     insertStmt.executeUpdate();
 
-                    likeButton.setText("❤");
+                    likeButton.setText("❤️");
                     likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
-                    showSuccess("Song added to liked songs! ❤");
+                    showSuccess("Song added to liked songs! ❤️");
                 }
             }
 
@@ -207,7 +215,92 @@ public class SongsController implements Initializable {
         }
     }
 
+    private void searchSongs(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            loadAllSongs();
+            return;
+        }
+
+        discoverSongsContainer.getChildren().clear();
+
+        String sql = "SELECT id, track_name, artist_name, genre, release_date, len, topic FROM songs " +
+                "WHERE track_name LIKE ? OR artist_name LIKE ? OR genre LIKE ? " +
+                "ORDER BY track_name";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            String searchTerm = "%" + query + "%";
+            stmt.setString(1, searchTerm);
+            stmt.setString(2, searchTerm);
+            stmt.setString(3, searchTerm);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                addDiscoverSongCard(rs.getInt("id"),
+                        rs.getString("track_name"),
+                        rs.getString("artist_name"),
+                        rs.getString("genre"),
+                        rs.getInt("release_date"),
+                        rs.getDouble("len"),
+                        rs.getString("topic"));
+            }
+
+        } catch (SQLException e) {
+            showError("Error searching songs: " + e.getMessage());
+        }
+    }
+
+    private void filterSongs() {
+        String genre = genreFilter.getValue();
+        String artist = artistFilter.getValue();
+
+        String sql = "SELECT id, track_name, artist_name, genre, release_date, len, topic FROM songs WHERE 1=1";
+
+        if (genre != null && !genre.equals("All Genres")) {
+            sql += " AND genre = ?";
+        }
+
+        if (artist != null && !artist.equals("All Artists")) {
+            sql += " AND artist_name = ?";
+        }
+
+        sql += " ORDER BY track_name";
+
+        discoverSongsContainer.getChildren().clear();
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            int paramIndex = 1;
+            if (genre != null && !genre.equals("All Genres")) {
+                stmt.setString(paramIndex++, genre);
+            }
+
+            if (artist != null && !artist.equals("All Artists")) {
+                stmt.setString(paramIndex++, artist);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                addDiscoverSongCard(rs.getInt("id"),
+                        rs.getString("track_name"),
+                        rs.getString("artist_name"),
+                        rs.getString("genre"),
+                        rs.getInt("release_date"),
+                        rs.getDouble("len"),
+                        rs.getString("topic"));
+            }
+
+        } catch (SQLException e) {
+            showError("Error filtering songs: " + e.getMessage());
+        }
+    }
+
     private void showAddToPlaylistDialog(int songId) {
+        // پیاده‌سازی مشابه قبلی
         ChoiceDialog<String> dialog = new ChoiceDialog<>();
         dialog.setTitle("Add to Playlist");
         dialog.setHeaderText("Select a playlist to add this song to");

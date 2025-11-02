@@ -5,26 +5,28 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
 
-<BorderPane stylesheets="@../style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.demo9.Controller.DashboardController">
+<BorderPane stylesheets="@../style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.demo9.Controller.DashboardController">
 
     <left>
-        <VBox fx:id="sidebar" spacing="5" styleClass="sidebar">
+        <VBox fx:id="sidebar" spacing="15" styleClass="sidebar">
             <Label styleClass="title-label" text="🎵 Playlist Manager" />
 
-            <VBox prefHeight="359.0" prefWidth="209.0" spacing="10">
-                <Button fx:id="playlistsBtn" onAction="#showPlaylistsSection" styleClass="sidebar-button" text="My Playlists" />
-                <Button fx:id="songsBtn" onAction="#showSongsSection" styleClass="sidebar-button" text="🎵Songs Library" />
-                <Button fx:id="mergeBtn" onAction="#showMergeSection" styleClass="sidebar-button" text="Merge Playlists" />
-                <Button fx:id="shuffleBtn" onAction="#showShuffleSection" styleClass="sidebar-button" text="Shuffle Merge" />
-                <Button fx:id="filterBtn" onAction="#showFilterSection" styleClass="sidebar-button" text="Filter Playlists" />
-                <Button fx:id="sortBtn" onAction="#showSortSection" styleClass="sidebar-button" text="Sort Playlists" />
+            <VBox spacing="8" styleClass="sidebar-buttons-container">
+                <Button fx:id="playlistsBtn" onAction="#showPlaylistsSection" styleClass="sidebar-button" text="📁 My Playlists" />
+                <Button fx:id="songsBtn" onAction="#showSongsSection" styleClass="sidebar-button" text="🎵 Songs Library" />
+                <Button fx:id="discoverSongsBtn" onAction="#showDiscoverSongsSection" styleClass="sidebar-button" text="🔍 Discover Songs" />
+                <Button fx:id="mergeBtn" onAction="#showMergeSection" styleClass="sidebar-button" text="🔄 Merge Playlists" />
+                <Button fx:id="shuffleBtn" onAction="#showShuffleSection" styleClass="sidebar-button" text="^-^Shuffle Merge" />
+                <Button fx:id="filterBtn" onAction="#showFilterSection" styleClass="sidebar-button" text="*Filter Playlists" />
+                <Button fx:id="sortBtn" onAction="#showSortSection" styleClass="sidebar-button" text="⚙Sort Playlists" />
                 <Button fx:id="likedBtn" onAction="#showLikedSection" styleClass="sidebar-button" text="❤Liked Songs" />
             </VBox>
 
             <VBox spacing="10" styleClass="user-section">
-                <Label fx:id="userLabel" styleClass="info-label" />
-                <Button onAction="#handleLogout" styleClass="danger-button" text="Logout" />
+                <Label fx:id="userLabel" styleClass="user-info-label" />
+                <Button onAction="#handleLogout" styleClass="logout-button" text="🚪 Logout" />
             </VBox>
         </VBox>
     </left>

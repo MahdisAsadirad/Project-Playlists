@@ -18,7 +18,7 @@ public class DashboardController {
     @FXML private VBox sidebar;
     @FXML private StackPane contentArea;
     @FXML private Label userLabel;
-    @FXML private Button playlistsBtn, songsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn;
+    @FXML private Button playlistsBtn, songsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn;
 
     private User currentUser;
     private Map<String, Parent> loadedSections = new HashMap<>();
@@ -35,12 +35,11 @@ public class DashboardController {
     }
 
     private void initializeSidebar() {
-        Button[] buttons = {playlistsBtn, songsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn};
+        Button[] buttons = {playlistsBtn, songsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn};
 
         for (Button btn : buttons) {
             btn.getStyleClass().clear();
             btn.getStyleClass().add("sidebar-button");
-
 
             btn.setOnMouseEntered(e -> {
                 if (btn != activeButton) {
@@ -55,18 +54,15 @@ public class DashboardController {
             });
         }
 
-
         setActiveButton(playlistsBtn);
     }
 
     private void setActiveButton(Button button) {
-
         if (activeButton != null) {
             activeButton.getStyleClass().clear();
             activeButton.getStyleClass().add("sidebar-button");
             activeButton.setStyle("-fx-background-color: transparent;");
         }
-
 
         activeButton = button;
         activeButton.getStyleClass().clear();
@@ -84,6 +80,12 @@ public class DashboardController {
     private void showSongsSection() {
         setActiveButton(songsBtn);
         loadSection("SongsSection");
+    }
+
+    @FXML
+    private void showDiscoverSongsSection() {
+        setActiveButton(discoverSongsBtn);
+        loadSection("DiscoverSongsSection");
     }
 
     @FXML
@@ -123,12 +125,13 @@ public class DashboardController {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/sections/" + sectionName + ".fxml"));
                 section = loader.load();
 
-
                 Object controller = loader.getController();
                 if (controller instanceof PlaylistsController) {
                     ((PlaylistsController) controller).setCurrentUser(currentUser);
                 } else if (controller instanceof SongsController) {
                     ((SongsController) controller).setCurrentUser(currentUser);
+                } else if (controller instanceof DiscoverSongsController) {
+                    ((DiscoverSongsController) controller).setCurrentUser(currentUser);
                 } else if (controller instanceof MergeController) {
                     ((MergeController) controller).setCurrentUser(currentUser);
                 } else if (controller instanceof ShuffleController) {

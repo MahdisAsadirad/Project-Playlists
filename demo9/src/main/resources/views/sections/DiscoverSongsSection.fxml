@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.demo9.Controller.DiscoverSongsController"
+      spacing="20" style="-fx-padding: 30;">
+
+    <Label text="🔍 Discover Songs" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+
+    <VBox spacing="15">
+        <!-- فیلترها و جستجو -->
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <VBox spacing="5">
+                <Label text="Search:" style="-fx-font-weight: bold;"/>
+                <TextField fx:id="searchField" promptText="Search songs..." prefWidth="200"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Genre:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="genreFilter" prefWidth="150"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Artist:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="artistFilter" prefWidth="150"/>
+            </VBox>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox fx:id="discoverSongsContainer" spacing="10">
+                <!-- آهنگ‌ها اینجا نمایش داده می‌شوند -->
+            </VBox>
+        </ScrollPane>
+    </VBox>
+
+</VBox>
