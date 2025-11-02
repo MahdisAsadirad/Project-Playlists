@@ -23,6 +23,7 @@ import java.util.List;
 
 public class PlaylistsController {
     @FXML private VBox playlistsContainer;
+    private Playlist currentPlaylist;
 
     private User currentUser;
     private Database db;
@@ -107,6 +108,8 @@ public class PlaylistsController {
 
     private void showBeautifulSongsView(Playlist playlist) {
         try {
+            this.currentPlaylist = playlist;
+
             Stage songsStage = new Stage();
             songsStage.initModality(Modality.APPLICATION_MODAL);
             songsStage.initStyle(StageStyle.DECORATED);
@@ -207,16 +210,19 @@ public class PlaylistsController {
         Button playBtn = createSmallButton("▶", "#27ae60");
         playBtn.setOnAction(e -> playSong(song));
 
-        Button likeBtn = createSmallButton("❤", "#e74c3c");
+        Button likeBtn = createSmallButton("❤", "blue");
         likeBtn.setOnAction(e -> likeSong(song));
 
 
-        actions.getChildren().addAll(playBtn, likeBtn);
+        Button removeBtn = createSmallButton("🗑", "#e74c3c");
+        removeBtn.setTooltip(new Tooltip("Remove from playlist"));
+        removeBtn.setOnAction(e -> removeSongFromPlaylist(song, currentPlaylist));
+
+        actions.getChildren().addAll(playBtn, likeBtn, removeBtn);
         card.getChildren().addAll(numberLabel, songIcon, songInfo, actions);
 
         return card;
     }
-
     private Button createSmallButton(String text, String color) {
         Button button = new Button(text);
         button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-font-size: 10; -fx-padding: 5 8; -fx-background-radius: 6; -fx-min-width: 40;");
@@ -251,11 +257,14 @@ public class PlaylistsController {
         showSuccess("Added to favorites: " + song.getTrackName());
     }
 
+
     private void removeSongFromPlaylist(SongNode song, Playlist playlist) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Remove Song");
         alert.setHeaderText("Remove '" + song.getTrackName() + "'?");
-        alert.setContentText("Are you sure you want to remove this song from the playlist?");
+        alert.setContentText("Are you sure you want to remove this song from the playlist '" + playlist.getName() + "'?");
+
+        alert.getDialogPane().setStyle("-fx-background-color: white;");
 
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
@@ -275,8 +284,10 @@ public class PlaylistsController {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                showSuccess("Song removed from playlist!");
-                showBeautifulSongsView(playlist);
+                showSuccess("Song '" + song.getTrackName() + "' removed from playlist!");
+
+                playlist.loadFromDatabase(db); // بارگذاری مجدد از دیتابیس
+                showBeautifulSongsView(playlist); // نمایش مجدد پنجره
             }
 
         } catch (SQLException e) {
