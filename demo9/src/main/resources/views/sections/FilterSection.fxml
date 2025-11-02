@@ -42,7 +42,6 @@
     </VBox>
 
     <VBox fx:id="resultContainer" spacing="10">
-        <!-- نتایج اینجا نمایش داده می‌شود -->
     </VBox>
 
 </VBox>

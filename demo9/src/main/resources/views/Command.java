@@ -1,8 +1,6 @@
 package org.example.demo9.View;
 
-import org.example.demo9.Controller.PlaylistController;
 import org.example.demo9.Controller.UserController;
-import org.example.demo9.Controller.SongController;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 

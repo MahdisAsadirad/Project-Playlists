@@ -1,45 +1,84 @@
 package org.example.demo9.Model.Classes;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.example.demo9.Model.util.Database;
+import java.sql.*;
 
 public class User {
     private int id;
     private String username;
-    private List<Playlist> playlists;
-    private Playlist likedSongs;
+    private Database db;
 
     public User(int id, String username) {
         this.id = id;
         this.username = username;
-        this.playlists = new ArrayList<>();
-        this.likedSongs = new Playlist("Liked Songs");
+        this.db = new Database();
     }
 
-    public void createPlaylist(String name) {
-        playlists.add(new Playlist(name));
+    public boolean createPlaylistInDatabase(String name) {
+        String sql = "INSERT INTO playlists (user_id, name) VALUES (?, ?)";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, this.id);
+            stmt.setString(2, name);
+            int result = stmt.executeUpdate();
+            return result > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
+
 
     public Playlist getPlaylist(String name) {
-        for (Playlist playlist : playlists) {
-            if (playlist.getName().equals(name)) {
+        String sql = "SELECT id, name FROM playlists WHERE name = ? AND user_id = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, name);
+            stmt.setInt(2, this.id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Playlist playlist = new Playlist(rs.getInt("id"), rs.getString("name"), this.id);
+                playlist.loadFromDatabase(db);
                 return playlist;
             }
+            return null;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
-    public void addToLikedSongs(SongNode song) {
-        likedSongs.addSong(song);
+    public java.util.List<Playlist> getPlaylistsFromDatabase() {
+        java.util.List<Playlist> playlists = new java.util.ArrayList<>();
+        String sql = "SELECT id, name FROM playlists WHERE user_id = ? ORDER BY name";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, this.id);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Playlist playlist = new Playlist(rs.getInt("id"), rs.getString("name"), this.id);
+                playlist.loadFromDatabase(db);
+                playlists.add(playlist);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return playlists;
     }
 
-    public void removeFromLikedSongs(String trackName) {
-        likedSongs.removeSong(trackName);
-    }
-
-    // Getter methods
     public int getId() { return id; }
     public String getUsername() { return username; }
-    public List<Playlist> getPlaylists() { return playlists; }
-    public Playlist getLikedSongs() { return likedSongs; }
+
 }

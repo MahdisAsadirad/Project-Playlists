@@ -1,10 +1,17 @@
 package org.example.demo9.Model.Classes;
 
+import org.example.demo9.Model.util.Database;
+import java.sql.*;
+import java.util.HashSet;
+import java.util.Set;
+
 public class Playlist {
+    private int id;
     private String name;
     private SongNode head;
     private SongNode tail;
     private int size;
+    private int userId;
 
     public Playlist(String name) {
         this.name = name;
@@ -13,48 +20,32 @@ public class Playlist {
         this.size = 0;
     }
 
-    // اضافه کردن به انتهای لیست (اصلی‌ترین عملیات)
+    public Playlist(int id, String name, int userId) {
+        this.id = id;
+        this.name = name;
+        this.userId = userId;
+        this.head = null;
+        this.tail = null;
+        this.size = 0;
+    }
+
+    // اضافه کردن آهنگ به لیست پیوندی
     public void addSong(SongNode song) {
+        SongNode newNode = new SongNode(song);
         if (head == null) {
-            head = song;
-            tail = song;
+            head = newNode;
+            tail = newNode;
         } else {
-            tail.setNext(song);
-            tail = song;
+            tail.setNext(newNode);
+            tail = newNode;
         }
         size++;
     }
 
-    // اضافه کردن به ابتدای لیست
-    public void addToFront(SongNode song) {
-        if (head == null) {
-            head = song;
-            tail = song;
-        } else {
-            song.setNext(head);
-            head = song;
-        }
-        size++;
-    }
-
-    // حذف از ابتدای لیست
-    public SongNode removeFromFront() {
-        if (head == null) return null;
-
-        SongNode removed = head;
-        head = head.getNext();
-        if (head == null) {
-            tail = null;
-        }
-        size--;
-        return removed;
-    }
-
-    // حذف آهنگ بر اساس نام
+    // حذف آهنگ از لیست پیوندی
     public boolean removeSong(String trackName) {
         if (head == null) return false;
 
-        // اگر آهنگ اول باشد
         if (head.getTrackName().equals(trackName)) {
             head = head.getNext();
             if (head == null) {
@@ -64,13 +55,11 @@ public class Playlist {
             return true;
         }
 
-        // جستجو در لیست
         SongNode current = head;
         while (current.getNext() != null) {
             if (current.getNext().getTrackName().equals(trackName)) {
                 current.setNext(current.getNext().getNext());
 
-                // اگر آخرین عنصر حذف شد
                 if (current.getNext() == null) {
                     tail = current;
                 }
@@ -83,36 +72,249 @@ public class Playlist {
         return false;
     }
 
-    // جستجو در لیست
-    public SongNode findSong(String trackName) {
-        SongNode current = head;
+    // مرج دو پلی‌لیست با ایجاد نودهای جدید و حذف پلی‌لیست‌های اصلی
+    public Playlist merge(Playlist other, String newName, Database db) throws SQLException {
+        Playlist merged = new Playlist(newName);
+        merged.setUserId(this.userId);
+
+        Set<Integer> addedSongIds = new HashSet<>();
+
+        // کپی عمیق از نودهای پلی‌لیست اول بدون تکراری
+        SongNode current = this.head;
         while (current != null) {
-            if (current.getTrackName().equals(trackName)) {
-                return current;
+            if (!addedSongIds.contains(current.getSongId())) {
+                merged.addSong(new SongNode(current));
+                addedSongIds.add(current.getSongId());
             }
             current = current.getNext();
         }
-        return null;
+
+        // کپی عمیق از نودهای پلی‌لیست دوم بدون تکراری
+        current = other.head;
+        while (current != null) {
+            if (!addedSongIds.contains(current.getSongId())) {
+                merged.addSong(new SongNode(current));
+                addedSongIds.add(current.getSongId());
+            }
+            current = current.getNext();
+        }
+
+        // حذف پلی‌لیست‌های اصلی از دیتابیس
+        deletePlaylistFromDatabase(db, this.id);
+        deletePlaylistFromDatabase(db, other.id);
+
+        return merged;
     }
 
-    // نمایش تمام آهنگ‌ها (پیمایش لیست)
-    public void displaySongs() {
-        SongNode current = head;
-        int index = 1;
+    // مرج ساده بدون حذف پلی‌لیست‌های اصلی (برای مواردی که نمی‌خواهیم حذف شوند)
+    public Playlist mergeSimple(Playlist other, String newName) {
+        Playlist merged = new Playlist(newName);
+        merged.setUserId(this.userId);
+
+        // کپی عمیق از نودهای پلی‌لیست اول
+        SongNode current = this.head;
         while (current != null) {
-            System.out.println(index + ". " + current);
+            merged.addSong(new SongNode(current));
             current = current.getNext();
-            index++;
+        }
+
+        // کپی عمیق از نودهای پلی‌لیست دوم
+        current = other.head;
+        while (current != null) {
+            merged.addSong(new SongNode(current));
+            current = current.getNext();
+        }
+
+        return merged;
+    }
+
+    // حذف پلی‌لیست از دیتابیس
+    private void deletePlaylistFromDatabase(Database db, int playlistId) throws SQLException {
+        try (Connection conn = db.getConnection()) {
+            // اول آهنگ‌های پلی‌لیست رو حذف کن
+            String deleteSongsSql = "DELETE FROM playlist_songs WHERE playlist_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteSongsSql)) {
+                stmt.setInt(1, playlistId);
+                stmt.executeUpdate();
+            }
+
+            // سپس خود پلی‌لیست رو حذف کن
+            String deletePlaylistSql = "DELETE FROM playlists WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deletePlaylistSql)) {
+                stmt.setInt(1, playlistId);
+                stmt.executeUpdate();
+            }
         }
     }
 
-    // معکوس کردن لیست
+    // بارگذاری از دیتابیس به لیست پیوندی
+    public void loadFromDatabase(Database db) throws SQLException {
+        String sql = "SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic " +
+                "FROM songs s " +
+                "JOIN playlist_songs ps ON s.id = ps.song_id " +
+                "WHERE ps.playlist_id = ? " +
+                "ORDER BY ps.user_id";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, this.id);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                SongNode song = new SongNode(
+                        rs.getInt("id"),
+                        rs.getString("artist_name"),
+                        rs.getString("track_name"),
+                        rs.getInt("release_date"),
+                        rs.getString("genre"),
+                        rs.getDouble("len"),
+                        rs.getString("topic")
+                );
+                this.addSong(song);
+            }
+        }
+    }
+
+    // ذخیره پلی‌لیست در دیتابیس
+    public int saveToDatabase(Database db) throws SQLException {
+        try (Connection conn = db.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // ایجاد پلی‌لیست جدید در دیتابیس
+            String insertPlaylistSql = "INSERT INTO playlists (user_id, name) VALUES (?, ?)";
+            int newPlaylistId;
+
+            try (PreparedStatement stmt = conn.prepareStatement(insertPlaylistSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                stmt.setInt(1, this.userId);
+                stmt.setString(2, this.name);
+                stmt.executeUpdate();
+
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    newPlaylistId = rs.getInt(1);
+                    this.id = newPlaylistId;
+                } else {
+                    throw new SQLException("Failed to create new playlist");
+                }
+            }
+
+            // ذخیره آهنگ‌های پلی‌لیست
+            savePlaylistSongsToDatabase(db, newPlaylistId);
+
+            conn.commit();
+            return newPlaylistId;
+        }
+    }
+
+    // ذخیره آهنگ‌های پلی‌لیست در دیتابیس
+    private void savePlaylistSongsToDatabase(Database db, int playlistId) throws SQLException {
+        String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            SongNode current = this.head;
+            while (current != null) {
+                stmt.setInt(1, playlistId);
+                stmt.setInt(2, current.getSongId());
+                stmt.setInt(3, this.userId);
+                stmt.addBatch();
+                current = current.getNext();
+            }
+            stmt.executeBatch();
+        }
+    }
+
+    // مرتب‌سازی با جا به جایی نودها
+    public void sortByCriteria(String criteria, boolean ascending) {
+        if (head == null || head.getNext() == null) return;
+
+        head = mergeSort(head, criteria, ascending);
+
+        // به روز رسانی tail
+        tail = head;
+        while (tail != null && tail.getNext() != null) {
+            tail = tail.getNext();
+        }
+    }
+
+    // مرتب‌سازی ادغامی
+    private SongNode mergeSort(SongNode head, String criteria, boolean ascending) {
+        if (head == null || head.getNext() == null) return head;
+
+        // پیدا کردن وسط لیست
+        SongNode middle = getMiddle(head);
+        SongNode nextOfMiddle = middle.getNext();
+        middle.setNext(null);
+
+        // مرتب‌سازی بازگشتی دو نیمه
+        SongNode left = mergeSort(head, criteria, ascending);
+        SongNode right = mergeSort(nextOfMiddle, criteria, ascending);
+
+        // ادغام دو نیمه مرتب شده
+        return merge(left, right, criteria, ascending);
+    }
+
+    // پیدا کردن نود وسط لیست
+    private SongNode getMiddle(SongNode head) {
+        if (head == null) return head;
+
+        SongNode slow = head;
+        SongNode fast = head;
+
+        while (fast.getNext() != null && fast.getNext().getNext() != null) {
+            slow = slow.getNext();
+            fast = fast.getNext().getNext();
+        }
+
+        return slow;
+    }
+
+    // ادغام دو لیست مرتب شده
+    private SongNode merge(SongNode left, SongNode right, String criteria, boolean ascending) {
+        if (left == null) return right;
+        if (right == null) return left;
+
+        boolean comparison;
+        switch (criteria.toLowerCase()) {
+            case "artist":
+                comparison = ascending ?
+                        left.getArtistName().compareToIgnoreCase(right.getArtistName()) <= 0 :
+                        left.getArtistName().compareToIgnoreCase(right.getArtistName()) > 0;
+                break;
+            case "release date":
+                comparison = ascending ?
+                        left.getReleaseDate() <= right.getReleaseDate() :
+                        left.getReleaseDate() > right.getReleaseDate();
+                break;
+            case "genre":
+                comparison = ascending ?
+                        left.getGenre().compareToIgnoreCase(right.getGenre()) <= 0 :
+                        left.getGenre().compareToIgnoreCase(right.getGenre()) > 0;
+                break;
+            default: // track name
+                comparison = ascending ?
+                        left.getTrackName().compareToIgnoreCase(right.getTrackName()) <= 0 :
+                        left.getTrackName().compareToIgnoreCase(right.getTrackName()) > 0;
+        }
+
+        if (comparison) {
+            left.setNext(merge(left.getNext(), right, criteria, ascending));
+            return left;
+        } else {
+            right.setNext(merge(left, right.getNext(), criteria, ascending));
+            return right;
+        }
+    }
+
+    // معکوس کردن لیست پیوندی
     public void reverse() {
         SongNode prev = null;
         SongNode current = head;
         SongNode next = null;
 
-        tail = head; // tail becomes the old head
+        tail = head;
 
         while (current != null) {
             next = current.getNext();
@@ -124,93 +326,114 @@ public class Playlist {
         head = prev;
     }
 
-    // ادغام دو لیست پیوندی
-    public void merge(Playlist other) {
-        if (other.head == null) return;
-
-        if (this.head == null) {
-            this.head = other.head;
-            this.tail = other.tail;
-        } else {
-            this.tail.setNext(other.head);
-            this.tail = other.tail;
-        }
-        this.size += other.size;
-
-        // پاک کردن لیست دیگر
-        other.head = null;
-        other.tail = null;
-        other.size = 0;
-    }
-
-    // فیلتر کردن بر اساس ژانر (ایجاد لیست جدید)
-    public Playlist filterByGenre(String genre) {
-        Playlist filtered = new Playlist(this.name + " - " + genre);
+    // جستجوی آهنگ در لیست پیوندی
+    public SongNode findSong(String trackName) {
         SongNode current = head;
-
         while (current != null) {
-            if (current.getGenre().equalsIgnoreCase(genre)) {
-                filtered.addSong(new SongNode(
-                        current.getArtistName(),
-                        current.getTrackName(),
-                        current.getReleaseDate(),
-                        current.getGenre(),
-                        current.getLen(),
-                        current.getTopic()
-                ));
+            if (current.getTrackName().equalsIgnoreCase(trackName)) {
+                return current;
             }
             current = current.getNext();
         }
-        return filtered;
+        return null;
     }
 
-    // مرتب‌سازی با استفاده از insertion sort (مناسب برای لیست پیوندی)
-    public void sortByTrackName() {
-        if (head == null || head.getNext() == null) return;
-
-        SongNode sorted = null;
+    // جستجوی آهنگ بر اساس ID
+    public SongNode findSongById(int songId) {
         SongNode current = head;
-
         while (current != null) {
-            SongNode next = current.getNext();
-            sorted = sortedInsert(sorted, current);
-            current = next;
-        }
-
-        head = sorted;
-
-        // به‌روزرسانی tail
-        tail = sorted;
-        while (tail != null && tail.getNext() != null) {
-            tail = tail.getNext();
-        }
-    }
-
-    private SongNode sortedInsert(SongNode sorted, SongNode newNode) {
-        // اگر لیست مرتب شده خالی است یا باید در ابتدا قرار گیرد
-        if (sorted == null || sorted.getTrackName().compareTo(newNode.getTrackName()) >= 0) {
-            newNode.setNext(sorted);
-            return newNode;
-        }
-
-        // پیدا کردن موقعیت مناسب
-        SongNode current = sorted;
-        while (current.getNext() != null &&
-                current.getNext().getTrackName().compareTo(newNode.getTrackName()) < 0) {
+            if (current.getSongId() == songId) {
+                return current;
+            }
             current = current.getNext();
         }
-
-        newNode.setNext(current.getNext());
-        current.setNext(newNode);
-        return sorted;
+        return null;
     }
 
-    // Getter methods
+    // بررسی وجود آهنگ در پلی‌لیست
+    public boolean containsSong(int songId) {
+        return findSongById(songId) != null;
+    }
+
+    // نمایش پلی‌لیست (برای دیباگ)
+    public void display() {
+        SongNode current = head;
+        int index = 1;
+        System.out.println("Playlist: " + name + " (Size: " + size + ")");
+        while (current != null) {
+            System.out.println(index + ". " + current);
+            current = current.getNext();
+            index++;
+        }
+        System.out.println();
+    }
+
+    // گرفتن آهنگ بر اساس ایندکس
+    public SongNode getSongAt(int index) {
+        if (index < 0 || index >= size) return null;
+
+        SongNode current = head;
+        for (int i = 0; i < index; i++) {
+            current = current.getNext();
+        }
+        return current;
+    }
+
+    // تبدیل لیست پیوندی به آرایه (برای برخی عملیات)
+    public SongNode[] toArray() {
+        SongNode[] array = new SongNode[size];
+        SongNode current = head;
+        int index = 0;
+        while (current != null) {
+            array[index++] = current;
+            current = current.getNext();
+        }
+        return array;
+    }
+
+    // پاک کردن تمام آهنگ‌های پلی‌لیست
+    public void clear() {
+        head = null;
+        tail = null;
+        size = 0;
+    }
+
+    // بررسی خالی بودن پلی‌لیست
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    // گرفتن مدت زمان کل پلی‌لیست
+    public double getTotalDuration() {
+        double total = 0;
+        SongNode current = head;
+        while (current != null) {
+            total += current.getLen();
+            current = current.getNext();
+        }
+        return total;
+    }
+
+    // فرمت مدت زمان
+    public String getFormattedDuration() {
+        double totalSeconds = getTotalDuration();
+        int minutes = (int) (totalSeconds / 60);
+        int seconds = (int) (totalSeconds % 60);
+        return String.format("%d:%02d", minutes, seconds);
+    }
+
+    // Getter و Setter
+    public int getId() { return id; }
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
     public SongNode getHead() { return head; }
     public int getSize() { return size; }
-    public boolean isEmpty() { return size == 0; }
-
+    public int getUserId() { return userId; }
     public SongNode getTail() { return tail; }
+
+    public void setId(int id) { this.id = id; }
+    public void setUserId(int userId) { this.userId = userId; }
+    public void setName(String name) { this.name = name; }
+    public void setHead(SongNode head) { this.head = head; }
+    public void setTail(SongNode tail) { this.tail = tail; }
+    public void setSize(int size) { this.size = size; }
 }

@@ -18,7 +18,7 @@ public class DashboardController {
     @FXML private VBox sidebar;
     @FXML private StackPane contentArea;
     @FXML private Label userLabel;
-    @FXML private Button playlistsBtn, songsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn;
+    @FXML private Button playlistsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn;
 
     private User currentUser;
     private Map<String, Parent> loadedSections = new HashMap<>();
@@ -35,7 +35,7 @@ public class DashboardController {
     }
 
     private void initializeSidebar() {
-        Button[] buttons = {playlistsBtn, songsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn};
+        Button[] buttons = {playlistsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn};
 
         for (Button btn : buttons) {
             btn.getStyleClass().clear();
@@ -74,12 +74,6 @@ public class DashboardController {
     private void showPlaylistsSection() {
         setActiveButton(playlistsBtn);
         loadSection("PlaylistsSection");
-    }
-
-    @FXML
-    private void showSongsSection() {
-        setActiveButton(songsBtn);
-        loadSection("SongsSection");
     }
 
     @FXML

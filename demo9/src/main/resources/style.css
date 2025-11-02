@@ -69,13 +69,13 @@
     -fx-background-color: #c0392b;
 }
 
-/* استایل محتوای اصلی */
+
 .content-area {
     -fx-background-color: #ecf0f1;
     -fx-padding: 20;
 }
 
-/* استایل تایتل */
+
 .title-label {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
@@ -83,7 +83,6 @@
     -fx-padding: 0 0 10 0;
 }
 
-/* استایل کارت‌ها */
 .playlist-card {
     -fx-background-color: white;
     -fx-background-radius: 10;
@@ -102,7 +101,6 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);
 }
 
-/* استایل دکمه‌های action */
 .primary-button {
     -fx-background-color: #3498db;
     -fx-text-fill: white;

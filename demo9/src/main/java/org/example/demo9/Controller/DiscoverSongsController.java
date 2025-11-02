@@ -49,7 +49,7 @@ public class DiscoverSongsController implements Initializable {
     }
 
     private void setupFilters() {
-        // پر کردن فیلتر ژانر
+
         String genreSql = "SELECT DISTINCT genre FROM songs ORDER BY genre";
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(genreSql);
@@ -66,7 +66,7 @@ public class DiscoverSongsController implements Initializable {
             showError("Error loading genres: " + e.getMessage());
         }
 
-        // پر کردن فیلتر آرتیست
+
         String artistSql = "SELECT DISTINCT artist_name FROM songs ORDER BY artist_name";
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(artistSql);
@@ -132,19 +132,19 @@ public class DiscoverSongsController implements Initializable {
 
         songInfo.getChildren().addAll(trackLabel, artistLabel, detailsLabel);
 
-        // دکمه‌های action
+
         HBox actions = new HBox(10);
 
-        // دکمه لایک
+
         Button likeButton = new Button("♡");
         likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
 
-        // بررسی وضعیت لایک
+
         checkAndUpdateLikeButton(likeButton, songId);
 
         likeButton.setOnAction(e -> toggleLikeSong(songId, likeButton));
 
-        // دکمه اضافه به پلی‌لیست
+
         Button addToPlaylistButton = new Button("Add to Playlist");
         addToPlaylistButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
         addToPlaylistButton.setOnAction(e -> showAddToPlaylistDialog(songId));
@@ -165,7 +165,7 @@ public class DiscoverSongsController implements Initializable {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next() && rs.getInt(1) > 0) {
-                likeButton.setText("❤️");
+                likeButton.setText("❤");
                 likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
             }
 

@@ -13,22 +13,64 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class SongsController implements Initializable {
     @FXML private VBox songsContainer;
     @FXML private TextField searchField;
+    @FXML private ComboBox<String> sortCombo;
+    // حذف RadioButton‌ها چون در FXML وجود ندارند
 
     private User currentUser;
     private Database db;
+    private List<SongNodeWrapper> allSongs;
 
     public SongsController() {
         this.db = new Database();
+        this.allSongs = new ArrayList<>();
+    }
+
+    // کلاس wrapper برای مدیریت وضعیت لایک
+    private class SongNodeWrapper {
+        private int songId;
+        private String trackName;
+        private String artistName;
+        private String genre;
+        private int releaseDate;
+        private double length;
+        private String topic;
+        private boolean isLiked;
+
+        public SongNodeWrapper(int songId, String trackName, String artistName,
+                               String genre, int releaseDate, double length, String topic) {
+            this.songId = songId;
+            this.trackName = trackName;
+            this.artistName = artistName;
+            this.genre = genre;
+            this.releaseDate = releaseDate;
+            this.length = length;
+            this.topic = topic;
+            this.isLiked = false;
+        }
+
+        // Getter methods
+        public int getSongId() { return songId; }
+        public String getTrackName() { return trackName; }
+        public String getArtistName() { return artistName; }
+        public String getGenre() { return genre; }
+        public int getReleaseDate() { return releaseDate; }
+        public double getLength() { return length; }
+        public String getTopic() { return topic; }
+        public boolean isLiked() { return isLiked; }
+        public void setLiked(boolean liked) { this.isLiked = liked; }
     }
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
         loadAllSongs();
+        setupSortCombo();
     }
 
     @Override
@@ -39,7 +81,25 @@ public class SongsController implements Initializable {
         });
     }
 
+    private void setupSortCombo() {
+        sortCombo.getItems().setAll(
+                "Track Name (A-Z)",
+                "Track Name (Z-A)",
+                "Artist Name (A-Z)",
+                "Artist Name (Z-A)",
+                "Release Date (Newest)",
+                "Release Date (Oldest)",
+                "Genre (A-Z)",
+                "Genre (Z-A)"
+        );
+        sortCombo.setValue("Track Name (A-Z)");
+
+        // اضافه کردن listener برای مرتب‌سازی
+        sortCombo.setOnAction(e -> sortAndDisplaySongs());
+    }
+
     private void loadAllSongs() {
+        allSongs.clear();
         songsContainer.getChildren().clear();
 
         String query = "SELECT id, track_name, artist_name, genre, release_date, len, topic FROM songs ORDER BY track_name";
@@ -49,23 +109,67 @@ public class SongsController implements Initializable {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                addSongCard(rs.getInt("id"),
+                SongNodeWrapper song = new SongNodeWrapper(
+                        rs.getInt("id"),
                         rs.getString("track_name"),
                         rs.getString("artist_name"),
                         rs.getString("genre"),
                         rs.getInt("release_date"),
                         rs.getDouble("len"),
-                        rs.getString("topic"));
+                        rs.getString("topic")
+                );
+                allSongs.add(song);
+
+                // بررسی وضعیت لایک
+                checkLikeStatus(song);
             }
+
+            displaySongs(allSongs);
 
         } catch (SQLException e) {
             showError("Error loading songs: " + e.getMessage());
         }
     }
 
-    private void addSongCard(int songId, String trackName, String artistName, String genre, int releaseDate, double length, String topic) {
+    private void checkLikeStatus(SongNodeWrapper song) {
+        String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(checkSql)) {
+
+            stmt.setInt(1, currentUser.getId());
+            stmt.setInt(2, song.getSongId());
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                song.setLiked(true);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error checking like status: " + e.getMessage());
+        }
+    }
+
+    private void displaySongs(List<SongNodeWrapper> songs) {
+        songsContainer.getChildren().clear();
+
+        if (songs.isEmpty()) {
+            Label emptyLabel = new Label("No songs found!");
+            emptyLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 16; -fx-padding: 40;");
+            songsContainer.getChildren().add(emptyLabel);
+            return;
+        }
+
+        for (SongNodeWrapper song : songs) {
+            addSongCard(song);
+        }
+    }
+
+    private void addSongCard(SongNodeWrapper song) {
         HBox card = new HBox(15);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600;");
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; " +
+                "-fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
 
         // آیکون آهنگ
         Label icon = new Label("🎵");
@@ -75,106 +179,46 @@ public class SongsController implements Initializable {
         VBox songInfo = new VBox(5);
         songInfo.setPrefWidth(400);
 
-        Label trackLabel = new Label(trackName);
+        Label trackLabel = new Label(song.getTrackName());
         trackLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #333;");
 
-        Label artistLabel = new Label("by " + artistName);
+        Label artistLabel = new Label("by " + song.getArtistName());
         artistLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 14;");
 
-        Label detailsLabel = new Label(genre + " • " + releaseDate + " • " + length + "s • " + topic);
+        Label detailsLabel = new Label(String.format("%s • %d • %.1fs • %s",
+                song.getGenre(), song.getReleaseDate(), song.getLength(), song.getTopic()));
         detailsLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 12;");
 
         songInfo.getChildren().addAll(trackLabel, artistLabel, detailsLabel);
 
-
+        // دکمه‌های action
         HBox actions = new HBox(10);
 
-        Button likeButton = new Button("❤");
-        likeButton.setStyle("-fx-background-color: transparent; -fx-font-size: 16;");
+        Button likeButton = new Button(song.isLiked() ? "❤" : "♡");
+        likeButton.setStyle(song.isLiked() ?
+                "-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;" :
+                "-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
 
-
-        checkAndUpdateLikeButton(likeButton, songId);
-
-        likeButton.setOnAction(e -> toggleLikeSong(songId, likeButton));
+        likeButton.setOnAction(e -> toggleLikeSong(song, likeButton));
 
         Button addToPlaylistButton = new Button("Add to Playlist");
-        addToPlaylistButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
-        addToPlaylistButton.setOnAction(e -> showAddToPlaylistDialog(songId));
+        addToPlaylistButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; " +
+                "-fx-font-size: 12; -fx-padding: 8 15; -fx-background-radius: 6;");
+        addToPlaylistButton.setOnAction(e -> showAddToPlaylistDialog(song.getSongId()));
 
         actions.getChildren().addAll(likeButton, addToPlaylistButton);
         card.getChildren().addAll(icon, songInfo, actions);
         songsContainer.getChildren().add(card);
     }
 
-    private void checkAndUpdateLikeButton(Button likeButton, int songId) {
-        String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
-
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(checkSql)) {
-
-            stmt.setInt(1, currentUser.getId());
-            stmt.setInt(2, songId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next() && rs.getInt(1) > 0) {
-                likeButton.setText("❤");
-                likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
-            } else {
-                likeButton.setText("♡");
-                likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Error checking like status: " + e.getMessage());
-        }
-    }
-
-
-    private void searchSongs(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            loadAllSongs();
-            return;
-        }
-
-        songsContainer.getChildren().clear();
-
-        String sql = "SELECT id, track_name, artist_name, genre, release_date, len, topic FROM songs " +
-                "WHERE track_name LIKE ? OR artist_name LIKE ? OR genre LIKE ? " +
-                "ORDER BY track_name";
-
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            String searchTerm = "%" + query + "%";
-            stmt.setString(1, searchTerm);
-            stmt.setString(2, searchTerm);
-            stmt.setString(3, searchTerm);
-
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                addSongCard(rs.getInt("id"),
-                        rs.getString("track_name"),
-                        rs.getString("artist_name"),
-                        rs.getString("genre"),
-                        rs.getInt("release_date"),
-                        rs.getDouble("len"),
-                        rs.getString("topic"));
-            }
-
-        } catch (SQLException e) {
-            showError("Error searching songs: " + e.getMessage());
-        }
-    }
-
-    private void toggleLikeSong(int songId, Button likeButton) {
+    private void toggleLikeSong(SongNodeWrapper song, Button likeButton) {
         String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
 
         try (Connection conn = db.getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
 
             checkStmt.setInt(1, currentUser.getId());
-            checkStmt.setInt(2, songId);
+            checkStmt.setInt(2, song.getSongId());
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next() && rs.getInt(1) > 0) {
@@ -182,22 +226,25 @@ public class SongsController implements Initializable {
                 String deleteSql = "DELETE FROM liked_songs WHERE user_id = ? AND song_id = ?";
                 try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
                     deleteStmt.setInt(1, currentUser.getId());
-                    deleteStmt.setInt(2, songId);
+                    deleteStmt.setInt(2, song.getSongId());
                     deleteStmt.executeUpdate();
 
                     likeButton.setText("♡");
                     likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
+                    song.setLiked(false);
                     showSuccess("Song removed from liked songs!");
                 }
             } else {
+                // لایک کردن
                 String insertSql = "INSERT INTO liked_songs (user_id, song_id) VALUES (?, ?)";
                 try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                     insertStmt.setInt(1, currentUser.getId());
-                    insertStmt.setInt(2, songId);
+                    insertStmt.setInt(2, song.getSongId());
                     insertStmt.executeUpdate();
 
                     likeButton.setText("❤");
                     likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
+                    song.setLiked(true);
                     showSuccess("Song added to liked songs! ❤");
                 }
             }
@@ -207,12 +254,113 @@ public class SongsController implements Initializable {
         }
     }
 
+    private void searchSongs(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            sortAndDisplaySongs();
+            return;
+        }
+
+        List<SongNodeWrapper> filteredSongs = new ArrayList<>();
+        String searchTerm = query.toLowerCase().trim();
+
+        for (SongNodeWrapper song : allSongs) {
+            if (song.getTrackName().toLowerCase().contains(searchTerm) ||
+                    song.getArtistName().toLowerCase().contains(searchTerm) ||
+                    song.getGenre().toLowerCase().contains(searchTerm)) {
+                filteredSongs.add(song);
+            }
+        }
+
+        sortAndDisplaySongs(filteredSongs);
+    }
+
+    private void sortAndDisplaySongs() {
+        sortAndDisplaySongs(allSongs);
+    }
+
+    private void sortAndDisplaySongs(List<SongNodeWrapper> songs) {
+        if (songs.isEmpty()) {
+            displaySongs(songs);
+            return;
+        }
+
+        String selectedSort = sortCombo.getValue();
+        if (selectedSort == null) {
+            selectedSort = "Track Name (A-Z)";
+        }
+
+        // استخراج معیار و جهت از گزینه انتخابی
+        String criteria;
+        boolean ascending;
+
+        switch (selectedSort) {
+            case "Track Name (Z-A)":
+                criteria = "Track Name";
+                ascending = false;
+                break;
+            case "Artist Name (A-Z)":
+                criteria = "Artist Name";
+                ascending = true;
+                break;
+            case "Artist Name (Z-A)":
+                criteria = "Artist Name";
+                ascending = false;
+                break;
+            case "Release Date (Newest)":
+                criteria = "Release Date";
+                ascending = false;
+                break;
+            case "Release Date (Oldest)":
+                criteria = "Release Date";
+                ascending = true;
+                break;
+            case "Genre (A-Z)":
+                criteria = "Genre";
+                ascending = true;
+                break;
+            case "Genre (Z-A)":
+                criteria = "Genre";
+                ascending = false;
+                break;
+            default: // "Track Name (A-Z)"
+                criteria = "Track Name";
+                ascending = true;
+        }
+
+        // مرتب‌سازی لیست
+        songs.sort((s1, s2) -> {
+            int result = 0;
+            switch (criteria) {
+                case "Track Name":
+                    result = s1.getTrackName().compareToIgnoreCase(s2.getTrackName());
+                    break;
+                case "Artist Name":
+                    result = s1.getArtistName().compareToIgnoreCase(s2.getArtistName());
+                    break;
+                case "Release Date":
+                    result = Integer.compare(s1.getReleaseDate(), s2.getReleaseDate());
+                    break;
+                case "Genre":
+                    result = s1.getGenre().compareToIgnoreCase(s2.getGenre());
+                    break;
+            }
+            return ascending ? result : -result;
+        });
+
+        displaySongs(songs);
+    }
+
     private void showAddToPlaylistDialog(int songId) {
         ChoiceDialog<String> dialog = new ChoiceDialog<>();
         dialog.setTitle("Add to Playlist");
         dialog.setHeaderText("Select a playlist to add this song to");
 
-        java.util.List<String> playlists = getUserPlaylists();
+        List<String> playlists = getUserPlaylists();
+        if (playlists.isEmpty()) {
+            showError("No playlists available! Create a playlist first.");
+            return;
+        }
+
         dialog.getItems().addAll(playlists);
 
         dialog.showAndWait().ifPresent(playlistName -> {
@@ -220,8 +368,8 @@ public class SongsController implements Initializable {
         });
     }
 
-    private java.util.List<String> getUserPlaylists() {
-        java.util.List<String> playlists = new java.util.ArrayList<>();
+    private List<String> getUserPlaylists() {
+        List<String> playlists = new ArrayList<>();
         String sql = "SELECT name FROM playlists WHERE user_id = ?";
 
         try (Connection conn = db.getConnection();

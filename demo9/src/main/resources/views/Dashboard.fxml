@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.geometry.Insets?>
+
 
 <BorderPane stylesheets="@../style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.demo9.Controller.DashboardController">
 
@@ -15,7 +15,6 @@
 
             <VBox spacing="8" styleClass="sidebar-buttons-container">
                 <Button fx:id="playlistsBtn" onAction="#showPlaylistsSection" styleClass="sidebar-button" text="📁 My Playlists" />
-                <Button fx:id="songsBtn" onAction="#showSongsSection" styleClass="sidebar-button" text="🎵 Songs Library" />
                 <Button fx:id="discoverSongsBtn" onAction="#showDiscoverSongsSection" styleClass="sidebar-button" text="🔍 Discover Songs" />
                 <Button fx:id="mergeBtn" onAction="#showMergeSection" styleClass="sidebar-button" text="🔄 Merge Playlists" />
                 <Button fx:id="shuffleBtn" onAction="#showShuffleSection" styleClass="sidebar-button" text="^-^Shuffle Merge" />

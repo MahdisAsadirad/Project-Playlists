@@ -2,8 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.Insets?>
+
 
 <VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.demo9.Controller.SongsController"
@@ -19,7 +18,7 @@
 
         <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
             <VBox fx:id="songsContainer" spacing="10">
-                <!-- تمام آهنگ‌ها اینجا نمایش داده می‌شوند -->
+
             </VBox>
         </ScrollPane>
     </VBox>

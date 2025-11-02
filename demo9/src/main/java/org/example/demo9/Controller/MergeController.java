@@ -4,22 +4,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import org.example.demo9.Model.Classes.Playlist;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class MergeController implements Initializable {
     @FXML private ComboBox<String> firstPlaylistCombo;
     @FXML private ComboBox<String> secondPlaylistCombo;
     @FXML private TextField newPlaylistNameField;
+    @FXML private CheckBox deleteOriginalCheckbox;
+    @FXML private CheckBox removeDuplicatesCheckbox;
     @FXML private Button mergeButton;
     @FXML private VBox resultContainer;
 
@@ -39,24 +37,28 @@ public class MergeController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         mergeButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
         mergeButton.setOnAction(e -> handleMerge());
+
+        deleteOriginalCheckbox.setSelected(true);
+        removeDuplicatesCheckbox.setSelected(true);
     }
 
     private void loadUserPlaylists() {
         String sql = "SELECT id, name FROM playlists WHERE user_id = ? ORDER BY name";
 
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (var conn = db.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, currentUser.getId());
-            ResultSet rs = stmt.executeQuery();
+            var rs = stmt.executeQuery();
 
-            List<String> playlists = new ArrayList<>();
+            firstPlaylistCombo.getItems().clear();
+            secondPlaylistCombo.getItems().clear();
+
             while (rs.next()) {
-                playlists.add(rs.getString("name"));
+                String playlistName = rs.getString("name");
+                firstPlaylistCombo.getItems().add(playlistName);
+                secondPlaylistCombo.getItems().add(playlistName);
             }
-
-            firstPlaylistCombo.getItems().setAll(playlists);
-            secondPlaylistCombo.getItems().setAll(playlists);
 
         } catch (SQLException e) {
             showError("Error loading playlists: " + e.getMessage());
@@ -65,112 +67,72 @@ public class MergeController implements Initializable {
 
     @FXML
     private void handleMerge() {
-        String firstPlaylist = firstPlaylistCombo.getValue();
-        String secondPlaylist = secondPlaylistCombo.getValue();
+        String firstPlaylistName = firstPlaylistCombo.getValue();
+        String secondPlaylistName = secondPlaylistCombo.getValue();
         String newName = newPlaylistNameField.getText().trim();
 
-        if (firstPlaylist == null || secondPlaylist == null || newName.isEmpty()) {
+        if (firstPlaylistName == null || secondPlaylistName == null || newName.isEmpty()) {
             showError("Please select both playlists and enter a name for the new playlist!");
             return;
         }
 
-        if (firstPlaylist.equals(secondPlaylist)) {
+        if (firstPlaylistName.equals(secondPlaylistName)) {
             showError("Please select two different playlists!");
             return;
         }
 
         try {
-            mergePlaylists(firstPlaylist, secondPlaylist, newName);
+            // بارگذاری پلی‌لیست‌ها از دیتابیس
+            Playlist playlist1 = loadPlaylistFromDB(firstPlaylistName);
+            Playlist playlist2 = loadPlaylistFromDB(secondPlaylistName);
+
+            Playlist mergedPlaylist;
+
+            if (deleteOriginalCheckbox.isSelected()) {
+                // مرج با حذف پلی‌لیست‌های اصلی
+                mergedPlaylist = playlist1.merge(playlist2, newName, db);
+            } else {
+                // مرج ساده بدون حذف
+                mergedPlaylist = playlist1.mergeSimple(playlist2, newName);
+            }
+
+            // ذخیره پلی‌لیست مرج شده در دیتابیس
+            int newPlaylistId = mergedPlaylist.saveToDatabase(db);
+
+            showSuccess("Playlists merged successfully! \n" +
+                    "New playlist: " + newName +
+                    " with " + mergedPlaylist.getSize() + " songs" +
+                    (deleteOriginalCheckbox.isSelected() ? "\nOriginal playlists were deleted." : ""));
+
+            // رفرش لیست پلی‌لیست‌ها
+            loadUserPlaylists();
+            clearForm();
+
         } catch (SQLException e) {
             showError("Error merging playlists: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void mergePlaylists(String firstPlaylistName, String secondPlaylistName, String newName) throws SQLException {
-        try (Connection conn = db.getConnection()) {
-            conn.setAutoCommit(false);
+    private Playlist loadPlaylistFromDB(String playlistName) throws SQLException {
+        String sql = "SELECT id, name, user_id FROM playlists WHERE name = ? AND user_id = ?";
+        try (var conn = db.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
 
-            try {
-                // پیدا کردن ID پلی‌لیست‌ها
-                int firstId = getPlaylistId(conn, firstPlaylistName);
-                int secondId = getPlaylistId(conn, secondPlaylistName);
-
-
-                int newPlaylistId = createNewPlaylist(conn, newName);
-
-
-                copyPlaylistSongs(conn, firstId, newPlaylistId);
-
-
-                copyPlaylistSongsUnique(conn, secondId, newPlaylistId);
-
-                conn.commit();
-
-                showSuccess("Playlists merged successfully! New playlist: " + newName);
-                clearForm();
-
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            }
-        }
-    }
-
-    private int getPlaylistId(Connection conn, String playlistName) throws SQLException {
-        String sql = "SELECT id FROM playlists WHERE name = ? AND user_id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, playlistName);
             stmt.setInt(2, currentUser.getId());
-            ResultSet rs = stmt.executeQuery();
+            var rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return rs.getInt("id");
-            } else {
-                throw new SQLException("Playlist not found: " + playlistName);
+                Playlist playlist = new Playlist(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getInt("user_id")
+                );
+                playlist.loadFromDatabase(db);
+                return playlist;
             }
-        }
-    }
-
-    private int createNewPlaylist(Connection conn, String name) throws SQLException {
-        String sql = "INSERT INTO playlists (user_id, name) VALUES (?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            stmt.setInt(1, currentUser.getId());
-            stmt.setString(2, name);
-            stmt.executeUpdate();
-
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
-            } else {
-                throw new SQLException("Failed to create new playlist");
-            }
-        }
-    }
-
-    private void copyPlaylistSongs(Connection conn, int sourcePlaylistId, int targetPlaylistId) throws SQLException {
-        String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) " +
-                "SELECT ?, song_id, user_id FROM playlist_songs WHERE playlist_id = ?";
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, targetPlaylistId);
-            stmt.setInt(2, sourcePlaylistId);
-            stmt.executeUpdate();
-        }
-    }
-
-    private void copyPlaylistSongsUnique(Connection conn, int sourcePlaylistId, int targetPlaylistId) throws SQLException {
-        String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) " +
-                "SELECT ?, ps.song_id, ps.user_id FROM playlist_songs ps " +
-                "WHERE ps.playlist_id = ? AND NOT EXISTS (" +
-                "    SELECT 1 FROM playlist_songs ps2 " +
-                "    WHERE ps2.playlist_id = ? AND ps2.song_id = ps.song_id" +
-                ")";
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, targetPlaylistId);
-            stmt.setInt(2, sourcePlaylistId);
-            stmt.setInt(3, targetPlaylistId);
-            stmt.executeUpdate();
+            throw new SQLException("Playlist not found: " + playlistName);
         }
     }
 
@@ -182,8 +144,9 @@ public class MergeController implements Initializable {
 
     private void showSuccess(String message) {
         resultContainer.getChildren().clear();
-        Label successLabel = new Label("" + message);
+        Label successLabel = new Label("✅ " + message);
         successLabel.setStyle("-fx-text-fill: #28a745; -fx-font-size: 14; -fx-font-weight: bold;");
+        successLabel.setWrapText(true);
         resultContainer.getChildren().add(successLabel);
     }
 
