@@ -39,7 +39,7 @@ public class DashboardController {
 
         for (Button btn : buttons) {
             btn.getStyleClass().clear();
-            btn.getStyleClass().add("sidebar-button");
+            btn.getStyleClass().add(defaultStyle);
 
             btn.setOnMouseEntered(e -> {
                 if (btn != activeButton) {

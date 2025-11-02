@@ -1,68 +1,38 @@
 package org.example.demo9.Controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.example.demo9.Model.Classes.Playlist;
+import org.example.demo9.Model.Classes.SongNode;
 import org.example.demo9.Model.Classes.User;
-import org.example.demo9.Model.util.Database;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class PlaylistsController {
     @FXML private VBox playlistsContainer;
-    @FXML private ScrollPane scrollPane;
 
-    private Database db;
     private User currentUser;
-
-    public PlaylistsController() {
-        this.db = new Database();
-    }
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
         loadPlaylists();
     }
 
-    @FXML
-    public void initialize() {
-        // اینجا نمی‌توانیم از getScene() استفاده کنیم چون هنوز کامپوننت به صحنه اضافه نشده
-        // کاربر از طریق DashboardController تنظیم خواهد شد
-    }
-
     private void loadPlaylists() {
         playlistsContainer.getChildren().clear();
 
-        String sql = "SELECT id, name FROM playlists WHERE user_id = ? ORDER BY name";
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        for (Playlist playlist : currentUser.getPlaylists()) {
+            addPlaylistCard(playlist);
+        }
 
-            stmt.setInt(1, currentUser.getId());
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                addPlaylistCard(rs.getInt("id"), rs.getString("name"));
-            }
-
-            if (playlistsContainer.getChildren().isEmpty()) {
-                Label emptyLabel = new Label("No playlists yet. Create your first playlist!");
-                emptyLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 16; -fx-padding: 40;");
-                playlistsContainer.getChildren().add(emptyLabel);
-            }
-
-        } catch (SQLException e) {
-            showError("Error loading playlists: " + e.getMessage());
+        if (currentUser.getPlaylists().isEmpty()) {
+            Label emptyLabel = new Label("No playlists yet. Create your first playlist!");
+            emptyLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 16; -fx-padding: 40;");
+            playlistsContainer.getChildren().add(emptyLabel);
         }
     }
 
-    private void addPlaylistCard(int playlistId, String playlistName) {
+    private void addPlaylistCard(Playlist playlist) {
         HBox card = new HBox(15);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20; -fx-border-color: #e0e0e0; -fx-border-radius: 10;");
         card.setPrefWidth(600);
@@ -71,11 +41,10 @@ public class PlaylistsController {
         icon.setStyle("-fx-font-size: 24;");
 
         VBox info = new VBox(5);
-        Label nameLabel = new Label(playlistName);
+        Label nameLabel = new Label(playlist.getName());
         nameLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #333;");
 
-        int songCount = getSongCount(playlistId);
-        Label countLabel = new Label(songCount + " songs");
+        Label countLabel = new Label(playlist.getSize() + " songs");
         countLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 14;");
 
         info.getChildren().addAll(nameLabel, countLabel);
@@ -84,33 +53,51 @@ public class PlaylistsController {
 
         Button viewBtn = new Button("View Songs");
         viewBtn.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
-        viewBtn.setOnAction(e -> viewPlaylistSongs(playlistId, playlistName));
+        viewBtn.setOnAction(e -> viewPlaylistSongs(playlist));
+
+        Button sortBtn = new Button("Sort");
+        sortBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
+        sortBtn.setOnAction(e -> {
+            playlist.sortByTrackName();
+            showSuccess("Playlist sorted successfully!");
+        });
+
+        Button reverseBtn = new Button("Reverse");
+        reverseBtn.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
+        reverseBtn.setOnAction(e -> {
+            playlist.reverse();
+            showSuccess("Playlist reversed successfully!");
+        });
 
         Button deleteBtn = new Button("Delete");
         deleteBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
-        deleteBtn.setOnAction(e -> deletePlaylist(playlistId));
+        deleteBtn.setOnAction(e -> deletePlaylist(playlist));
 
-        actions.getChildren().addAll(viewBtn, deleteBtn);
-
+        actions.getChildren().addAll(viewBtn, sortBtn, reverseBtn, deleteBtn);
         card.getChildren().addAll(icon, info, actions);
         playlistsContainer.getChildren().add(card);
     }
 
-    private int getSongCount(int playlistId) {
-        String sql = "SELECT COUNT(*) as count FROM playlist_songs WHERE playlist_id = ?";
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+    private void viewPlaylistSongs(Playlist playlist) {
+        StringBuilder songsList = new StringBuilder();
+        SongNode current = playlist.getHead();
+        int index = 1;
 
-            stmt.setInt(1, playlistId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getInt("count");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        while (current != null) {
+            songsList.append(index).append(". ").append(current.toString()).append("\n");
+            current = current.getNext();
+            index++;
         }
-        return 0;
+
+        TextArea textArea = new TextArea(songsList.toString());
+        textArea.setEditable(false);
+        textArea.setPrefSize(600, 400);
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Songs in " + playlist.getName());
+        alert.setHeaderText("Total songs: " + playlist.getSize());
+        alert.getDialogPane().setContent(textArea);
+        alert.showAndWait();
     }
 
     @FXML
@@ -122,74 +109,100 @@ public class PlaylistsController {
 
         dialog.showAndWait().ifPresent(playlistName -> {
             if (!playlistName.trim().isEmpty()) {
-                createPlaylist(playlistName.trim());
+                currentUser.createPlaylist(playlistName.trim());
+                showSuccess("Playlist '" + playlistName + "' created successfully!");
+                loadPlaylists();
             }
         });
     }
 
-    private void createPlaylist(String playlistName) {
-        String sql = "INSERT INTO playlists (user_id, name) VALUES (?, ?)";
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+    @FXML
+    private void showAddSongDialog() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Add Song");
+        dialog.setHeaderText("Add New Song to Playlist");
 
-            stmt.setInt(1, currentUser.getId());
-            stmt.setString(2, playlistName);
-            stmt.executeUpdate();
+        ChoiceDialog<String> playlistDialog = new ChoiceDialog<>();
+        playlistDialog.setTitle("Select Playlist");
+        playlistDialog.setHeaderText("Choose a playlist to add the song to");
 
-            showSuccess("Playlist '" + playlistName + "' created successfully!");
-            loadPlaylists();
-
-        } catch (SQLException e) {
-            showError("Error creating playlist: " + e.getMessage());
+        for (Playlist playlist : currentUser.getPlaylists()) {
+            playlistDialog.getItems().add(playlist.getName());
         }
+
+        playlistDialog.showAndWait().ifPresent(playlistName -> {
+            Playlist selectedPlaylist = currentUser.getPlaylist(playlistName);
+            if (selectedPlaylist != null) {
+                // دریافت اطلاعات آهنگ از کاربر
+                Dialog<SongNode> songDialog = createSongInputDialog();
+                songDialog.showAndWait().ifPresent(song -> {
+                    selectedPlaylist.addSong(song);
+                    showSuccess("Song added to " + playlistName + " successfully!");
+                });
+            }
+        });
     }
 
-    private void deletePlaylist(int playlistId) {
+    private Dialog<SongNode> createSongInputDialog() {
+        Dialog<SongNode> dialog = new Dialog<>();
+        dialog.setTitle("Add Song");
+        dialog.setHeaderText("Enter Song Details");
+
+        // ایجاد فرم ورودی
+        TextField artistField = new TextField();
+        TextField trackField = new TextField();
+        TextField yearField = new TextField();
+        TextField genreField = new TextField();
+        TextField lengthField = new TextField();
+        TextField topicField = new TextField();
+
+        VBox content = new VBox(10,
+                new Label("Artist:"), artistField,
+                new Label("Track Name:"), trackField,
+                new Label("Release Year:"), yearField,
+                new Label("Genre:"), genreField,
+                new Label("Length (seconds):"), lengthField,
+                new Label("Topic:"), topicField
+        );
+
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType == ButtonType.OK) {
+                try {
+                    return new SongNode(
+                            artistField.getText(),
+                            trackField.getText(),
+                            Integer.parseInt(yearField.getText()),
+                            genreField.getText(),
+                            Double.parseDouble(lengthField.getText()),
+                            topicField.getText()
+                    );
+                } catch (NumberFormatException e) {
+                    showError("Please enter valid numbers for year and length!");
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        return dialog;
+    }
+
+    private void deletePlaylist(Playlist playlist) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete Playlist");
         alert.setHeaderText("Are you sure you want to delete this playlist?");
         alert.setContentText("This action cannot be undone.");
 
         alert.showAndWait().ifPresent(response -> {
-            if (response == javafx.scene.control.ButtonType.OK) {
-                String sql = "DELETE FROM playlists WHERE id = ? AND user_id = ?";
-                try (Connection conn = db.getConnection();
-                     PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-                    stmt.setInt(1, playlistId);
-                    stmt.setInt(2, currentUser.getId());
-                    int rows = stmt.executeUpdate();
-
-                    if (rows > 0) {
-                        showSuccess("Playlist deleted successfully!");
-                        loadPlaylists();
-                    }
-
-                } catch (SQLException e) {
-                    showError("Error deleting playlist: " + e.getMessage());
-                }
+            if (response == ButtonType.OK) {
+                currentUser.getPlaylists().remove(playlist);
+                showSuccess("Playlist deleted successfully!");
+                loadPlaylists();
             }
         });
-    }
-
-    private void viewPlaylistSongs(int playlistId, String playlistName) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/sections/PlaylistSongs.fxml"));
-            Parent songsSection = loader.load();
-
-            PlaylistSongsController controller = loader.getController();
-            controller.setPlaylistInfo(playlistId, playlistName, currentUser);
-
-            // پیدا کردن contentArea از طریق صحنه
-            StackPane contentArea = (StackPane) playlistsContainer.getScene().lookup("#contentArea");
-            if (contentArea != null) {
-                contentArea.getChildren().setAll(songsSection);
-            }
-
-        } catch (Exception e) {
-            showError("Error loading songs: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     private void showSuccess(String message) {
