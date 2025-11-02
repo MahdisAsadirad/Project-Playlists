@@ -100,6 +100,9 @@ public class Playlist {
         deletePlaylistFromDatabase(db, this.id);
         deletePlaylistFromDatabase(db, other.id);
 
+        this.clear();
+        other.clear();
+
         return merged;
     }
 
@@ -172,7 +175,6 @@ public class Playlist {
                 }
             }
 
-            // ذخیره آهنگ‌های پلی‌لیست
             savePlaylistSongsToDatabase(db, newPlaylistId);
 
             conn.commit();
@@ -180,7 +182,6 @@ public class Playlist {
         }
     }
 
-    // ذخیره آهنگ‌های پلی‌لیست در دیتابیس
     private void savePlaylistSongsToDatabase(Database db, int playlistId) throws SQLException {
         String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
 
@@ -199,21 +200,18 @@ public class Playlist {
         }
     }
 
-    // مرتب‌سازی با جا به جایی نودها
-    public void sortByCriteria(String criteria, boolean ascending) {
+    public void sortByCriteria(String subject, boolean ascending) {
         if (head == null || head.getNext() == null) return;
 
-        head = mergeSort(head, criteria, ascending);
+        head = mergeSort(head, subject, ascending);
 
-        // به روز رسانی tail
         tail = head;
         while (tail != null && tail.getNext() != null) {
             tail = tail.getNext();
         }
     }
 
-    // مرتب‌سازی ادغامی
-    private SongNode mergeSort(SongNode head, String criteria, boolean ascending) {
+    private SongNode mergeSort(SongNode head, String subject, boolean ascending) {
         if (head == null || head.getNext() == null) return head;
 
         // پیدا کردن وسط لیست
@@ -221,15 +219,13 @@ public class Playlist {
         SongNode nextOfMiddle = middle.getNext();
         middle.setNext(null);
 
-        // مرتب‌سازی بازگشتی دو نیمه
-        SongNode left = mergeSort(head, criteria, ascending);
-        SongNode right = mergeSort(nextOfMiddle, criteria, ascending);
+        SongNode left = mergeSort(head, subject, ascending);
+        SongNode right = mergeSort(nextOfMiddle, subject, ascending);
 
         // ادغام دو نیمه مرتب شده
-        return merge(left, right, criteria, ascending);
+        return sort(left, right, subject, ascending);
     }
 
-    // پیدا کردن نود وسط لیست
     private SongNode getMiddle(SongNode head) {
         if (head == null) return head;
 
@@ -244,124 +240,40 @@ public class Playlist {
         return slow;
     }
 
-    // ادغام دو لیست مرتب شده
-    private SongNode merge(SongNode left, SongNode right, String criteria, boolean ascending) {
+    private SongNode sort(SongNode left, SongNode right, String subject, boolean ascending) {
         if (left == null) return right;
         if (right == null) return left;
 
-        boolean comparison;
-        switch (criteria.toLowerCase()) {
+        boolean compare;
+        switch (subject.toLowerCase()) {
             case "artist":
-                comparison = ascending ?
+                compare = ascending ?
                         left.getArtistName().compareToIgnoreCase(right.getArtistName()) <= 0 :
                         left.getArtistName().compareToIgnoreCase(right.getArtistName()) > 0;
                 break;
             case "release date":
-                comparison = ascending ?
+                compare = ascending ?
                         left.getReleaseDate() <= right.getReleaseDate() :
                         left.getReleaseDate() > right.getReleaseDate();
                 break;
             case "genre":
-                comparison = ascending ?
+                compare = ascending ?
                         left.getGenre().compareToIgnoreCase(right.getGenre()) <= 0 :
                         left.getGenre().compareToIgnoreCase(right.getGenre()) > 0;
                 break;
             default: // track name
-                comparison = ascending ?
+                compare = ascending ?
                         left.getTrackName().compareToIgnoreCase(right.getTrackName()) <= 0 :
                         left.getTrackName().compareToIgnoreCase(right.getTrackName()) > 0;
         }
 
-        if (comparison) {
-            left.setNext(merge(left.getNext(), right, criteria, ascending));
+        if (compare) {
+            left.setNext(sort(left.getNext(), right, subject, ascending));
             return left;
         } else {
-            right.setNext(merge(left, right.getNext(), criteria, ascending));
+            right.setNext(sort(left, right.getNext(), subject, ascending));
             return right;
         }
-    }
-
-    // معکوس کردن لیست پیوندی
-    public void reverse() {
-        SongNode prev = null;
-        SongNode current = head;
-        SongNode next = null;
-
-        tail = head;
-
-        while (current != null) {
-            next = current.getNext();
-            current.setNext(prev);
-            prev = current;
-            current = next;
-        }
-
-        head = prev;
-    }
-
-    // جستجوی آهنگ در لیست پیوندی
-    public SongNode findSong(String trackName) {
-        SongNode current = head;
-        while (current != null) {
-            if (current.getTrackName().equalsIgnoreCase(trackName)) {
-                return current;
-            }
-            current = current.getNext();
-        }
-        return null;
-    }
-
-    // جستجوی آهنگ بر اساس ID
-    public SongNode findSongById(int songId) {
-        SongNode current = head;
-        while (current != null) {
-            if (current.getSongId() == songId) {
-                return current;
-            }
-            current = current.getNext();
-        }
-        return null;
-    }
-
-    // بررسی وجود آهنگ در پلی‌لیست
-    public boolean containsSong(int songId) {
-        return findSongById(songId) != null;
-    }
-
-    // نمایش پلی‌لیست (برای دیباگ)
-    public void display() {
-        SongNode current = head;
-        int index = 1;
-        System.out.println("Playlist: " + name + " (Size: " + size + ")");
-        while (current != null) {
-            System.out.println(index + ". " + current);
-            current = current.getNext();
-            index++;
-        }
-        System.out.println();
-    }
-
-    // گرفتن آهنگ بر اساس ایندکس
-    public SongNode getSongAt(int index) {
-        if (index < 0 || index >= size) return null;
-
-        SongNode current = head;
-        for (int i = 0; i < index; i++) {
-            current = current.getNext();
-        }
-        return current;
-    }
-
-    // تبدیل لیست پیوندی به آرایه (برای برخی عملیات)
-    public SongNode[] toArray() {
-        SongNode[] array = new SongNode[size];
-        SongNode current = head;
-        int index = 0;
-        while (current != null) {
-            array[index++] = current;
-            current = current.getNext();
-        }
-        return array;
     }
 
     // پاک کردن تمام آهنگ‌های پلی‌لیست
@@ -371,31 +283,6 @@ public class Playlist {
         size = 0;
     }
 
-    // بررسی خالی بودن پلی‌لیست
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    // گرفتن مدت زمان کل پلی‌لیست
-    public double getTotalDuration() {
-        double total = 0;
-        SongNode current = head;
-        while (current != null) {
-            total += current.getLen();
-            current = current.getNext();
-        }
-        return total;
-    }
-
-    // فرمت مدت زمان
-    public String getFormattedDuration() {
-        double totalSeconds = getTotalDuration();
-        int minutes = (int) (totalSeconds / 60);
-        int seconds = (int) (totalSeconds % 60);
-        return String.format("%d:%02d", minutes, seconds);
-    }
-
-    // Getter و Setter
     public int getId() { return id; }
     public String getName() { return name; }
     public SongNode getHead() { return head; }
