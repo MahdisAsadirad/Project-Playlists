@@ -23,6 +23,7 @@ public class MergeController implements Initializable {
 
     private User currentUser;
     private Database db;
+    Playlist mergedPlaylist;
 
     public MergeController() {
         this.db = new Database();
@@ -86,18 +87,11 @@ public class MergeController implements Initializable {
             Playlist playlist1 = loadPlaylistFromDB(firstPlaylistName);
             Playlist playlist2 = loadPlaylistFromDB(secondPlaylistName);
 
-            Playlist mergedPlaylist;
-
             if (deleteOriginalCheckbox.isSelected()) {
-                // مرج با حذف پلی‌لیست‌های اصلی
                 mergedPlaylist = playlist1.merge(playlist2, newName, db);
-            } else {
-                // مرج ساده بدون حذف
-                mergedPlaylist = playlist1.mergeSimple(playlist2, newName);
             }
-
             // ذخیره پلی‌لیست مرج شده در دیتابیس
-            int newPlaylistId = mergedPlaylist.saveToDatabase(db);
+            int newPlaylistId = mergedPlaylist.savePlaylistToDatabase(db);
 
             showSuccess("Playlists merged successfully! \n" +
                     "New playlist: " + newName +

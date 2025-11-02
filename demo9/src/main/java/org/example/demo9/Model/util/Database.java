@@ -16,7 +16,7 @@ public class Database {
             conn.setAutoCommit(true);
             return conn;
         } catch (SQLException | ClassNotFoundException e) {
-            throw new RuntimeException("❌ Database connection failed: " + e.getMessage(), e);
+            throw new RuntimeException("❌ Database disconnected " + e.getMessage(), e);
         }
     }
 }

@@ -4,9 +4,9 @@ import org.example.demo9.Model.util.Database;
 import java.sql.*;
 
 public class User {
-    private int id;
-    private String username;
-    private Database db;
+    private final int id;
+    private final String username;
+    private final Database db;
 
     public User(int id, String username) {
         this.id = id;
@@ -30,7 +30,6 @@ public class User {
             return false;
         }
     }
-
 
     public Playlist getPlaylist(String name) {
         String sql = "SELECT id, name FROM playlists WHERE name = ? AND user_id = ?";
@@ -80,5 +79,4 @@ public class User {
 
     public int getId() { return id; }
     public String getUsername() { return username; }
-
 }

@@ -11,7 +11,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/views/Login.fxml"));
         primaryStage.setTitle("🎵 Music Playlist Manager");
-        primaryStage.setScene(new Scene(root, 500, 600));
+        primaryStage.setScene(new Scene(root, 600, 450));
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(600);
         primaryStage.show();

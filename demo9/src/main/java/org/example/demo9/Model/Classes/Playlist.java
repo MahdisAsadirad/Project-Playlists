@@ -29,8 +29,7 @@ public class Playlist {
         this.size = 0;
     }
 
-    // اضافه کردن آهنگ به لیست پیوندی
-    public void addSong(SongNode song) {
+    public void addSongToLinkedList(SongNode song) {
         SongNode newNode = new SongNode(song);
         if (head == null) {
             head = newNode;
@@ -42,8 +41,7 @@ public class Playlist {
         size++;
     }
 
-    // حذف آهنگ از لیست پیوندی
-    public boolean removeSong(String trackName) {
+    public boolean removeSongFromPlaylist(String trackName) {
         if (head == null) return false;
 
         if (head.getTrackName().equals(trackName)) {
@@ -71,30 +69,29 @@ public class Playlist {
         }
         return false;
     }
-
-    // مرج دو پلی‌لیست با ایجاد نودهای جدید و حذف پلی‌لیست‌های اصلی
+    
     public Playlist merge(Playlist other, String newName, Database db) throws SQLException {
         Playlist merged = new Playlist(newName);
         merged.setUserId(this.userId);
 
-        Set<Integer> addedSongIds = new HashSet<>();
+        Set<String> addedSongIds = new HashSet<>();
 
-        // کپی عمیق از نودهای پلی‌لیست اول بدون تکراری
+        //کپی کردن اهنگ های پلی لیست اول
         SongNode current = this.head;
         while (current != null) {
-            if (!addedSongIds.contains(current.getSongId())) {
-                merged.addSong(new SongNode(current));
-                addedSongIds.add(current.getSongId());
+            if (!addedSongIds.contains(current.getTrackName())) {
+                merged.addSongToLinkedList(new SongNode(current));
+                addedSongIds.add(current.getTrackName());
             }
             current = current.getNext();
         }
 
-        // کپی عمیق از نودهای پلی‌لیست دوم بدون تکراری
+        //کپی اهنگ های پلی لیست دو
         current = other.head;
         while (current != null) {
-            if (!addedSongIds.contains(current.getSongId())) {
-                merged.addSong(new SongNode(current));
-                addedSongIds.add(current.getSongId());
+            if (!addedSongIds.contains(current.getTrackName())) {
+                merged.addSongToLinkedList(new SongNode(current));
+                addedSongIds.add(current.getTrackName());
             }
             current = current.getNext();
         }
@@ -106,29 +103,6 @@ public class Playlist {
         return merged;
     }
 
-    // مرج ساده بدون حذف پلی‌لیست‌های اصلی (برای مواردی که نمی‌خواهیم حذف شوند)
-    public Playlist mergeSimple(Playlist other, String newName) {
-        Playlist merged = new Playlist(newName);
-        merged.setUserId(this.userId);
-
-        // کپی عمیق از نودهای پلی‌لیست اول
-        SongNode current = this.head;
-        while (current != null) {
-            merged.addSong(new SongNode(current));
-            current = current.getNext();
-        }
-
-        // کپی عمیق از نودهای پلی‌لیست دوم
-        current = other.head;
-        while (current != null) {
-            merged.addSong(new SongNode(current));
-            current = current.getNext();
-        }
-
-        return merged;
-    }
-
-    // حذف پلی‌لیست از دیتابیس
     private void deletePlaylistFromDatabase(Database db, int playlistId) throws SQLException {
         try (Connection conn = db.getConnection()) {
             // اول آهنگ‌های پلی‌لیست رو حذف کن
@@ -147,7 +121,6 @@ public class Playlist {
         }
     }
 
-    // بارگذاری از دیتابیس به لیست پیوندی
     public void loadFromDatabase(Database db) throws SQLException {
         String sql = "SELECT s.id, s.artist_name, s.track_name, s.release_date, s.genre, s.len, s.topic " +
                 "FROM songs s " +
@@ -171,13 +144,13 @@ public class Playlist {
                         rs.getDouble("len"),
                         rs.getString("topic")
                 );
-                this.addSong(song);
+                this.addSongToLinkedList(song);
             }
         }
     }
 
-    // ذخیره پلی‌لیست در دیتابیس
-    public int saveToDatabase(Database db) throws SQLException {
+
+    public int savePlaylistToDatabase(Database db) throws SQLException {
         try (Connection conn = db.getConnection()) {
             conn.setAutoCommit(false);
 

@@ -6,18 +6,17 @@ public class SongNode {
     private String trackName;
     private int releaseDate;
     private String genre;
-    private double len;
+    private double length;
     private String topic;
     private SongNode next;
 
-    public SongNode(int songId, String artistName, String trackName, int releaseDate,
-                    String genre, double len, String topic) {
+    public SongNode(int songId, String artistName, String trackName, int releaseDate, String genre, double length, String topic) {
         this.songId = songId;
         this.artistName = artistName;
         this.trackName = trackName;
         this.releaseDate = releaseDate;
         this.genre = genre;
-        this.len = len;
+        this.length = length;
         this.topic = topic;
         this.next = null;
     }
@@ -28,7 +27,7 @@ public class SongNode {
         this.trackName = other.trackName;
         this.releaseDate = other.releaseDate;
         this.genre = other.genre;
-        this.len = other.len;
+        this.length = other.length;
         this.topic = other.topic;
         this.next = null;
     }
@@ -38,8 +37,7 @@ public class SongNode {
     public String getTrackName() { return trackName; }
     public int getReleaseDate() { return releaseDate; }
     public String getGenre() { return genre; }
-    public double getLen() { return len; }
-    public String getTopic() { return topic; }
+    public double getLen() { return length; }
     public SongNode getNext() { return next; }
     public void setNext(SongNode next) { this.next = next; }
 
@@ -48,8 +46,8 @@ public class SongNode {
         return String.format("%s - %s (%d)", artistName, trackName, releaseDate);
     }
 
-    public void setLen(double len) {
-        this.len = len;
+    public void setLen(double length) {
+        this.length = length;
     }
 
     public void setSongId(int songId) {
