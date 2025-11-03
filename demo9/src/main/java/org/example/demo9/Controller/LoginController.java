@@ -16,17 +16,21 @@ import org.example.demo9.Model.util.Database;
 import java.sql.SQLException;
 
 public class LoginController {
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private Button loginButton;
-    @FXML private Button signupButton;
-    @FXML private Label errorLabel;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
+    private Button loginButton;
+    @FXML
+    private Button signupButton;
+    @FXML
+    private Label errorLabel;
 
-    private UserController userController;
-    private Database db;
+    private final UserController userController;
 
     public LoginController() {
-        this.db = new Database();
+        Database db = new Database();
         this.userController = new UserController(db);
     }
 
@@ -73,7 +77,7 @@ public class LoginController {
 
         try {
             if (userController.signUp(username, password)) {
-                showSuccess("Sign up successful! Please login.");
+                showSuccess();
                 clearFields();
             } else {
                 showError("Sign up failed! Username might already exist.");
@@ -97,7 +101,7 @@ public class LoginController {
 
         } catch (Exception e) {
             showError("Error loading dashboard: " + e.getMessage());
-            e.printStackTrace(); // برای دیباگ بهتر
+            e.printStackTrace();
         }
     }
 
@@ -106,11 +110,11 @@ public class LoginController {
         errorLabel.setVisible(true);
     }
 
-    private void showSuccess(String message) {
+    private void showSuccess() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText("Sign up successful! Please login.");
         alert.showAndWait();
     }
 

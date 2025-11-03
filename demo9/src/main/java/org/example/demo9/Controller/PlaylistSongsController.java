@@ -9,7 +9,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
-
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,7 +25,7 @@ public class PlaylistSongsController implements Initializable {
     private int playlistId;
     private String playlistName;
     private User currentUser;
-    private Database db;
+    private final Database db;
 
     public PlaylistSongsController() {
         this.db = new Database();
@@ -34,7 +33,6 @@ public class PlaylistSongsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // تنظیم استایل دکمه‌ها
         backButton.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
         addSongButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
     }
@@ -54,7 +52,6 @@ public class PlaylistSongsController implements Initializable {
     private void loadSongs() {
         songsContainer.getChildren().clear();
 
-        // جایگزینی Text Block با String معمولی
         String query = "SELECT s.id, s.track_name, s.artist_name, s.genre, s.release_date, u.username " +
                 "FROM playlist_songs ps " +
                 "JOIN songs s ON ps.song_id = s.id " +
@@ -94,11 +91,9 @@ public class PlaylistSongsController implements Initializable {
         HBox card = new HBox(15);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600;");
 
-        // آیکون آهنگ
         Label icon = new Label("🎵");
         icon.setStyle("-fx-font-size: 20;");
 
-        // اطلاعات آهنگ
         VBox songInfo = new VBox(5);
         songInfo.setPrefWidth(400);
 
@@ -108,12 +103,11 @@ public class PlaylistSongsController implements Initializable {
         Label artistLabel = new Label("by " + artistName);
         artistLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 14;");
 
-        Label detailsLabel = new Label(genre + " • " + releaseDate + " • Added by: " + addedBy);
+        Label detailsLabel = new Label(genre + "   • " + releaseDate + "   • Added by: " + addedBy);
         detailsLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 12;");
 
         songInfo.getChildren().addAll(trackLabel, artistLabel, detailsLabel);
 
-        // دکمه حذف
         Button removeButton = new Button("Remove");
         removeButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
         removeButton.setOnAction(e -> removeSongFromPlaylist(songId));
@@ -140,7 +134,6 @@ public class PlaylistSongsController implements Initializable {
             PlaylistsController controller = loader.getController();
             controller.setCurrentUser(currentUser);
 
-            // پیدا کردن contentArea از طریق صحنه
             StackPane contentArea = (StackPane) songsContainer.getScene().lookup("#contentArea");
             if (contentArea != null) {
                 contentArea.getChildren().setAll(playlistsSection);
@@ -184,9 +177,8 @@ public class PlaylistSongsController implements Initializable {
                 songInfo.setStyle("-fx-font-size: 14;");
 
                 Button addButton = new Button("Add");
-                addButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 12;");
+                addButton.setStyle("-fx-background-color: green; -fx-text-fill: white; -fx-font-size: 12;");
 
-                // ذخیره songId در یک متغیر نهایی برای استفاده در lambda
                 final int currentSongId = rs.getInt("id");
                 addButton.setOnAction(e -> addSongToPlaylist(currentSongId));
 
@@ -215,7 +207,7 @@ public class PlaylistSongsController implements Initializable {
             loadSongs();
 
         } catch (SQLException e) {
-            if (e.getErrorCode() == 1062) { // Duplicate entry
+            if (e.getErrorCode() == 1062) {
                 showError("This song is already in the playlist!");
             } else {
                 showError("Error adding song: " + e.getMessage());
@@ -242,7 +234,7 @@ public class PlaylistSongsController implements Initializable {
 
                     if (rows > 0) {
                         showSuccess("Song removed successfully!");
-                        loadSongs(); // رفرش لیست
+                        loadSongs();
                     }
 
                 } catch (SQLException e) {

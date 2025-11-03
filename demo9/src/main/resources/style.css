@@ -33,7 +33,7 @@
 
 .sidebar-button:hover {
     -fx-background-color: #34495e;
-    -fx-text-fill: black;
+    -fx-text-fill: white;
 }
 
 .sidebar-button:selected {
@@ -179,7 +179,6 @@
     -fx-font-weight: bold;
 }
 
-/* استایل اسکرول‌پین */
 .scroll-pane {
     -fx-background-color: transparent;
     -fx-border-color: transparent;

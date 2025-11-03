@@ -21,7 +21,7 @@ public class DashboardController {
     @FXML private Button playlistsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn;
 
     private User currentUser;
-    private Map<String, Parent> loadedSections = new HashMap<>();
+    private final Map<String, Parent> loadedSections = new HashMap<>();
     private Button activeButton;
 
     private final String defaultStyle = "sidebar-button";
@@ -43,7 +43,7 @@ public class DashboardController {
 
             btn.setOnMouseEntered(e -> {
                 if (btn != activeButton) {
-                    btn.setStyle("-fx-background-color: #f8f9fa;");
+                    btn.setStyle(activeStyle);
                 }
             });
 
@@ -60,13 +60,13 @@ public class DashboardController {
     private void setActiveButton(Button button) {
         if (activeButton != null) {
             activeButton.getStyleClass().clear();
-            activeButton.getStyleClass().add("sidebar-button");
+            activeButton.getStyleClass().add(defaultStyle);
             activeButton.setStyle("-fx-background-color: transparent;");
         }
 
         activeButton = button;
         activeButton.getStyleClass().clear();
-        activeButton.getStyleClass().add("sidebar-button");
+        activeButton.getStyleClass().add(defaultStyle);
         activeButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white;");
     }
 
@@ -154,7 +154,7 @@ public class DashboardController {
         try {
             Parent loginRoot = FXMLLoader.load(getClass().getResource("/views/Login.fxml"));
             Stage stage = (Stage) sidebar.getScene().getWindow();
-            stage.setScene(new Scene(loginRoot, 900, 600));
+            stage.setScene(new Scene(loginRoot, 1200, 800));
             stage.setTitle("🎵 Music Playlist Manager");
         } catch (Exception e) {
             e.printStackTrace();

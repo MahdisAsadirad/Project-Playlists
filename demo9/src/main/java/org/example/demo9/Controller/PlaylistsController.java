@@ -2,10 +2,10 @@ package org.example.demo9.Controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -14,7 +14,6 @@ import org.example.demo9.Model.Classes.Playlist;
 import org.example.demo9.Model.Classes.SongNode;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,7 +63,6 @@ public class PlaylistsController {
         card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-border-color: #e0e0e0; -fx-border-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);");
         card.setPrefWidth(600);
 
-
         Label icon = new Label("🎵");
         icon.setStyle("-fx-font-size: 28; -fx-padding: 5;");
 
@@ -108,63 +106,24 @@ public class PlaylistsController {
 
     private void showBeautifulSongsView(Playlist playlist) {
         try {
-            this.currentPlaylist = playlist;
+            // بارگذاری PlaylistSongsSection.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/sections/PlaylistSongs.fxml"));
+            VBox playlistSongsSection = loader.load();
 
-            Stage songsStage = new Stage();
-            songsStage.initModality(Modality.APPLICATION_MODAL);
-            songsStage.initStyle(StageStyle.DECORATED);
-            songsStage.setTitle("🎵 " + playlist.getName() + " - Songs");
+            // گرفتن کنترلر و تنظیم اطلاعات
+            PlaylistSongsController controller = loader.getController();
+            controller.setPlaylistInfo(playlist.getId(), playlist.getName(), currentUser); // ✅ اینجا فراخوانی می‌شود
 
-            VBox root = new VBox(20);
-            root.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 30;");
-
-            HBox header = new HBox(15);
-            header.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);");
-
-            Label playlistIcon = new Label("🎵");
-            playlistIcon.setStyle("-fx-font-size: 32;");
-
-            VBox headerInfo = new VBox(5);
-            Label titleLabel = new Label(playlist.getName());
-            titleLabel.setStyle("-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
-
-            Label statsLabel = new Label("📊 " + playlist.getSize() + " songs • ⏱" + calculateTotalDuration(playlist) + " • 👤 " + currentUser.getUsername());
-            statsLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 14;");
-
-            headerInfo.getChildren().addAll(titleLabel, statsLabel);
-            header.getChildren().addAll(playlistIcon, headerInfo);
-
-            ScrollPane scrollPane = new ScrollPane();
-            scrollPane.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
-            scrollPane.setFitToWidth(true);
-
-            VBox songsContainer = new VBox(10);
-            songsContainer.setStyle("-fx-padding: 10;");
-
-            SongNode current = playlist.getHead();
-            int index = 1;
-
-            while (current != null) {
-                HBox songCard = createSongCard(current, index);
-                songsContainer.getChildren().add(songCard);
-                current = current.getNext();
-                index++;
+            // پیدا کردن contentArea و نمایش
+            StackPane contentArea = (StackPane) playlistsContainer.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(playlistSongsSection);
+            } else {
+                showError("Content area not found!");
             }
 
-            scrollPane.setContent(songsContainer);
-
-            Button closeBtn = new Button("Close");
-            closeBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8;");
-            closeBtn.setOnAction(e -> songsStage.close());
-
-            root.getChildren().addAll(header, scrollPane, closeBtn);
-
-            Scene scene = new Scene(root, 700, 600);
-            songsStage.setScene(scene);
-            songsStage.show();
-
         } catch (Exception e) {
-            showError("Error showing songs: " + e.getMessage());
+            showError("Error loading playlist songs: " + e.getMessage());
             e.printStackTrace();
         }
     }
