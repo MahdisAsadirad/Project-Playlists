@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.example.demo9.Model.Classes.SongNode;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 import java.net.URL;
@@ -95,7 +96,7 @@ public class PlaylistSongsController implements Initializable {
         icon.setStyle("-fx-font-size: 20;");
 
         VBox songInfo = new VBox(5);
-        songInfo.setPrefWidth(400);
+        songInfo.setPrefWidth(350);
 
         Label trackLabel = new Label(trackName);
         trackLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #333;");
@@ -112,8 +113,36 @@ public class PlaylistSongsController implements Initializable {
         removeButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
         removeButton.setOnAction(e -> removeSongFromPlaylist(songId));
 
-        card.getChildren().addAll(icon, songInfo, removeButton);
+        Button playBtn = new Button("▶");
+        playBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
+        playBtn.setOnAction(e -> playSong(trackName, artistName));
+
+        Button likeBtn = new Button("❤");
+        likeBtn.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
+        likeBtn.setOnAction(e -> likeSong(trackName));
+
+        HBox buttonsBox = new HBox(10, playBtn, likeBtn, removeButton);
+
+        card.getChildren().addAll(icon, songInfo, buttonsBox);
         songsContainer.getChildren().add(card);
+
+    }
+
+    // تغییر متدهای playSong و likeSong برای دریافت داده مستقیم
+    private void playSong(String trackName, String artistName) {
+        showSuccess("Now playing: " + trackName + " - " + artistName);
+    }
+
+    private void likeSong(String trackName) {
+        showSuccess("Added to favorites: " + trackName);
+    }
+
+
+    private void playSong(SongNode song) {
+        showSuccess("Now playing: " + song.getTrackName() + " - " + song.getArtistName());
+    }
+    private void likeSong(SongNode song) {
+        showSuccess("Added to favorites: " + song.getTrackName());
     }
 
     @FXML
