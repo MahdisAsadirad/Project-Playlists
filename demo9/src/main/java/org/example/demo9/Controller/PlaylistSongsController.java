@@ -128,7 +128,7 @@ public class PlaylistSongsController implements Initializable {
 
     }
 
-    // تغییر متدهای playSong و likeSong برای دریافت داده مستقیم
+
     private void playSong(String trackName, String artistName) {
         showSuccess("Now playing: " + trackName + " - " + artistName);
     }
@@ -137,13 +137,6 @@ public class PlaylistSongsController implements Initializable {
         showSuccess("Added to favorites: " + trackName);
     }
 
-
-    private void playSong(SongNode song) {
-        showSuccess("Now playing: " + song.getTrackName() + " - " + song.getArtistName());
-    }
-    private void likeSong(SongNode song) {
-        showSuccess("Added to favorites: " + song.getTrackName());
-    }
 
     @FXML
     private void handleAddSong() {

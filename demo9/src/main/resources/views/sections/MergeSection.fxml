@@ -7,7 +7,7 @@
       fx:controller="org.example.demo9.Controller.MergeController"
       spacing="20" style="-fx-padding: 30;">
 
-    <Label text="🔄 Merge Playlists" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+    <Label text="Merge Playlists" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
 
     <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
         <Label text="Select two playlists to merge:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>

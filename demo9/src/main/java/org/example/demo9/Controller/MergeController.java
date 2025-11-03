@@ -38,9 +38,6 @@ public class MergeController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         mergeButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
         mergeButton.setOnAction(e -> handleMerge());
-
-        deleteOriginalCheckbox.setSelected(true);
-        removeDuplicatesCheckbox.setSelected(true);
     }
 
     private void loadUserPlaylists() {
@@ -83,14 +80,13 @@ public class MergeController implements Initializable {
         }
 
         try {
-            // بارگذاری پلی‌لیست‌ها از دیتابیس
             Playlist playlist1 = loadPlaylistFromDB(firstPlaylistName);
             Playlist playlist2 = loadPlaylistFromDB(secondPlaylistName);
 
             if (deleteOriginalCheckbox.isSelected()) {
                 mergedPlaylist = playlist1.merge(playlist2, newName, db);
             }
-            // ذخیره پلی‌لیست مرج شده در دیتابیس
+
             int newPlaylistId = mergedPlaylist.savePlaylistToDatabase(db);
 
             showSuccess("Playlists merged successfully! \n" +
@@ -98,7 +94,6 @@ public class MergeController implements Initializable {
                     " with " + mergedPlaylist.getSize() + " songs" +
                     (deleteOriginalCheckbox.isSelected() ? "\nOriginal playlists were deleted." : ""));
 
-            // رفرش لیست پلی‌لیست‌ها
             loadUserPlaylists();
             clearForm();
 
@@ -138,7 +133,7 @@ public class MergeController implements Initializable {
 
     private void showSuccess(String message) {
         resultContainer.getChildren().clear();
-        Label successLabel = new Label("✅ " + message);
+        Label successLabel = new Label(message);
         successLabel.setStyle("-fx-text-fill: #28a745; -fx-font-size: 14; -fx-font-weight: bold;");
         successLabel.setWrapText(true);
         resultContainer.getChildren().add(successLabel);

@@ -113,11 +113,10 @@ public class DiscoverSongsController implements Initializable {
         HBox card = new HBox(15);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600;");
 
-        // آیکون آهنگ
         Label icon = new Label("🎵");
         icon.setStyle("-fx-font-size: 20;");
 
-        // اطلاعات آهنگ
+
         VBox songInfo = new VBox(5);
         songInfo.setPrefWidth(400);
 
@@ -185,7 +184,7 @@ public class DiscoverSongsController implements Initializable {
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next() && rs.getInt(1) > 0) {
-                // آنلایک کردن
+
                 String deleteSql = "DELETE FROM liked_songs WHERE user_id = ? AND song_id = ?";
                 try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
                     deleteStmt.setInt(1, currentUser.getId());
@@ -197,14 +196,14 @@ public class DiscoverSongsController implements Initializable {
                     showSuccess("Song removed from liked songs!");
                 }
             } else {
-                // لایک کردن
+
                 String insertSql = "INSERT INTO liked_songs (user_id, song_id) VALUES (?, ?)";
                 try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                     insertStmt.setInt(1, currentUser.getId());
                     insertStmt.setInt(2, songId);
                     insertStmt.executeUpdate();
 
-                    likeButton.setText("❤️");
+                    likeButton.setText("❤");
                     likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
                     showSuccess("Song added to liked songs! ❤️");
                 }
@@ -278,9 +277,6 @@ public class DiscoverSongsController implements Initializable {
                 stmt.setString(paramIndex++, genre);
             }
 
-            if (artist != null && !artist.equals("All Artists")) {
-                stmt.setString(paramIndex++, artist);
-            }
 
             ResultSet rs = stmt.executeQuery();
 
@@ -300,7 +296,7 @@ public class DiscoverSongsController implements Initializable {
     }
 
     private void showAddToPlaylistDialog(int songId) {
-        // پیاده‌سازی مشابه قبلی
+
         ChoiceDialog<String> dialog = new ChoiceDialog<>();
         dialog.setTitle("Add to Playlist");
         dialog.setHeaderText("Select a playlist to add this song to");
