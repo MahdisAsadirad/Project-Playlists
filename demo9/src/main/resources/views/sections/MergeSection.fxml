@@ -1,39 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.demo9.Controller.MergeController"
-      spacing="20" style="-fx-padding: 30;">
+<VBox spacing="20" style="-fx-padding: 30;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.demo9.Controller.MergeController">
 
-    <Label text="Merge Playlists" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+    <Label style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;" text="Merge Playlists" />
 
     <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
-        <Label text="Select two playlists to merge:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+        <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Select two playlists to merge:" />
 
-        <HBox spacing="15" alignment="CENTER_LEFT">
+        <HBox alignment="CENTER_LEFT" spacing="15">
             <VBox spacing="5">
-                <Label text="First Playlist:" style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="firstPlaylistCombo" prefWidth="200"/>
+                <Label style="-fx-font-weight: bold;" text="First Playlist:" />
+                <ComboBox fx:id="firstPlaylistCombo" prefWidth="200" />
             </VBox>
 
             <VBox spacing="5">
-                <Label text="Second Playlist:" style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="secondPlaylistCombo" prefWidth="200"/>
+                <Label style="-fx-font-weight: bold;" text="Second Playlist:" />
+                <ComboBox fx:id="secondPlaylistCombo" prefWidth="200" />
             </VBox>
         </HBox>
 
         <VBox spacing="5">
-            <Label text="New Playlist Name:" style="-fx-font-weight: bold;"/>
-            <TextField fx:id="newPlaylistNameField" promptText="Enter name for merged playlist" prefWidth="300"/>
+            <Label style="-fx-font-weight: bold;" text="New Playlist Name:" />
+            <TextField fx:id="newPlaylistNameField" prefWidth="300" promptText="Enter name for merged playlist" />
         </VBox>
-
-        <Button fx:id="mergeButton" text="Merge Playlists" prefWidth="150"/>
+        <Button fx:id="mergeButton" prefWidth="150" text="Merge Playlists" />
     </VBox>
-
     <VBox fx:id="resultContainer" spacing="10">
-
     </VBox>
 
 </VBox>

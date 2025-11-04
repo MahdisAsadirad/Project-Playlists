@@ -1,5 +1,4 @@
 package org.example.demo9.Controller;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -7,7 +6,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import org.example.demo9.Model.Classes.SongNode;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 import java.net.URL;
@@ -57,8 +55,7 @@ public class PlaylistSongsController implements Initializable {
                 "FROM playlist_songs ps " +
                 "JOIN songs s ON ps.song_id = s.id " +
                 "JOIN users u ON ps.user_id = u.id " +
-                "WHERE ps.playlist_id = ? " +
-                "ORDER BY s.track_name";
+                "WHERE ps.playlist_id = ? ";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -185,7 +182,7 @@ public class PlaylistSongsController implements Initializable {
     }
 
     private void loadAvailableSongs(VBox songsList) throws SQLException {
-        String query = "SELECT id, track_name, artist_name, genre FROM songs ORDER BY track_name";
+        String query ="SELECT id, track_name, artist_name, genre FROM songs";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);

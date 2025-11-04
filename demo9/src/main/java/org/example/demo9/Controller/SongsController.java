@@ -21,7 +21,6 @@ public class SongsController implements Initializable {
     @FXML private VBox songsContainer;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
-    // حذف RadioButton‌ها چون در FXML وجود ندارند
 
     private User currentUser;
     private Database db;
@@ -55,7 +54,6 @@ public class SongsController implements Initializable {
             this.isLiked = false;
         }
 
-        // Getter methods
         public int getSongId() { return songId; }
         public String getTrackName() { return trackName; }
         public String getArtistName() { return artistName; }
@@ -65,6 +63,34 @@ public class SongsController implements Initializable {
         public String getTopic() { return topic; }
         public boolean isLiked() { return isLiked; }
         public void setLiked(boolean liked) { this.isLiked = liked; }
+
+        public void setSongId(int songId) {
+            this.songId = songId;
+        }
+
+        public void setTrackName(String trackName) {
+            this.trackName = trackName;
+        }
+
+        public void setArtistName(String artistName) {
+            this.artistName = artistName;
+        }
+
+        public void setGenre(String genre) {
+            this.genre = genre;
+        }
+
+        public void setReleaseDate(int releaseDate) {
+            this.releaseDate = releaseDate;
+        }
+
+        public void setLength(double length) {
+            this.length = length;
+        }
+
+        public void setTopic(String topic) {
+            this.topic = topic;
+        }
     }
 
     public void setCurrentUser(User user) {
@@ -102,7 +128,7 @@ public class SongsController implements Initializable {
         allSongs.clear();
         songsContainer.getChildren().clear();
 
-        String query = "SELECT id, track_name, artist_name, genre, release_date, len, topic FROM songs ORDER BY track_name";
+        String query = "SELECT id, track_name, artist_name, genre, release_date, len, topic FROM songs";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);

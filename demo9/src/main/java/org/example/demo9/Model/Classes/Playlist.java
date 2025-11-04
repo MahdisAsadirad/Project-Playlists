@@ -69,14 +69,13 @@ public class Playlist {
         }
         return false;
     }
-    
+
     public Playlist merge(Playlist other, String newName, Database db) throws SQLException {
         Playlist merged = new Playlist(newName);
         merged.setUserId(this.userId);
 
         Set<String> addedSongIds = new HashSet<>();
 
-        //کپی کردن اهنگ های پلی لیست اول
         SongNode current = this.head;
         while (current != null) {
             if (!addedSongIds.contains(current.getTrackName())) {
@@ -86,7 +85,6 @@ public class Playlist {
             current = current.getNext();
         }
 
-        //کپی اهنگ های پلی لیست دو
         current = other.head;
         while (current != null) {
             if (!addedSongIds.contains(current.getTrackName())) {
@@ -108,14 +106,12 @@ public class Playlist {
 
     private void deletePlaylistFromDatabase(Database db, int playlistId) throws SQLException {
         try (Connection conn = db.getConnection()) {
-            // اول آهنگ‌های پلی‌لیست رو حذف کن
             String deleteSongsSql = "DELETE FROM playlist_songs WHERE playlist_id = ?";
             try (PreparedStatement stmt = conn.prepareStatement(deleteSongsSql)) {
                 stmt.setInt(1, playlistId);
                 stmt.executeUpdate();
             }
 
-            // سپس خود پلی‌لیست رو حذف کن
             String deletePlaylistSql = "DELETE FROM playlists WHERE id = ?";
             try (PreparedStatement stmt = conn.prepareStatement(deletePlaylistSql)) {
                 stmt.setInt(1, playlistId);

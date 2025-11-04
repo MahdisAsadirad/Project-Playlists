@@ -56,7 +56,7 @@ public class User {
 
     public java.util.List<Playlist> getPlaylistsFromDatabase() {
         java.util.List<Playlist> playlists = new java.util.ArrayList<>();
-        String sql = "SELECT id, name FROM playlists WHERE user_id = ? ORDER BY name";
+        String sql = "SELECT id, name FROM playlists WHERE user_id = ?";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

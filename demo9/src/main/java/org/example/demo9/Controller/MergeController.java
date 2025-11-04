@@ -7,22 +7,24 @@ import javafx.scene.layout.VBox;
 import org.example.demo9.Model.Classes.Playlist;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
-
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class MergeController implements Initializable {
-    @FXML private ComboBox<String> firstPlaylistCombo;
-    @FXML private ComboBox<String> secondPlaylistCombo;
-    @FXML private TextField newPlaylistNameField;
-    @FXML private CheckBox deleteOriginalCheckbox;
-    @FXML private CheckBox removeDuplicatesCheckbox;
-    @FXML private Button mergeButton;
-    @FXML private VBox resultContainer;
+    @FXML
+    private ComboBox<String> firstPlaylistCombo;
+    @FXML
+    private ComboBox<String> secondPlaylistCombo;
+    @FXML
+    private TextField newPlaylistNameField;
+    @FXML
+    private Button mergeButton;
+    @FXML
+    private VBox resultContainer;
 
     private User currentUser;
-    private Database db;
+    private final Database db;
     Playlist mergedPlaylist;
 
     public MergeController() {
@@ -41,7 +43,7 @@ public class MergeController implements Initializable {
     }
 
     private void loadUserPlaylists() {
-        String sql = "SELECT id, name FROM playlists WHERE user_id = ? ORDER BY name";
+        String sql = "SELECT id, name FROM playlists WHERE user_id = ?";
 
         try (var conn = db.getConnection();
              var stmt = conn.prepareStatement(sql)) {
@@ -83,16 +85,10 @@ public class MergeController implements Initializable {
             Playlist playlist1 = loadPlaylistFromDB(firstPlaylistName);
             Playlist playlist2 = loadPlaylistFromDB(secondPlaylistName);
 
-            if (deleteOriginalCheckbox.isSelected()) {
-                mergedPlaylist = playlist1.merge(playlist2, newName, db);
-            }
+            mergedPlaylist = playlist1.merge(playlist2, newName, db);
 
-            int newPlaylistId = mergedPlaylist.savePlaylistToDatabase(db);
-
-            showSuccess("Playlists merged successfully! \n" +
-                    "New playlist: " + newName +
-                    " with " + mergedPlaylist.getSize() + " songs" +
-                    (deleteOriginalCheckbox.isSelected() ? "\nOriginal playlists were deleted." : ""));
+            showSuccess("Playlists merged successfully! \n" + "New playlist: " + newName +
+                    " with " + mergedPlaylist.getSize() + " songs") ;
 
             loadUserPlaylists();
             clearForm();

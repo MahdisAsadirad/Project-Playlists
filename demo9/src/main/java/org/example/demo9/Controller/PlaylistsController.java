@@ -1,31 +1,23 @@
 package org.example.demo9.Controller;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.example.demo9.Model.Classes.Playlist;
-import org.example.demo9.Model.Classes.SongNode;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 public class PlaylistsController {
     @FXML private VBox playlistsContainer;
-    private Playlist currentPlaylist;
 
     private User currentUser;
-    private Database db;
+    private final Database db;
 
     public PlaylistsController() {
         this.db = new Database();
