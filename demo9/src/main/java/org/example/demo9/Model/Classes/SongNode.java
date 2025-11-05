@@ -39,6 +39,7 @@ public class SongNode {
     public String getGenre() { return genre; }
     public double getLen() { return length; }
     public SongNode getNext() { return next; }
+    public String getTopic() { return topic; }
     public void setNext(SongNode next) { this.next = next; }
 
     @Override

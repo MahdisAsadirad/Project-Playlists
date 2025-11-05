@@ -8,10 +8,10 @@
       fx:controller="org.example.demo9.Controller.LikedSongsController"
       spacing="20" style="-fx-padding: 30;">
 
-    <Label text="❤️ Liked Songs" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+    <Label text="❤ Liked Songs" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
 
     <VBox spacing="15">
-        <Label fx:id="statsLabel" text="❤️ Your Liked Songs" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+        <Label fx:id="statsLabel" text="❤ Your Liked Songs" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
 
         <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
             <VBox fx:id="likedSongsContainer" spacing="10">

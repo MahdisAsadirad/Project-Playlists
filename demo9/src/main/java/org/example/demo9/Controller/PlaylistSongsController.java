@@ -55,7 +55,7 @@ public class PlaylistSongsController implements Initializable {
                 "FROM playlist_songs ps " +
                 "JOIN songs s ON ps.song_id = s.id " +
                 "JOIN users u ON ps.user_id = u.id " +
-                "WHERE ps.playlist_id = ? ";
+                "WHERE ps.playlist_id = ?";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -182,7 +182,7 @@ public class PlaylistSongsController implements Initializable {
     }
 
     private void loadAvailableSongs(VBox songsList) throws SQLException {
-        String query ="SELECT id, track_name, artist_name, genre FROM songs";
+        String query ="SELECT id, track_name, artist_name, genre FROM songs ORDER BY track_name ";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);

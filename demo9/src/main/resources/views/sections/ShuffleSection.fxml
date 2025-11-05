@@ -1,35 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.demo9.Controller.ShuffleController"
-      spacing="20" style="-fx-padding: 30;">
+<VBox prefHeight="600" prefWidth="800" spacing="20" style="-fx-padding: 30;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.demo9.Controller.ShuffleController">
 
-    <Label text="🎲 Shuffle Merge Playlists" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+    <Label style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;" text="🎲 Shuffle Merge Playlists" />
 
     <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
-        <Label text="Select multiple playlists to shuffle merge:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+        <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Select multiple playlists to shuffle merge:" />
 
         <VBox spacing="10">
-            <Label text="Available Playlists:" style="-fx-font-weight: bold;"/>
-            <ListView fx:id="playlistsListView" prefHeight="200" prefWidth="400"/>
-            <Label text="Hold Ctrl to select multiple playlists" style="-fx-text-fill: #666; -fx-font-size: 12;"/>
+            <Label style="-fx-font-weight: bold;" text="Available Playlists:" />
+            <ListView fx:id="playlistsListView" prefHeight="200" prefWidth="400" />
+            <Label style="-fx-text-fill: #666; -fx-font-size: 12;" text="Hold Ctrl to select multiple playlists" />
         </VBox>
 
         <VBox spacing="5">
-            <Label text="New Playlist Name:" style="-fx-font-weight: bold;"/>
-            <TextField fx:id="newPlaylistNameField" promptText="Enter name for shuffled playlist" prefWidth="300"/>
+            <Label style="-fx-font-weight: bold;" text="New Playlist Name:" />
+            <TextField fx:id="newPlaylistNameField" prefWidth="300" promptText="Enter name for shuffled playlist" />
         </VBox>
 
-        <Button fx:id="shuffleButton" text="Create Shuffled Playlist" prefWidth="200"/>
+        <HBox spacing="10">
+            <Button fx:id="shuffleButton" prefWidth="180" text="Create Shuffled Playlist" />
+            <Button fx:id="reshuffleButton" prefWidth="100" text="Reshuffle" />
+        </HBox>
     </VBox>
 
     <VBox fx:id="resultContainer" spacing="10">
         <!-- نتایج اینجا نمایش داده می‌شود -->
+    </VBox>
+
+    <VBox prefHeight="400" spacing="10">
+        <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #333;" text="🎵 Shuffled Songs:" />
+
+        <ScrollPane fitToWidth="true" prefHeight="350" style="-fx-background-color: transparent; -fx-border-color: #e0e0e0; -fx-border-radius: 10;">
+            <VBox fx:id="shuffledSongsContainer" spacing="10" style="-fx-padding: 15;">
+                <!-- آهنگ‌های شافل شده اینجا نمایش داده می‌شوند -->
+            </VBox>
+        </ScrollPane>
     </VBox>
 
 </VBox>
