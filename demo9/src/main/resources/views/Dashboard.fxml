@@ -17,9 +17,9 @@
                 <Button fx:id="playlistsBtn" onAction="#showPlaylistsSection" styleClass="sidebar-button" text="📁 My Playlists" />
                 <Button fx:id="discoverSongsBtn" onAction="#showDiscoverSongsSection" styleClass="sidebar-button" text="🔍 Discover Songs" />
                 <Button fx:id="mergeBtn" onAction="#showMergeSection" styleClass="sidebar-button" text="🔄 Merge Playlists" />
-                <Button fx:id="shuffleBtn" onAction="#showShuffleSection" styleClass="sidebar-button" text="^-^Shuffle Merge" />
-                <Button fx:id="filterBtn" onAction="#showFilterSection" styleClass="sidebar-button" text="*Filter Playlists" />
-                <Button fx:id="sortBtn" onAction="#showSortSection" styleClass="sidebar-button" text="⚙Sort Playlists" />
+                <Button fx:id="shuffleBtn" onAction="#showShuffleSection" styleClass="sidebar-button" text="🔀 Shuffle Merge" />
+                <Button fx:id="filterBtn" onAction="#showFilterSection" styleClass="sidebar-button" text="Filter Playlists" />
+                <Button fx:id="sortBtn" onAction="#showSortSection" styleClass="sidebar-button" text="Sort Playlists" />
                 <Button fx:id="likedBtn" onAction="#showLikedSection" styleClass="sidebar-button" text="❤Liked Songs" />
             </VBox>
 

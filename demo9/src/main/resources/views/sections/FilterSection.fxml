@@ -2,46 +2,53 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.Insets?>
 
-<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<VBox xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.demo9.Controller.FilterController"
-      spacing="20" style="-fx-padding: 30;">
+      spacing="20"
+      stylesheets="@page-styles.css"
+      styleClass="root"
+      style="-fx-padding: 30;">
 
-    <Label text="📊 Filter Playlist" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+    <!-- عنوان -->
+    <Label text="📊 Filter Playlist" styleClass="title"/>
 
-    <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
-        <Label text="Filter songs from a playlist:" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+    <!-- فرم فیلتر -->
+    <VBox spacing="15" styleClass="card">
+        <Label text="Filter songs from a playlist:" styleClass="subtitle"/>
 
         <HBox spacing="15" alignment="CENTER_LEFT">
+            <!-- انتخاب پلی‌لیست -->
             <VBox spacing="5">
-                <Label text="Select Playlist:" style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="playlistCombo" prefWidth="200"/>
+                <Label text="Select Playlist:" styleClass="subtitle"/>
+                <ComboBox fx:id="playlistCombo" prefWidth="200" styleClass="combo-box"/>
             </VBox>
 
+            <!-- معیار فیلتر -->
             <VBox spacing="5">
-                <Label text="Filter Criteria:" style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="criteriaCombo" prefWidth="150"/>
+                <Label text="Filter Criteria:" styleClass="subtitle"/>
+                <ComboBox fx:id="criteriaCombo" prefWidth="150" styleClass="combo-box"/>
             </VBox>
         </HBox>
 
+        <!-- مقدار فیلتر -->
         <VBox spacing="5">
-            <Label text="Filter Value:" style="-fx-font-weight: bold;"/>
-            <TextField fx:id="filterValueField" promptText="Enter value to filter by" prefWidth="300"/>
-            <Label text="Example: For 'Genre' enter 'Rock', for 'Release Year' enter '2020'"
-                   style="-fx-text-fill: #666; -fx-font-size: 12;"/>
+            <Label text="Filter Value:" styleClass="subtitle"/>
+            <TextField fx:id="filterValueField" promptText="Enter value to filter by" prefWidth="300" styleClass="text-field"/>
+            <Label text="Example: For 'Genre' enter 'Rock', for 'Release Year' enter '2020'" styleClass="hint"/>
         </VBox>
 
+        <!-- نام پلی‌لیست جدید -->
         <VBox spacing="5">
-            <Label text="New Playlist Name:" style="-fx-font-weight: bold;"/>
-            <TextField fx:id="newPlaylistNameField" promptText="Enter name for filtered playlist" prefWidth="300"/>
+            <Label text="New Playlist Name:" styleClass="subtitle"/>
+            <TextField fx:id="newPlaylistNameField" promptText="Enter name for filtered playlist" prefWidth="300" styleClass="text-field"/>
         </VBox>
 
-        <Button fx:id="filterButton" text="Create Filtered Playlist" prefWidth="180"/>
+        <!-- دکمه ایجاد -->
+        <Button fx:id="filterButton" text="Create Filtered Playlist" styleClass="button success"/>
     </VBox>
 
-    <VBox fx:id="resultContainer" spacing="10">
-    </VBox>
-
+    <!-- نمایش نتیجه -->
+    <VBox fx:id="resultContainer" spacing="10" styleClass="card"/>
 </VBox>

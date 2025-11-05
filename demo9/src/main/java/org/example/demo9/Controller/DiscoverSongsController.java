@@ -21,6 +21,7 @@ public class DiscoverSongsController implements Initializable {
     @FXML private ComboBox<String> genreFilter;
     @FXML private ComboBox<String> artistFilter;
 
+
     private User currentUser;
     private final Database db;
 
@@ -111,7 +112,7 @@ public class DiscoverSongsController implements Initializable {
     private void addDiscoverSongCard(int songId, String trackName, String artistName,
                                      String genre, int releaseDate, double length, String topic) {
         HBox card = new HBox(15);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600;");
+        card.getStyleClass().add("song-card");
 
         Label icon = new Label("🎵");
         icon.setStyle("-fx-font-size: 20;");
@@ -136,7 +137,10 @@ public class DiscoverSongsController implements Initializable {
 
 
         Button likeButton = new Button("♡");
-        likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
+        likeButton.getStyleClass().add("button");
+
+//        Button likeButton = new Button("♡");
+//        likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
 
 
         checkAndUpdateLikeButton(likeButton, songId);

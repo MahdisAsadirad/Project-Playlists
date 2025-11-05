@@ -44,8 +44,6 @@ public class ShuffleController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        shuffleButton.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
-        reshuffleButton.setStyle("-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
 
         shuffleButton.setOnAction(e -> handleShuffleMerge());
         reshuffleButton.setOnAction(e -> reshufflePlaylist());

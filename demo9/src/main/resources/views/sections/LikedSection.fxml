@@ -3,21 +3,26 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<VBox xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.demo9.Controller.LikedSongsController"
-      spacing="20" style="-fx-padding: 30;">
+      spacing="20"
+      stylesheets="@page-styles.css"
+      styleClass="root"
+      style="-fx-padding: 30;">
 
-    <Label text="❤ Liked Songs" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+    <!-- عنوان صفحه -->
+    <Label text="❤ Liked Songs" styleClass="title"/>
 
-    <VBox spacing="15">
-        <Label fx:id="statsLabel" text="❤ Your Liked Songs" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+    <!-- کارت اصلی -->
+    <VBox spacing="15" styleClass="card">
 
-        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
-            <VBox fx:id="likedSongsContainer" spacing="10">
+        <Label fx:id="statsLabel" text="❤ Your Liked Songs" styleClass="subtitle"/>
 
-            </VBox>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox fx:id="likedSongsContainer" spacing="10"/>
         </ScrollPane>
+
     </VBox>
 
 </VBox>

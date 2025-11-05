@@ -1,0 +1,242 @@
+/* ======= Root layout ======= */
+.root, .vbox {
+    -fx-background-color: linear-gradient(to bottom right, #f9f9fb, #eef1f6);
+    -fx-font-family: "Poppins", "Segoe UI", sans-serif;
+    -fx-font-smoothing-type: gray;
+}
+
+/* ======= Title ======= */
+.label.title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+    -fx-padding: 0 0 15 5;
+}
+
+/* ======= Card-like section ======= */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);
+}
+
+/* ======= Labels ======= */
+.label {
+    -fx-text-fill: #2d3436;
+    -fx-font-size: 14px;
+}
+
+.label.subtitle {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.label.hint {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 12px;
+}
+
+/* ======= Inputs ======= */
+.text-field, .combo-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dcdde1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-font-size: 13px;
+}
+
+.text-field:focused, .combo-box:focused {
+    -fx-border-color: #6c5ce7;
+    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.25), 8, 0, 0, 0);
+}
+
+/* ======= Buttons ======= */
+.button {
+    -fx-background-color: linear-gradient(to right, #6c5ce7, #74b9ff);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 10 18;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.3), 6, 0, 0, 0);
+    -fx-transition: 0.3s;
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to right, #a29bfe, #81ecec);
+    -fx-translate-y: -2;
+}
+
+/* ======= Scroll Areas ======= */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #b2bec3;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #6c5ce7;
+}
+
+/* ======= Cards for songs/playlists ======= */
+.song-card, .playlist-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: transparent;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);
+}
+
+.song-card:hover, .playlist-card:hover {
+    -fx-translate-y: -3;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
+}
+
+/* ======= Special Buttons ======= */
+.button.success {
+    -fx-background-color: linear-gradient(to right, #00b894, #00cec9);
+}
+
+.button.success:hover {
+    -fx-background-color: linear-gradient(to right, #55efc4, #81ecec);
+}
+
+.button.danger {
+    -fx-background-color: linear-gradient(to right, #e74c3c, #c0392b);
+}
+
+.button.danger:hover {
+    -fx-background-color: linear-gradient(to right, #ff7675, #d63031);
+}
+/* ======= Root layout ======= */
+.root, .vbox {
+    -fx-background-color: linear-gradient(to bottom right, #f9f9fb, #eef1f6);
+    -fx-font-family: "Poppins", "Segoe UI", sans-serif;
+    -fx-font-smoothing-type: gray;
+}
+
+/* ======= Title ======= */
+.label.title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+    -fx-padding: 0 0 15 5;
+}
+
+/* ======= Card-like section ======= */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);
+}
+
+/* ======= Labels ======= */
+.label {
+    -fx-text-fill: #2d3436;
+    -fx-font-size: 14px;
+}
+
+.label.subtitle {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.label.hint {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 12px;
+}
+
+/* ======= Inputs ======= */
+.text-field, .combo-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dcdde1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-font-size: 13px;
+}
+
+.text-field:focused, .combo-box:focused {
+    -fx-border-color: #6c5ce7;
+    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.25), 8, 0, 0, 0);
+}
+
+/* ======= Buttons ======= */
+.button {
+    -fx-background-color: linear-gradient(to right, #6c5ce7, #74b9ff);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 10 18;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.3), 6, 0, 0, 0);
+    -fx-transition: 0.3s;
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to right, #a29bfe, #81ecec);
+    -fx-translate-y: -2;
+}
+
+/* ======= Scroll Areas ======= */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #b2bec3;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #6c5ce7;
+}
+
+/* ======= Cards for songs/playlists ======= */
+.song-card, .playlist-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: transparent;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);
+}
+
+.song-card:hover, .playlist-card:hover {
+    -fx-translate-y: -3;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
+}
+
+/* ======= Special Buttons ======= */
+.button.success {
+    -fx-background-color: linear-gradient(to right, #00b894, #00cec9);
+}
+
+.button.success:hover {
+    -fx-background-color: linear-gradient(to right, #55efc4, #81ecec);
+}
+
+.button.danger {
+    -fx-background-color: linear-gradient(to right, #e74c3c, #c0392b);
+}
+
+.button.danger:hover {
+    -fx-background-color: linear-gradient(to right, #ff7675, #d63031);
+}
+
+/* ======= Headers and separators ======= */
+.separator {
+    -fx-background-color: #dfe6e9;
+}
+
+/* ======= Headers and separators ======= */
+.separator {
+    -fx-background-color: #dfe6e9;
+}

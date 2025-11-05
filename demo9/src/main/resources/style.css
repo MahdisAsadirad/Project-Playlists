@@ -1,50 +1,54 @@
-
 .root {
-    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-family: "Poppins", "Segoe UI", sans-serif;
     -fx-font-smoothing-type: gray;
 }
 
-
+/* ===== Sidebar ===== */
 .sidebar {
-    -fx-background-color: #2c3e50;
-    -fx-padding: 20 15;
+    -fx-background-color: linear-gradient(to bottom, #2c3e50, #34495e);
+    -fx-padding: 25 15;
     -fx-pref-width: 280;
     -fx-spacing: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0, 0, 0);
 }
 
-.sidebar-buttons-container {
-    -fx-spacing: 5;
+.title-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ecf0f1;
+    -fx-padding: 0 0 15 5;
 }
 
-
+/* ===== Sidebar Buttons ===== */
 .sidebar-button {
     -fx-background-color: transparent;
     -fx-text-fill: #ecf0f1;
     -fx-font-size: 14px;
-    -fx-font-weight: normal;
     -fx-alignment: center-left;
     -fx-padding: 12 15;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-border-width: 0;
+    -fx-background-radius: 10;
     -fx-cursor: hand;
-    -fx-effect: null;
+    -fx-transition: 0.3s;
 }
 
 .sidebar-button:hover {
-    -fx-background-color: #34495e;
-    -fx-text-fill: white;
-}
-
-.sidebar-button:selected {
-    -fx-background-color: #3498db;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
     -fx-text-fill: #ffffff;
-    -fx-font-weight: bold;
+    -fx-translate-x: 5;
 }
 
+.sidebar-button:focused,
+.sidebar-button:selected {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.6), 8, 0, 0, 2);
+}
+
+/* ===== User Section ===== */
 .user-section {
-    -fx-padding: 20 0 0 0;
-    -fx-border-color: #34495e;
+    -fx-padding: 30 0 0 0;
+    -fx-border-color: #3b4a59;
     -fx-border-width: 1 0 0 0;
 }
 
@@ -52,189 +56,84 @@
     -fx-text-fill: #bdc3c7;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-padding: 0 0 10 0;
+    -fx-padding: 10 0;
 }
 
 .logout-button {
-    -fx-background-color: #e74c3c;
+    -fx-background-color: linear-gradient(to right, #e74c3c, #c0392b);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-size: 14px;
-    -fx-background-radius: 8;
+    -fx-font-size: 13px;
+    -fx-background-radius: 10;
     -fx-padding: 10 15;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(231,76,60,0.3), 8, 0, 0, 0);
 }
 
 .logout-button:hover {
-    -fx-background-color: #c0392b;
+    -fx-background-color: #ff6b6b;
 }
 
-
+/* ===== Content Area ===== */
 .content-area {
-    -fx-background-color: #ecf0f1;
-    -fx-padding: 20;
+    -fx-background-color: linear-gradient(to bottom right, #f5f7fa, #e4ebf1);
+    -fx-padding: 25;
 }
 
-
-.title-label {
-    -fx-font-size: 20px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #ecf0f1;
-    -fx-padding: 0 0 10 0;
-}
-
-.playlist-card {
+/* ===== Playlist & Song Cards ===== */
+.playlist-card, .song-card {
     -fx-background-color: white;
-    -fx-background-radius: 10;
-    -fx-border-color: #bdc3c7;
-    -fx-border-radius: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
-    -fx-padding: 15;
+    -fx-background-radius: 15;
+    -fx-border-color: transparent;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);
+    -fx-transition: 0.3s;
 }
 
-.song-card {
-    -fx-background-color: white;
-    -fx-background-radius: 8;
-    -fx-border-color: #ecf0f1;
-    -fx-border-radius: 8;
-    -fx-padding: 15;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);
+.playlist-card:hover, .song-card:hover {
+    -fx-translate-y: -3;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
 }
 
+/* ===== Buttons (Common) ===== */
 .primary-button {
-    -fx-background-color: #3498db;
+    -fx-background-color: linear-gradient(to right, #6c5ce7, #74b9ff);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-size: 13px;
-    -fx-background-radius: 6;
-    -fx-padding: 8 16;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8;
+    -fx-padding: 10 18;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.3), 6, 0, 0, 0);
 }
 
 .primary-button:hover {
-    -fx-background-color: #2980b9;
+    -fx-background-color: linear-gradient(to right, #a29bfe, #81ecec);
 }
 
-.danger-button {
-    -fx-background-color: #e74c3c;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 13px;
-    -fx-background-radius: 6;
-    -fx-padding: 8 16;
-    -fx-cursor: hand;
-}
-
-.danger-button:hover {
-    -fx-background-color: #c0392b;
-}
-
-.success-button {
-    -fx-background-color: #27ae60;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 13px;
-    -fx-background-radius: 6;
-    -fx-padding: 8 16;
-    -fx-cursor: hand;
-}
-
-.success-button:hover {
-    -fx-background-color: #219a52;
-}
-
-.warning-button {
-    -fx-background-color: #f39c12;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 13px;
-    -fx-background-radius: 6;
-    -fx-padding: 8 16;
-    -fx-cursor: hand;
-}
-
-.warning-button:hover {
-    -fx-background-color: #d35400;
-}
-
-/* استایل متن‌ها */
-.subtitle-label {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #2c3e50;
-}
-
-.info-label {
-    -fx-text-fill: #7f8c8d;
-    -fx-font-size: 14px;
-}
-
-.success-label {
-    -fx-text-fill: #27ae60;
-    -fx-font-weight: bold;
-}
-
-.error-label {
-    -fx-text-fill: #e74c3c;
-    -fx-font-weight: bold;
-}
-
-.scroll-pane {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-}
-
-.scroll-pane .viewport {
-    -fx-background-color: transparent;
-}
-
-.scroll-bar:vertical {
-    -fx-background-color: transparent;
-}
-
-.scroll-bar:vertical .track {
-    -fx-background-color: transparent;
-}
-
-.scroll-bar:vertical .thumb {
-    -fx-background-color: #bdc3c7;
-    -fx-background-radius: 4;
-}
-
-.scroll-bar:vertical .thumb:hover {
-    -fx-background-color: #95a5a6;
-}
-
-.text-field, .password-field, .text-area {
+/* ===== ComboBox, Inputs ===== */
+.text-field, .password-field, .combo-box {
     -fx-background-color: white;
-    -fx-border-color: #bdc3c7;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
+    -fx-border-color: #dfe6e9;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
     -fx-padding: 10;
     -fx-font-size: 14px;
 }
 
-.text-field:focused, .password-field:focused, .text-area:focused {
-    -fx-border-color: #3498db;
-    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.3), 10, 0, 0, 0);
+.text-field:focused, .password-field:focused, .combo-box:focused {
+    -fx-border-color: #6c5ce7;
+    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.3), 10, 0, 0, 0);
 }
 
-.combo-box {
-    -fx-background-color: white;
-    -fx-border-color: #bdc3c7;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-padding: 8;
+/* ===== ScrollBars ===== */
+.scroll-pane, .scroll-bar:vertical {
+    -fx-background-color: transparent;
 }
-
-.combo-box .list-cell {
-    -fx-padding: 8 12;
-    -fx-font-size: 14px;
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #b2bec3;
+    -fx-background-radius: 4;
 }
-
-.combo-box .list-view {
-    -fx-background-color: white;
-    -fx-border-color: #bdc3c7;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #6c5ce7;
 }

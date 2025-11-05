@@ -3,23 +3,26 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<VBox xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.demo9.Controller.PlaylistsController"
-      spacing="20" style="-fx-padding: 30;">
+      spacing="20"
+      stylesheets="@page-styles.css"
+      styleClass="root"
+      style="-fx-padding: 30;">
 
+    <!-- نوار بالایی -->
     <HBox spacing="15" alignment="CENTER_LEFT">
-        <Label text="📁 My Playlists" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+        <Label text="📁 My Playlists" styleClass="title"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Button text="+ Create New Playlist"
-                style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;"
+                styleClass="button success"
                 onAction="#showCreatePlaylistDialog"/>
     </HBox>
 
-    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
-        <VBox fx:id="playlistsContainer" spacing="15">
-
-        </VBox>
+    <!-- لیست پلی‌لیست‌ها -->
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+        <VBox fx:id="playlistsContainer" spacing="15"/>
     </ScrollPane>
 
 </VBox>
