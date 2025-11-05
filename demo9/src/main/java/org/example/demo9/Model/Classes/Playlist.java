@@ -182,35 +182,6 @@ public class Playlist {
         }
     }
 
-    private void savePlaylistSongsToDatabase(Database db, int playlistId) throws SQLException {
-        String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
-
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            SongNode current = this.head;
-            while (current != null) {
-                stmt.setInt(1, playlistId);
-                stmt.setInt(2, current.getSongId());
-                stmt.setInt(3, this.userId);
-                stmt.addBatch();
-                current = current.getNext();
-            }
-            stmt.executeBatch();
-        }
-    }
-
-    public void sortByCriteria(String subject, boolean ascending) {
-        if (head == null || head.getNext() == null) return;
-
-        head = mergeSort(head, subject, ascending);
-
-        tail = head;
-        while (tail != null && tail.getNext() != null) {
-            tail = tail.getNext();
-        }
-    }
-
     private SongNode mergeSort(SongNode head, String subject, boolean ascending) {
         if (head == null || head.getNext() == null) return head;
 
@@ -223,7 +194,7 @@ public class Playlist {
         SongNode right = mergeSort(nextOfMiddle, subject, ascending);
 
         // ادغام دو نیمه مرتب شده
-        return sort(left, right, subject, ascending);
+        return merge(left, right, subject, ascending);
     }
 
     private SongNode getMiddle(SongNode head) {
@@ -240,7 +211,7 @@ public class Playlist {
         return slow;
     }
 
-    private SongNode sort(SongNode left, SongNode right, String subject, boolean ascending) {
+    private SongNode merge(SongNode left, SongNode right, String subject, boolean ascending) {
         if (left == null) return right;
         if (right == null) return left;
 
@@ -268,11 +239,29 @@ public class Playlist {
         }
 
         if (compare) {
-            left.setNext(sort(left.getNext(), right, subject, ascending));
+            left.setNext(merge(left.getNext(), right, subject, ascending));
             return left;
         } else {
-            right.setNext(sort(left, right.getNext(), subject, ascending));
+            right.setNext(merge(left, right.getNext(), subject, ascending));
             return right;
+        }
+    }
+
+    public void savePlaylistSongsToDatabase(Database db, int playlistId) throws SQLException {
+        String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            SongNode current = this.head;
+            while (current != null) {
+                stmt.setInt(1, playlistId);
+                stmt.setInt(2, current.getSongId());
+                stmt.setInt(3, this.userId);
+                stmt.addBatch();
+                current = current.getNext();
+            }
+            stmt.executeBatch();
         }
     }
 
@@ -282,6 +271,19 @@ public class Playlist {
         tail = null;
         size = 0;
     }
+
+    public void sortByCriteria(String subject, boolean ascending) {
+        if (head == null || head.getNext() == null) return;
+
+        head = mergeSort(head, subject, ascending);
+
+        // آپدیت tail پس از مرتب‌سازی
+        tail = head;
+        while (tail != null && tail.getNext() != null) {
+            tail = tail.getNext();
+        }
+    }
+
 
     public int getId() { return id; }
     public String getName() { return name; }

@@ -130,10 +130,12 @@ public class DashboardController {
                     ((MergeController) controller).setCurrentUser(currentUser);
                 } else if (controller instanceof ShuffleController) {
                     ((ShuffleController) controller).setCurrentUser(currentUser);
+                    ((ShuffleController) controller).setDashboardController(this);
                 } else if (controller instanceof FilterController) {
                     ((FilterController) controller).setCurrentUser(currentUser);
                 } else if (controller instanceof SortController) {
                     ((SortController) controller).setCurrentUser(currentUser);
+                    ((SortController) controller).setDashboardController(this);
                 } else if (controller instanceof LikedSongsController) {
                     ((LikedSongsController) controller).setCurrentUser(currentUser);
                 }
@@ -158,6 +160,12 @@ public class DashboardController {
             stage.setTitle("🎵 Music Playlist Manager");
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void refreshPlaylists() {
+        if (activeButton == playlistsBtn) {
+            showPlaylistsSection();
         }
     }
 

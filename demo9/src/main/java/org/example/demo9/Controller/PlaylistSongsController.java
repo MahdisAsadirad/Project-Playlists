@@ -1,4 +1,5 @@
 package org.example.demo9.Controller;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -8,6 +9,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
+
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -106,6 +108,16 @@ public class PlaylistSongsController implements Initializable {
 
         songInfo.getChildren().addAll(trackLabel, artistLabel, detailsLabel);
 
+        // Like button
+        Button likeBtn = new Button("♡");
+        likeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
+
+        // Check and set initial like status
+        checkAndUpdateLikeButton(likeBtn, songId);
+
+        // Set action for like button
+        likeBtn.setOnAction(e -> toggleLikeSong(songId, likeBtn));
+
         Button removeButton = new Button("Remove");
         removeButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
         removeButton.setOnAction(e -> removeSongFromPlaylist(songId));
@@ -114,26 +126,79 @@ public class PlaylistSongsController implements Initializable {
         playBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
         playBtn.setOnAction(e -> playSong(trackName, artistName));
 
-        Button likeBtn = new Button("❤");
-        likeBtn.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
-        likeBtn.setOnAction(e -> likeSong(trackName));
-
         HBox buttonsBox = new HBox(10, playBtn, likeBtn, removeButton);
 
         card.getChildren().addAll(icon, songInfo, buttonsBox);
         songsContainer.getChildren().add(card);
-
     }
 
+    private void checkAndUpdateLikeButton(Button likeButton, int songId) {
+        String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(checkSql)) {
+
+            stmt.setInt(1, currentUser.getId());
+            stmt.setInt(2, songId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                likeButton.setText("❤");
+                likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
+            } else {
+                likeButton.setText("♡");
+                likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error checking like status: " + e.getMessage());
+        }
+    }
+
+    private void toggleLikeSong(int songId, Button likeButton) {
+        String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+
+            checkStmt.setInt(1, currentUser.getId());
+            checkStmt.setInt(2, songId);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                // Unlike the song
+                String deleteSql = "DELETE FROM liked_songs WHERE user_id = ? AND song_id = ?";
+                try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
+                    deleteStmt.setInt(1, currentUser.getId());
+                    deleteStmt.setInt(2, songId);
+                    deleteStmt.executeUpdate();
+
+                    likeButton.setText("♡");
+                    likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
+                    showSuccess("Song removed from liked songs!");
+                }
+            } else {
+                // Like the song
+                String insertSql = "INSERT INTO liked_songs (user_id, song_id) VALUES (?, ?)";
+                try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                    insertStmt.setInt(1, currentUser.getId());
+                    insertStmt.setInt(2, songId);
+                    insertStmt.executeUpdate();
+
+                    likeButton.setText("❤");
+                    likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
+                    showSuccess("Song added to liked songs! ❤");
+                }
+            }
+
+        } catch (SQLException e) {
+            showError("Error toggling like status: " + e.getMessage());
+        }
+    }
 
     private void playSong(String trackName, String artistName) {
         showSuccess("Now playing: " + trackName + " - " + artistName);
     }
-
-    private void likeSong(String trackName) {
-        showSuccess("Added to favorites: " + trackName);
-    }
-
 
     @FXML
     private void handleAddSong() {
@@ -182,7 +247,7 @@ public class PlaylistSongsController implements Initializable {
     }
 
     private void loadAvailableSongs(VBox songsList) throws SQLException {
-        String query ="SELECT id, track_name, artist_name, genre FROM songs ORDER BY track_name ";
+        String query ="SELECT id, track_name, artist_name, genre FROM songs ORDER BY id ";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);

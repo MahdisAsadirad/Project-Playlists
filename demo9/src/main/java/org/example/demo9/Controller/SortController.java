@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import org.example.demo9.Model.Classes.Playlist;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 
@@ -20,13 +21,12 @@ public class SortController implements Initializable {
     @FXML private ComboBox<String> playlistCombo;
     @FXML private ComboBox<String> sortCriteriaCombo;
     @FXML private ToggleGroup sortOrderGroup;
-    @FXML private RadioButton ascendingRadio;
-    @FXML private RadioButton descendingRadio;
     @FXML private Button sortButton;
     @FXML private VBox resultContainer;
 
     private User currentUser;
-    private Database db;
+    private final Database db;
+    private DashboardController dashboardController;
 
     public SortController() {
         this.db = new Database();
@@ -38,16 +38,18 @@ public class SortController implements Initializable {
         setupSortCriteria();
     }
 
+    public void setDashboardController(DashboardController dashboardController) {
+        this.dashboardController = dashboardController;
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         sortButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
         sortButton.setOnAction(e -> handleSort());
-
-        ascendingRadio.setSelected(true);
     }
 
     private void loadUserPlaylists() {
-        String sql = "SELECT name FROM playlists WHERE user_id = ? ORDER BY name";
+        String sql = "SELECT name FROM playlists WHERE user_id = ?";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -82,7 +84,6 @@ public class SortController implements Initializable {
     private void handleSort() {
         String playlistName = playlistCombo.getValue();
         String criteria = sortCriteriaCombo.getValue();
-        String sortOrder = ascendingRadio.isSelected() ? "ASC" : "DESC";
 
         if (playlistName == null || criteria == null) {
             showError("Please select a playlist and sort criteria!");
@@ -90,90 +91,78 @@ public class SortController implements Initializable {
         }
 
         try {
-            sortPlaylist(playlistName, criteria, sortOrder);
-        } catch (SQLException e) {
+            sortPlaylistUsingLinkedList(playlistName, criteria);
+        } catch (Exception e) {
             showError("Error sorting playlist: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void sortPlaylist(String playlistName, String criteria, String sortOrder) throws SQLException {
-        try (Connection conn = db.getConnection()) {
-            conn.setAutoCommit(false);
+    private void sortPlaylistUsingLinkedList(String playlistName, String criteria) {
+        // دریافت پلی‌لیست از کاربر
+        Playlist playlist = currentUser.getPlaylist(playlistName);
 
-            try {
-                int playlistId = getPlaylistId(conn, playlistName);
+        if (playlist == null) {
+            showError("Playlist not found!");
+            return;
+        }
 
-                deletePlaylistSongs(conn, playlistId);
+        // تعیین جهت مرتب‌سازی
+        boolean ascending = getSortOrderFromUI();
 
-                reinsertSortedSongs(conn, playlistId, criteria, sortOrder);
+        // مرتب‌سازی روی لیست پیوندی
+        playlist.sortByCriteria(criteria.toLowerCase(), ascending);
 
-                conn.commit();
+        // ذخیره در دیتابیس
+        try {
+            // ابتدا آهنگ‌های قدیمی را از دیتابیس حذف می‌کنیم
+            deletePlaylistSongsFromDatabase(playlist.getId());
 
-                showSuccess("Playlist sorted successfully by " + criteria + " (" +
-                        (sortOrder.equals("ASC") ? "Ascending" : "Descending") + ")");
-                clearForm();
+            // سپس آهنگ‌های مرتب شده را ذخیره می‌کنیم
+            playlist.savePlaylistSongsToDatabase(db, playlist.getId());
 
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
+            showSuccess("Playlist sorted successfully by " + criteria);
+
+            // رفرش کردن داشبورد
+            if (dashboardController != null) {
+                dashboardController.refreshPlaylists();
             }
+
+            clearForm();
+
+        } catch (SQLException e) {
+            showError("Error saving sorted playlist: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private int getPlaylistId(Connection conn, String playlistName) throws SQLException {
-        String sql = "SELECT id FROM playlists WHERE name = ? AND user_id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, playlistName);
-            stmt.setInt(2, currentUser.getId());
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getInt("id");
-            } else {
-                throw new SQLException("Playlist not found: " + playlistName);
-            }
-        }
-    }
-
-    private void deletePlaylistSongs(Connection conn, int playlistId) throws SQLException {
+    private void deletePlaylistSongsFromDatabase(int playlistId) throws SQLException {
         String sql = "DELETE FROM playlist_songs WHERE playlist_id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, playlistId);
             stmt.executeUpdate();
         }
     }
 
-    private void reinsertSortedSongs(Connection conn, int playlistId, String criteria, String sortOrder) throws SQLException {
-        String columnName = getColumnName(criteria);
-        String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) " +
-                "SELECT ?, s.id, ? " +
-                "FROM songs s " +
-                "JOIN playlist_songs ps ON s.id = ps.song_id " +
-                "WHERE ps.playlist_id = ? " +
-                "ORDER BY s." + columnName + " " + sortOrder;
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, playlistId);
-            stmt.setInt(2, currentUser.getId());
-            stmt.setInt(3, playlistId);
-            stmt.executeUpdate();
-        }
-    }
-
-    private String getColumnName(String criteria) {
-        switch (criteria.toLowerCase()) {
-            case "track name": return "track_name";
-            case "artist name": return "artist_name";
-            case "release date": return "release_date";
-            case "genre": return "genre";
-            default: return "track_name";
-        }
+    private boolean getSortOrderFromUI() {
+        RadioButton selected = (RadioButton) sortOrderGroup.getSelectedToggle();
+        return selected != null && selected.getText().equalsIgnoreCase("Ascending");
     }
 
     private void clearForm() {
         playlistCombo.setValue(null);
         sortCriteriaCombo.setValue("Track Name");
-        ascendingRadio.setSelected(true);
+
+        // بازنشانی radio buttons
+        if (sortOrderGroup.getSelectedToggle() != null) {
+            sortOrderGroup.getSelectedToggle().setSelected(false);
+        }
+        // انتخاب پیش‌فرض
+        RadioButton ascendingRadio = (RadioButton) sortOrderGroup.getToggles().get(0);
+        if (ascendingRadio != null) {
+            ascendingRadio.setSelected(true);
+        }
     }
 
     private void showSuccess(String message) {

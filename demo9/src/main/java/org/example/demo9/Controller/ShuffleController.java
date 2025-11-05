@@ -30,6 +30,7 @@ public class ShuffleController implements Initializable {
     private Playlist currentShuffledPlaylist;
     private int currentShuffledPlaylistId;
     private final Random random;
+    private DashboardController dashboardController;
 
     public ShuffleController() {
         this.db = new Database();
@@ -52,8 +53,12 @@ public class ShuffleController implements Initializable {
         playlistsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
+    public void setDashboardController(DashboardController dashboardController) {
+        this.dashboardController = dashboardController;
+    }
+
     private void loadUserPlaylists() {
-        String sql = "SELECT name FROM playlists WHERE user_id = ? ORDER BY name";
+        String sql = "SELECT name FROM playlists WHERE user_id = ? ";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -124,9 +129,14 @@ public class ShuffleController implements Initializable {
 
                 conn.commit();
 
-                showSuccess("Shuffled playlist created successfully! \n" +
-                        "Merged " + playlistNames.size() + " playlists with " +
-                        shuffledSongs.size() + " songs in RANDOM order!");
+                showSuccess("Shuffled playlist created successfully!");
+
+                if (dashboardController != null) {
+                    dashboardController.refreshPlaylists();
+                }
+
+                clearForm();
+                displayShuffledSongs();
 
                 clearForm();
                 displayShuffledSongs();

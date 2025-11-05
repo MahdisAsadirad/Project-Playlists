@@ -22,7 +22,7 @@ public class DiscoverSongsController implements Initializable {
     @FXML private ComboBox<String> artistFilter;
 
     private User currentUser;
-    private Database db;
+    private final Database db;
 
     public DiscoverSongsController() {
         this.db = new Database();
@@ -205,7 +205,7 @@ public class DiscoverSongsController implements Initializable {
 
                     likeButton.setText("❤");
                     likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
-                    showSuccess("Song added to liked songs! ❤️");
+                    showSuccess("Song added to liked songs! ❤");
                 }
             }
 

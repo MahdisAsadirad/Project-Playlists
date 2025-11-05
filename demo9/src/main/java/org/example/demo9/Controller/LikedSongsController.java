@@ -85,7 +85,7 @@ public class LikedSongsController implements Initializable {
         card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600;");
 
         // آیکون قلب
-        Label heartIcon = new Label("❤️");
+        Label heartIcon = new Label("❤");
         heartIcon.setStyle("-fx-font-size: 20;");
 
         // اطلاعات آهنگ
@@ -216,7 +216,7 @@ public class LikedSongsController implements Initializable {
     }
 
     private void updateStats(int songCount) {
-        statsLabel.setText("❤️ You have " + songCount + " liked songs");
+        statsLabel.setText("❤ You have " + songCount + " liked songs");
         statsLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #333;");
     }
 

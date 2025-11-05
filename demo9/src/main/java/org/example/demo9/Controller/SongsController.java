@@ -120,7 +120,6 @@ public class SongsController implements Initializable {
         );
         sortCombo.setValue("Track Name (A-Z)");
 
-        // اضافه کردن listener برای مرتب‌سازی
         sortCombo.setOnAction(e -> sortAndDisplaySongs());
     }
 
