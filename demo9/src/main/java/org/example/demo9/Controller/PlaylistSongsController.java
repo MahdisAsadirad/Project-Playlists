@@ -57,7 +57,7 @@ public class PlaylistSongsController implements Initializable {
                 "FROM playlist_songs ps " +
                 "JOIN songs s ON ps.song_id = s.id " +
                 "JOIN users u ON ps.user_id = u.id " +
-                "WHERE ps.playlist_id = ?";
+                "WHERE ps.playlist_id = ? ORDER BY ps.sort_order ASC";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {

@@ -13,7 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
-public class PlaylistsController {
+public class PlaylistsController{
     @FXML private VBox playlistsContainer;
 
     private User currentUser;

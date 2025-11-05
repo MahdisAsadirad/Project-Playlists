@@ -15,10 +15,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DashboardController {
-    @FXML private VBox sidebar;
-    @FXML private StackPane contentArea;
-    @FXML private Label userLabel;
-    @FXML private Button playlistsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn;
+    @FXML
+    private VBox sidebar;
+    @FXML
+    private StackPane contentArea;
+    @FXML
+    private Label userLabel;
+    @FXML
+    private Button playlistsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn;
 
     private User currentUser;
     private final Map<String, Parent> loadedSections = new HashMap<>();
@@ -27,25 +31,15 @@ public class DashboardController {
     private final String defaultStyle = "sidebar-button";
     private final String activeStyle = "sidebar-button:selected";
 
-    public void setCurrentUser(User user) {
-        this.currentUser = user;
-        userLabel.setText("👤 " + user.getUsername());
-        initializeSidebar();
-        showPlaylistsSection();
-    }
 
     private void initializeSidebar() {
         Button[] buttons = {playlistsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn};
 
         for (Button btn : buttons) {
-            btn.getStyleClass().clear();
-            btn.getStyleClass().add(defaultStyle);
-
-            btn.setOnMouseEntered(e -> {
-                if (btn != activeButton) {
-                    btn.setStyle(activeStyle);
-                }
-            });
+            btn.getStyleClass().removeAll(defaultStyle, activeStyle, "selected");
+            if (!btn.getStyleClass().contains(defaultStyle)) {
+                btn.getStyleClass().add(defaultStyle);
+            }
 
             btn.setOnMouseExited(e -> {
                 if (btn != activeButton) {
@@ -57,18 +51,30 @@ public class DashboardController {
         setActiveButton(playlistsBtn);
     }
 
+    public interface UserAware {
+        void setCurrentUser(User user);
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        userLabel.setText("👤 " + user.getUsername());
+        initializeSidebar();
+        showPlaylistsSection();
+    }
+
     private void setActiveButton(Button button) {
         if (activeButton != null) {
-            activeButton.getStyleClass().clear();
-            activeButton.getStyleClass().add(defaultStyle);
+            activeButton.getStyleClass().remove("active");
             activeButton.setStyle("-fx-background-color: transparent;");
         }
 
         activeButton = button;
-        activeButton.getStyleClass().clear();
-        activeButton.getStyleClass().add(defaultStyle);
+        if (!activeButton.getStyleClass().contains("active")) {
+            activeButton.getStyleClass().add("active"); 
+        }
         activeButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white;");
     }
+
 
     @FXML
     private void showPlaylistsSection() {

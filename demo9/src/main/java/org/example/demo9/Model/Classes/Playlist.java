@@ -48,7 +48,7 @@ public class Playlist {
 
         Set<String> addedSongIds = new HashSet<>();
 
-        //کپی کردن اهنگ های پلی لیست اول
+        // کپی کردن اهنگ های پلی لیست اول
         SongNode current = this.head;
         while (current != null) {
             if (!addedSongIds.contains(current.getTrackName())) {
@@ -58,7 +58,7 @@ public class Playlist {
             current = current.getNext();
         }
 
-        //کپی اهنگ های پلی لیست دو
+        // کپی اهنگ های پلی لیست دو
         current = other.head;
         while (current != null) {
             if (!addedSongIds.contains(current.getTrackName())) {
@@ -78,7 +78,7 @@ public class Playlist {
         return merged;
     }
 
-    private void deletePlaylistFromDatabase(Database db, int playlistId) throws SQLException {
+    public void deletePlaylistFromDatabase(Database db, int playlistId) throws SQLException {
         try (Connection conn = db.getConnection()) {
             // اول آهنگ‌های پلی‌لیست رو حذف کن
             String deleteSongsSql = "DELETE FROM playlist_songs WHERE playlist_id = ?";
@@ -186,34 +186,36 @@ public class Playlist {
         if (left == null) return right;
         if (right == null) return left;
 
-        boolean compare;
-
-        System.out.println("Sorting by: '" + subject;
-        System.out.println("Left: " + left.getTrackName() + ", Right: " + right.getTrackName());
+        int compareResult = 0;
+        boolean shouldLeftComeFirst = false;
 
         switch (subject.toLowerCase()) {
             case "artist name":
-                compare = left.getArtistName().compareToIgnoreCase(right.getArtistName());
+                compareResult = left.getArtistName().compareToIgnoreCase(right.getArtistName());
+                shouldLeftComeFirst = compareResult <= 0;
                 break;
             case "release date":
-                compare = left.getReleaseDate() <= right.getReleaseDate();
+                shouldLeftComeFirst = left.getReleaseDate() <= right.getReleaseDate();
                 break;
             case "genre":
-                compare = left.getGenre().compareToIgnoreCase(right.getGenre()) ;
+                compareResult = left.getGenre().compareToIgnoreCase(right.getGenre());
+                shouldLeftComeFirst = compareResult <= 0;
                 break;
             case "track name":
             default:
-                compare = left.getTrackName().compareToIgnoreCase(right.getTrackName());
+                compareResult = left.getTrackName().compareToIgnoreCase(right.getTrackName());
+                shouldLeftComeFirst = compareResult <= 0;
         }
 
-        if (compare) {
-            left.setNext(merge(left.getNext(), right, subject, ascending));
+        if (shouldLeftComeFirst) {
+            left.setNext(merge(left.getNext(), right, subject));
             return left;
         } else {
-            right.setNext(merge(left, right.getNext(), subject, ascending));
+            right.setNext(merge(left, right.getNext(), subject));
             return right;
         }
     }
+
 
     public void savePlaylistSongsToDatabase(Database db, int playlistId) throws SQLException {
         String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id, song_order) VALUES (?, ?, ?, ?)";
@@ -238,6 +240,29 @@ public class Playlist {
         }
     }
 
+    public void updateSongOrderInDatabase(Database db) throws SQLException {
+        String sql = "UPDATE playlist_songs SET song_order = ? WHERE playlist_id = ? AND song_id = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            SongNode current = this.head;
+            int order = 1;
+
+            while (current != null) {
+                stmt.setInt(1, order);
+                stmt.setInt(2, this.id);
+                stmt.setInt(3, current.getSongId());
+                stmt.addBatch();
+
+                current = current.getNext();
+                order++;
+            }
+            stmt.executeBatch();
+        }
+    }
+
+
     public void clear() {
         head = null;
         tail = null;
@@ -254,7 +279,6 @@ public class Playlist {
             tail = tail.getNext();
         }
     }
-
 
     public int getId() {
         return id;
@@ -286,5 +310,13 @@ public class Playlist {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public SongNode getTail() {
+        return tail;
     }
 }
