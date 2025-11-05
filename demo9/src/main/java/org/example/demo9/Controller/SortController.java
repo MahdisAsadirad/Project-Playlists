@@ -5,6 +5,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import org.example.demo9.Model.Classes.Playlist;
+import org.example.demo9.Model.Classes.SongNode;
 import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 
@@ -90,6 +91,12 @@ public class SortController implements Initializable {
             return;
         }
 
+        Playlist playlist = currentUser.getPlaylist(playlistName);
+        if (playlist == null || playlist.getSize() == 0) {
+            showError("Playlist is empty or not found!");
+            return;
+        }
+
         try {
             sortPlaylistUsingLinkedList(playlistName, criteria);
         } catch (Exception e) {
@@ -99,7 +106,6 @@ public class SortController implements Initializable {
     }
 
     private void sortPlaylistUsingLinkedList(String playlistName, String criteria) {
-        // دریافت پلی‌لیست از کاربر
         Playlist playlist = currentUser.getPlaylist(playlistName);
 
         if (playlist == null) {
@@ -107,32 +113,69 @@ public class SortController implements Initializable {
             return;
         }
 
-        // تعیین جهت مرتب‌سازی
+        // دیباگ: نمایش قبل از مرتب‌سازی
+        System.out.println("=== BEFORE SORTING ===");
+        System.out.println("Playlist: " + playlistName);
+        System.out.println("Criteria: " + criteria);
+        System.out.println("Songs count: " + playlist.getSize());
+
+        SongNode current = playlist.getHead();
+        while (current != null) {
+            System.out.println(" - " + current.getTrackName() + " by " + current.getArtistName());
+            current = current.getNext();
+        }
+
         boolean ascending = getSortOrderFromUI();
 
-        // مرتب‌سازی روی لیست پیوندی
+        // مرتب‌سازی
         playlist.sortByCriteria(criteria.toLowerCase(), ascending);
 
-        // ذخیره در دیتابیس
-        try {
-            // ابتدا آهنگ‌های قدیمی را از دیتابیس حذف می‌کنیم
-            deletePlaylistSongsFromDatabase(playlist.getId());
+        // دیباگ: نمایش بعد از مرتب‌سازی
+        System.out.println("=== AFTER SORTING ===");
+        current = playlist.getHead();
+        while (current != null) {
+            System.out.println(" - " + current.getTrackName() + " by " + current.getArtistName());
+            current = current.getNext();
+        }
 
-            // سپس آهنگ‌های مرتب شده را ذخیره می‌کنیم
-            playlist.savePlaylistSongsToDatabase(db, playlist.getId());
+        // ذخیره در دیتابیس و رفرش
+        try {
+            deletePlaylistSongsFromDatabase(playlist.getId());
+            int newPlaylistId = playlist.savePlaylistToDatabase(db);
+            playlist.setId(newPlaylistId);
 
             showSuccess("Playlist sorted successfully by " + criteria);
 
-            // رفرش کردن داشبورد
+            // رفرش قوی‌تر داشبورد
             if (dashboardController != null) {
                 dashboardController.refreshPlaylists();
             }
 
-            clearForm();
-
         } catch (SQLException e) {
             showError("Error saving sorted playlist: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private void deletePlaylistCompletelyFromDatabase(int playlistId) throws SQLException {
+        try (Connection conn = db.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // اول آهنگ‌های پلی‌لیست را حذف کن
+            String deleteSongsSql = "DELETE FROM playlist_songs WHERE playlist_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteSongsSql)) {
+                stmt.setInt(1, playlistId);
+                stmt.executeUpdate();
+            }
+
+            // سپس خود پلی‌لیست را حذف کن
+            String deletePlaylistSql = "DELETE FROM playlists WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deletePlaylistSql)) {
+                stmt.setInt(1, playlistId);
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
         }
     }
 

@@ -1,13 +1,13 @@
 package org.example.demo9.Model.Classes;
 
 public class SongNode {
-    private int songId;
-    private String artistName;
-    private String trackName;
-    private int releaseDate;
-    private String genre;
-    private double length;
-    private String topic;
+    private final int songId;
+    private final String artistName;
+    private final String trackName;
+    private final int releaseDate;
+    private final String genre;
+    private final double length;
+    private final String topic;
     private SongNode next;
 
     public SongNode(int songId, String artistName, String trackName, int releaseDate, String genre, double length, String topic) {
@@ -45,33 +45,5 @@ public class SongNode {
     @Override
     public String toString() {
         return String.format("%s - %s (%d)", artistName, trackName, releaseDate);
-    }
-
-    public void setLen(double length) {
-        this.length = length;
-    }
-
-    public void setSongId(int songId) {
-        this.songId = songId;
-    }
-
-    public void setArtistName(String artistName) {
-        this.artistName = artistName;
-    }
-
-    public void setTrackName(String trackName) {
-        this.trackName = trackName;
-    }
-
-    public void setReleaseDate(int releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
     }
 }

@@ -1,6 +1,7 @@
 package org.example.demo9.Model.Classes;
 
 import org.example.demo9.Model.util.Database;
+
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,35 +40,6 @@ public class Playlist {
             tail = newNode;
         }
         size++;
-    }
-
-    public boolean removeSongFromPlaylist(String trackName) {
-        if (head == null) return false;
-
-        if (head.getTrackName().equals(trackName)) {
-            head = head.getNext();
-            if (head == null) {
-                tail = null;
-            }
-            size--;
-            return true;
-        }
-
-        SongNode current = head;
-        while (current.getNext() != null) {
-            if (current.getNext().getTrackName().equals(trackName)) {
-                current.setNext(current.getNext().getNext());
-
-                if (current.getNext() == null) {
-                    tail = current;
-                }
-
-                size--;
-                return true;
-            }
-            current = current.getNext();
-        }
-        return false;
     }
 
     public Playlist merge(Playlist other, String newName, Database db) throws SQLException {
@@ -129,13 +101,15 @@ public class Playlist {
                 "FROM songs s " +
                 "JOIN playlist_songs ps ON s.id = ps.song_id " +
                 "WHERE ps.playlist_id = ? " +
-                "ORDER BY ps.user_id";
+                "ORDER BY ps.song_order";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, this.id);
             ResultSet rs = stmt.executeQuery();
+
+            this.clear();
 
             while (rs.next()) {
                 SongNode song = new SongNode(
@@ -151,7 +125,6 @@ public class Playlist {
             }
         }
     }
-
 
     public int savePlaylistToDatabase(Database db) throws SQLException {
         try (Connection conn = db.getConnection()) {
@@ -182,19 +155,17 @@ public class Playlist {
         }
     }
 
-    private SongNode mergeSort(SongNode head, String subject, boolean ascending) {
+    private SongNode mergeSort(SongNode head, String subject) {
         if (head == null || head.getNext() == null) return head;
 
-        // پیدا کردن وسط لیست
         SongNode middle = getMiddle(head);
         SongNode nextOfMiddle = middle.getNext();
         middle.setNext(null);
 
-        SongNode left = mergeSort(head, subject, ascending);
-        SongNode right = mergeSort(nextOfMiddle, subject, ascending);
+        SongNode left = mergeSort(head, subject);
+        SongNode right = mergeSort(nextOfMiddle, subject);
 
-        // ادغام دو نیمه مرتب شده
-        return merge(left, right, subject, ascending);
+        return merge(left, right, subject);
     }
 
     private SongNode getMiddle(SongNode head) {
@@ -211,31 +182,28 @@ public class Playlist {
         return slow;
     }
 
-    private SongNode merge(SongNode left, SongNode right, String subject, boolean ascending) {
+    private SongNode merge(SongNode left, SongNode right, String subject) {
         if (left == null) return right;
         if (right == null) return left;
 
         boolean compare;
+
+        System.out.println("Sorting by: '" + subject;
+        System.out.println("Left: " + left.getTrackName() + ", Right: " + right.getTrackName());
+
         switch (subject.toLowerCase()) {
-            case "artist":
-                compare = ascending ?
-                        left.getArtistName().compareToIgnoreCase(right.getArtistName()) <= 0 :
-                        left.getArtistName().compareToIgnoreCase(right.getArtistName()) > 0;
+            case "artist name":
+                compare = left.getArtistName().compareToIgnoreCase(right.getArtistName());
                 break;
             case "release date":
-                compare = ascending ?
-                        left.getReleaseDate() <= right.getReleaseDate() :
-                        left.getReleaseDate() > right.getReleaseDate();
+                compare = left.getReleaseDate() <= right.getReleaseDate();
                 break;
             case "genre":
-                compare = ascending ?
-                        left.getGenre().compareToIgnoreCase(right.getGenre()) <= 0 :
-                        left.getGenre().compareToIgnoreCase(right.getGenre()) > 0;
+                compare = left.getGenre().compareToIgnoreCase(right.getGenre()) ;
                 break;
-            default: // track name
-                compare = ascending ?
-                        left.getTrackName().compareToIgnoreCase(right.getTrackName()) <= 0 :
-                        left.getTrackName().compareToIgnoreCase(right.getTrackName()) > 0;
+            case "track name":
+            default:
+                compare = left.getTrackName().compareToIgnoreCase(right.getTrackName());
         }
 
         if (compare) {
@@ -248,36 +216,39 @@ public class Playlist {
     }
 
     public void savePlaylistSongsToDatabase(Database db, int playlistId) throws SQLException {
-        String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id, song_order) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             SongNode current = this.head;
+            int order = 1;
+
             while (current != null) {
                 stmt.setInt(1, playlistId);
                 stmt.setInt(2, current.getSongId());
                 stmt.setInt(3, this.userId);
+                stmt.setInt(4, order);
                 stmt.addBatch();
+
                 current = current.getNext();
+                order++;
             }
             stmt.executeBatch();
         }
     }
 
-    // پاک کردن تمام آهنگ‌های پلی‌لیست
     public void clear() {
         head = null;
         tail = null;
         size = 0;
     }
 
-    public void sortByCriteria(String subject, boolean ascending) {
+    public void sortByCriteria(String subject) {
         if (head == null || head.getNext() == null) return;
 
-        head = mergeSort(head, subject, ascending);
+        head = mergeSort(head, subject);
 
-        // آپدیت tail پس از مرتب‌سازی
         tail = head;
         while (tail != null && tail.getNext() != null) {
             tail = tail.getNext();
@@ -285,17 +256,35 @@ public class Playlist {
     }
 
 
-    public int getId() { return id; }
-    public String getName() { return name; }
-    public SongNode getHead() { return head; }
-    public int getSize() { return size; }
-    public int getUserId() { return userId; }
-    public SongNode getTail() { return tail; }
+    public int getId() {
+        return id;
+    }
 
-    public void setId(int id) { this.id = id; }
-    public void setUserId(int userId) { this.userId = userId; }
-    public void setName(String name) { this.name = name; }
-    public void setHead(SongNode head) { this.head = head; }
-    public void setTail(SongNode tail) { this.tail = tail; }
-    public void setSize(int size) { this.size = size; }
+    public String getName() {
+        return name;
+    }
+
+    public SongNode getHead() {
+        return head;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 }
