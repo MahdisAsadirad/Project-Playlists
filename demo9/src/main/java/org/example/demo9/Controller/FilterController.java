@@ -39,7 +39,6 @@ public class FilterController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        filterButton.setStyle("-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
         filterButton.setOnAction(e -> handleFilter());
     }
 

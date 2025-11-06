@@ -10,10 +10,8 @@
       styleClass="vbox"
       stylesheets="@page-styles.css">
 
-    <!-- عنوان -->
     <Label text="⚙ Sort Playlist" styleClass="title"/>
 
-    <!-- بخش کارت مرتب‌سازی -->
     <VBox spacing="20" styleClass="card">
         <Label text="Sort songs in a playlist:" styleClass="subtitle"/>
 
@@ -29,10 +27,9 @@
             </VBox>
         </HBox>
 
-        <Button fx:id="sortButton" text="Sort Playlist" prefWidth="160" styleClass="button success"/>
+        <Button fx:id="sortButton" text="Sort Playlist" prefWidth="160" styleClass="button-success"/>
     </VBox>
 
-    <!-- نتیجه مرتب‌سازی -->
     <VBox fx:id="resultContainer" spacing="15"/>
 
 </VBox>

@@ -3,7 +3,6 @@
     -fx-font-smoothing-type: gray;
 }
 
-/* ===== Sidebar ===== */
 .sidebar {
     -fx-background-color: linear-gradient(to bottom, #2c3e50, #34495e);
     -fx-padding: 25 15;
@@ -19,7 +18,6 @@
     -fx-padding: 0 0 15 5;
 }
 
-/* ===== Sidebar Buttons ===== */
 .sidebar-button {
     -fx-background-color: transparent;
     -fx-text-fill: #ecf0f1;
@@ -45,7 +43,6 @@
     -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.6), 8, 0, 0, 2);
 }
 
-/* ===== User Section ===== */
 .user-section {
     -fx-padding: 30 0 0 0;
     -fx-border-color: #3b4a59;
@@ -74,13 +71,11 @@
     -fx-background-color: #ff6b6b;
 }
 
-/* ===== Content Area ===== */
 .content-area {
     -fx-background-color: linear-gradient(to bottom right, #f5f7fa, #e4ebf1);
     -fx-padding: 25;
 }
 
-/* ===== Playlist & Song Cards ===== */
 .playlist-card, .song-card {
     -fx-background-color: white;
     -fx-background-radius: 15;
@@ -95,7 +90,6 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
 }
 
-/* ===== Buttons (Common) ===== */
 .primary-button {
     -fx-background-color: linear-gradient(to right, #6c5ce7, #74b9ff);
     -fx-text-fill: white;
@@ -111,7 +105,6 @@
     -fx-background-color: linear-gradient(to right, #a29bfe, #81ecec);
 }
 
-/* ===== ComboBox, Inputs ===== */
 .text-field, .password-field, .combo-box {
     -fx-background-color: white;
     -fx-border-color: #dfe6e9;
@@ -126,7 +119,6 @@
     -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.3), 10, 0, 0, 0);
 }
 
-/* ===== ScrollBars ===== */
 .scroll-pane, .scroll-bar:vertical {
     -fx-background-color: transparent;
 }

@@ -11,17 +11,15 @@
       styleClass="root"
       style="-fx-padding: 30;">
 
-    <!-- نوار بالایی -->
     <HBox spacing="15" alignment="CENTER_LEFT">
         <Button fx:id="backButton" text="← Back" onAction="#handleBack" styleClass="button"/>
         <Label fx:id="playlistTitleLabel" styleClass="title"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="addSongButton" text="+ Add Song" onAction="#handleAddSong" styleClass="button success"/>
+        <Button fx:id="addSongButton" text="+ Add Song" onAction="#handleAddSong" styleClass="button-success"/>
     </HBox>
 
     <Separator styleClass="separator"/>
 
-    <!-- لیست آهنگ‌ها -->
     <ScrollPane fitToWidth="true" styleClass="scroll-pane">
         <VBox fx:id="songsContainer" spacing="10"/>
     </ScrollPane>

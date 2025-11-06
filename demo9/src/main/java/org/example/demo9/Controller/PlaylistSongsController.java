@@ -11,17 +11,18 @@ import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ResourceBundle;
 
 public class PlaylistSongsController implements Initializable {
-    @FXML private Label playlistTitleLabel;
-    @FXML private VBox songsContainer;
-    @FXML private Button backButton;
-    @FXML private Button addSongButton;
+    @FXML
+    private Label playlistTitleLabel;
+    @FXML
+    private VBox songsContainer;
+    @FXML
+    private Button backButton;
+    @FXML
+    private Button addSongButton;
 
     private int playlistId;
     private String playlistName;
@@ -34,8 +35,10 @@ public class PlaylistSongsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        backButton.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
-        addSongButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
+        // کلاس‌های استایل برای دکمه‌ها
+        backButton.getStyleClass().add("button");
+        addSongButton.getStyleClass().add("button-success");
+        playlistTitleLabel.getStyleClass().add("title");
     }
 
     public void setPlaylistInfo(int playlistId, String playlistName, User user) {
@@ -59,6 +62,7 @@ public class PlaylistSongsController implements Initializable {
                 "JOIN users u ON ps.user_id = u.id " +
                 "WHERE ps.playlist_id = ? ORDER BY ps.sort_order ASC";
 
+
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
@@ -67,18 +71,20 @@ public class PlaylistSongsController implements Initializable {
 
             boolean hasSongs = false;
             while (rs.next()) {
-                addSongCard(rs.getInt("id"),
+                addSongCard(
+                        rs.getInt("id"),
                         rs.getString("track_name"),
                         rs.getString("artist_name"),
                         rs.getString("genre"),
                         rs.getInt("release_date"),
-                        rs.getString("username"));
+                        rs.getString("username")
+                );
                 hasSongs = true;
             }
 
             if (!hasSongs) {
                 Label emptyLabel = new Label("No songs in this playlist yet!");
-                emptyLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 16; -fx-padding: 40;");
+                emptyLabel.getStyleClass().add("label-hint");
                 songsContainer.getChildren().add(emptyLabel);
             }
 
@@ -89,41 +95,38 @@ public class PlaylistSongsController implements Initializable {
 
     private void addSongCard(int songId, String trackName, String artistName, String genre, int releaseDate, String addedBy) {
         HBox card = new HBox(15);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600;");
+        card.getStyleClass().add("song-card");
 
         Label icon = new Label("🎵");
-        icon.setStyle("-fx-font-size: 20;");
+        icon.getStyleClass().add("label");
 
         VBox songInfo = new VBox(5);
         songInfo.setPrefWidth(350);
 
         Label trackLabel = new Label(trackName);
-        trackLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #333;");
+        trackLabel.getStyleClass().add("label-subtitle");
 
         Label artistLabel = new Label("by " + artistName);
-        artistLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 14;");
+        artistLabel.getStyleClass().add("label");
 
         Label detailsLabel = new Label(genre + "   • " + releaseDate + "   • Added by: " + addedBy);
-        detailsLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 12;");
+        detailsLabel.getStyleClass().add("label-hint");
 
         songInfo.getChildren().addAll(trackLabel, artistLabel, detailsLabel);
 
-        // Like button
-        Button likeBtn = new Button("♡");
-        likeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
-
-        // Check and set initial like status
+        Button likeBtn = new Button();
+        likeBtn.getStyleClass().add("button");
         checkAndUpdateLikeButton(likeBtn, songId);
-
-        // Set action for like button
         likeBtn.setOnAction(e -> toggleLikeSong(songId, likeBtn));
 
         Button removeButton = new Button("Remove");
-        removeButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
+        removeButton.getStyleClass().add("button");
+        removeButton.getStyleClass().add("danger");
         removeButton.setOnAction(e -> removeSongFromPlaylist(songId));
 
         Button playBtn = new Button("▶");
-        playBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
+        playBtn.getStyleClass().add("button");
+        playBtn.getStyleClass().add("success");
         playBtn.setOnAction(e -> playSong(trackName, artistName));
 
         HBox buttonsBox = new HBox(10, playBtn, likeBtn, removeButton);
@@ -144,10 +147,8 @@ public class PlaylistSongsController implements Initializable {
 
             if (rs.next() && rs.getInt(1) > 0) {
                 likeButton.setText("❤");
-                likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
             } else {
                 likeButton.setText("♡");
-                likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
             }
 
         } catch (SQLException e) {
@@ -166,27 +167,19 @@ public class PlaylistSongsController implements Initializable {
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next() && rs.getInt(1) > 0) {
-                // Unlike the song
-                String deleteSql = "DELETE FROM liked_songs WHERE user_id = ? AND song_id = ?";
-                try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
+                try (PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM liked_songs WHERE user_id = ? AND song_id = ?")) {
                     deleteStmt.setInt(1, currentUser.getId());
                     deleteStmt.setInt(2, songId);
                     deleteStmt.executeUpdate();
-
                     likeButton.setText("♡");
-                    likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
                     showSuccess("Song removed from liked songs!");
                 }
             } else {
-                // Like the song
-                String insertSql = "INSERT INTO liked_songs (user_id, song_id) VALUES (?, ?)";
-                try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                try (PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO liked_songs (user_id, song_id) VALUES (?, ?)")) {
                     insertStmt.setInt(1, currentUser.getId());
                     insertStmt.setInt(2, songId);
                     insertStmt.executeUpdate();
-
                     likeButton.setText("❤");
-                    likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16;");
                     showSuccess("Song added to liked songs! ❤");
                 }
             }
@@ -235,19 +228,20 @@ public class PlaylistSongsController implements Initializable {
         dialog.setHeaderText("Select a song to add to " + playlistName);
 
         VBox songsList = new VBox(10);
+        songsList.getStyleClass().add("vbox");
         ScrollPane scrollPane = new ScrollPane(songsList);
+        scrollPane.getStyleClass().add("scroll-pane");
         scrollPane.setPrefSize(400, 300);
 
         loadAvailableSongs(songsList);
 
         dialog.getDialogPane().setContent(scrollPane);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
         dialog.showAndWait();
     }
 
     private void loadAvailableSongs(VBox songsList) throws SQLException {
-        String query ="SELECT id, track_name, artist_name, genre FROM songs ORDER BY id ";
+        String query = "SELECT id, track_name, artist_name, genre FROM songs ORDER BY id";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -255,13 +249,13 @@ public class PlaylistSongsController implements Initializable {
 
             while (rs.next()) {
                 HBox songItem = new HBox(10);
-                songItem.setStyle("-fx-padding: 10; -fx-border-color: #eee; -fx-border-width: 0 0 1 0;");
+                songItem.getStyleClass().add("song-card");
 
                 Label songInfo = new Label(rs.getString("track_name") + " - " + rs.getString("artist_name"));
-                songInfo.setStyle("-fx-font-size: 14;");
+                songInfo.getStyleClass().add("label");
 
                 Button addButton = new Button("Add");
-                addButton.setStyle("-fx-background-color: green; -fx-text-fill: white; -fx-font-size: 12;");
+                addButton.getStyleClass().addAll("button", "success");
 
                 final int currentSongId = rs.getInt("id");
                 addButton.setOnAction(e -> addSongToPlaylist(currentSongId));
@@ -302,7 +296,7 @@ public class PlaylistSongsController implements Initializable {
     private void removeSongFromPlaylist(int songId) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Remove Song");
-        alert.setHeaderText("Are you sure you want to remove this song from the playlist?");
+        alert.setHeaderText("Are you sure you want to remove this song?");
         alert.setContentText("This action cannot be undone.");
 
         alert.showAndWait().ifPresent(response -> {

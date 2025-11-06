@@ -13,7 +13,7 @@
         <VBox fx:id="sidebar" spacing="15" styleClass="sidebar">
             <Label styleClass="title-label" text="🎵 Playlist Manager" />
 
-            <VBox spacing="8" styleClass="sidebar-buttons-container">
+            <VBox spacing="8" styleClass="sidebar-button">
                 <Button fx:id="playlistsBtn" onAction="#showPlaylistsSection" styleClass="sidebar-button" text="📁 My Playlists" />
                 <Button fx:id="discoverSongsBtn" onAction="#showDiscoverSongsSection" styleClass="sidebar-button" text="🔍 Discover Songs" />
                 <Button fx:id="mergeBtn" onAction="#showMergeSection" styleClass="sidebar-button" text="🔄 Merge Playlists" />

@@ -47,7 +47,6 @@ public class SortController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        sortButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
         sortButton.setOnAction(e -> handleSort());
     }
 

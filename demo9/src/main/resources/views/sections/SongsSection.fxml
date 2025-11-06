@@ -13,7 +13,7 @@
     <VBox spacing="15">
         <HBox spacing="10" alignment="CENTER_LEFT">
             <Label text="Search:" style="-fx-font-weight: bold;"/>
-            <TextField fx:id="searchField" promptText="Search by track name, artist, or genre..." prefWidth="300"/>
+            <TextField fx:id="searchField" promptText="Search by track name, artist, or genre..." prefWidth="500"/>
         </HBox>
 
         <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">

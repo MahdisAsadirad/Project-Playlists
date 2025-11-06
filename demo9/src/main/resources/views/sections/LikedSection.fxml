@@ -11,10 +11,8 @@
       styleClass="root"
       style="-fx-padding: 30;">
 
-    <!-- عنوان صفحه -->
     <Label text="❤ Liked Songs" styleClass="title"/>
 
-    <!-- کارت اصلی -->
     <VBox spacing="15" styleClass="card">
 
         <Label fx:id="statsLabel" text="❤ Your Liked Songs" styleClass="subtitle"/>

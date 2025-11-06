@@ -38,7 +38,6 @@ public class MergeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        mergeButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
         mergeButton.setOnAction(e -> handleMerge());
     }
 

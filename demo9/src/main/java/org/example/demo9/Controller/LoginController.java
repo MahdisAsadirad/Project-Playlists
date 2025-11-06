@@ -96,7 +96,10 @@ public class LoginController {
             controller.setCurrentUser(user);
 
             Stage stage = (Stage) loginButton.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 800));
+
+            stage.setScene(new Scene(root));
+            stage.setFullScreen(true);
+
             stage.setTitle("🎵 Dashboard - " + user.getUsername());
 
         } catch (Exception e) {

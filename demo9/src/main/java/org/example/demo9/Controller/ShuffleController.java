@@ -44,7 +44,6 @@ public class ShuffleController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         shuffleButton.setOnAction(e -> handleShuffleMerge());
         reshuffleButton.setOnAction(e -> reshufflePlaylist());
 
@@ -163,7 +162,12 @@ public class ShuffleController implements Initializable {
         String sql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Set<Integer> seenSongs = new HashSet<>();
             for (SongNode song : shuffledSongs) {
+                if (seenSongs.contains(song.getSongId())) {
+                    continue;
+                }
+                seenSongs.add(song.getSongId());
                 stmt.setInt(1, playlistId);
                 stmt.setInt(2, song.getSongId());
                 stmt.setInt(3, currentUser.getId());
@@ -172,6 +176,7 @@ public class ShuffleController implements Initializable {
             stmt.executeBatch();
         }
     }
+
 
     @FXML
     private void reshufflePlaylist() {

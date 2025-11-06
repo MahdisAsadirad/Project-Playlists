@@ -11,10 +11,8 @@
       styleClass="root"
       style="-fx-padding: 30;">
 
-    <!-- عنوان صفحه -->
     <Label text="Merge Playlists" styleClass="title"/>
 
-    <!-- کارت اصلی -->
     <VBox spacing="15" styleClass="card">
 
         <Label text="Select two playlists to merge:" styleClass="subtitle"/>
@@ -36,7 +34,7 @@
             <TextField fx:id="newPlaylistNameField" prefWidth="300" promptText="Enter name for merged playlist" styleClass="text-field"/>
         </VBox>
 
-        <Button fx:id="mergeButton" text="Merge Playlists" styleClass="button success" prefWidth="150"/>
+        <Button fx:id="mergeButton" text="Merge Playlists" styleClass="button-success" prefWidth="150"/>
     </VBox>
 
     <VBox fx:id="resultContainer" spacing="10"/>

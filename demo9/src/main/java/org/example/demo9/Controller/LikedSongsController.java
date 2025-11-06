@@ -9,10 +9,7 @@ import org.example.demo9.Model.Classes.User;
 import org.example.demo9.Model.util.Database;
 
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -22,7 +19,7 @@ public class LikedSongsController implements Initializable {
     @FXML private Label statsLabel;
 
     private User currentUser;
-    private Database db;
+    private final Database db;
 
     public LikedSongsController() {
         this.db = new Database();
@@ -35,13 +32,14 @@ public class LikedSongsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // می‌توانید استایل‌های اضافی اینجا اضافه کنید
+        // اضافه کردن کلاس‌های استایل به عناصر اصلی
+        likedSongsContainer.getStyleClass().add("vbox");
+        statsLabel.getStyleClass().add("subtitle");
     }
 
     private void loadLikedSongs() {
         likedSongsContainer.getChildren().clear();
 
-        // جایگزینی Text Block با String معمولی
         String query = "SELECT s.id, s.track_name, s.artist_name, s.genre, s.release_date, s.len, s.topic " +
                 "FROM liked_songs ls " +
                 "JOIN songs s ON ls.song_id = s.id " +
@@ -70,7 +68,7 @@ public class LikedSongsController implements Initializable {
 
             if (songCount == 0) {
                 Label emptyLabel = new Label("You haven't liked any songs yet!");
-                emptyLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 16; -fx-padding: 40;");
+                emptyLabel.getStyleClass().add("hint");
                 likedSongsContainer.getChildren().add(emptyLabel);
             }
 
@@ -82,36 +80,36 @@ public class LikedSongsController implements Initializable {
     private void addLikedSongCard(int songId, String trackName, String artistName,
                                   String genre, int releaseDate, double length, String topic) {
         HBox card = new HBox(15);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-pref-width: 600;");
+        card.getStyleClass().add("song-card");
 
         // آیکون قلب
         Label heartIcon = new Label("❤");
-        heartIcon.setStyle("-fx-font-size: 20;");
+        heartIcon.getStyleClass().add("heart-icon");
 
         // اطلاعات آهنگ
         VBox songInfo = new VBox(5);
         songInfo.setPrefWidth(400);
 
         Label trackLabel = new Label(trackName);
-        trackLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #333;");
+        trackLabel.getStyleClass().add("song-title");
 
         Label artistLabel = new Label("by " + artistName);
-        artistLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 14;");
+        artistLabel.getStyleClass().add("song-artist");
 
         Label detailsLabel = new Label(genre + " • " + releaseDate + " • " + length + "s • " + topic);
-        detailsLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 12;");
+        detailsLabel.getStyleClass().add("song-details");
 
         songInfo.getChildren().addAll(trackLabel, artistLabel, detailsLabel);
 
-        // دکمه‌های action
+        // دکمه‌ها
         HBox actions = new HBox(10);
 
         Button unlikeButton = new Button("Unlike");
-        unlikeButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
+        unlikeButton.getStyleClass().addAll("button", "danger");
         unlikeButton.setOnAction(e -> unlikeSong(songId));
 
         Button addToPlaylistButton = new Button("Add to Playlist");
-        addToPlaylistButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 15;");
+        addToPlaylistButton.getStyleClass().addAll("button", "success");
         addToPlaylistButton.setOnAction(e -> showAddToPlaylistDialog(songId));
 
         actions.getChildren().addAll(unlikeButton, addToPlaylistButton);
@@ -128,7 +126,6 @@ public class LikedSongsController implements Initializable {
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 String sql = "DELETE FROM liked_songs WHERE user_id = ? AND song_id = ?";
-
                 try (Connection conn = db.getConnection();
                      PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -156,9 +153,7 @@ public class LikedSongsController implements Initializable {
         List<String> playlists = getUserPlaylists();
         dialog.getItems().addAll(playlists);
 
-        dialog.showAndWait().ifPresent(playlistName -> {
-            addSongToPlaylist(songId, playlistName);
-        });
+        dialog.showAndWait().ifPresent(playlistName -> addSongToPlaylist(songId, playlistName));
     }
 
     private List<String> getUserPlaylists() {
@@ -170,10 +165,7 @@ public class LikedSongsController implements Initializable {
 
             stmt.setInt(1, currentUser.getId());
             ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                playlists.add(rs.getString("name"));
-            }
+            while (rs.next()) playlists.add(rs.getString("name"));
 
         } catch (SQLException e) {
             showError("Error loading playlists: " + e.getMessage());
@@ -194,30 +186,26 @@ public class LikedSongsController implements Initializable {
 
             if (rs.next()) {
                 int playlistId = rs.getInt("id");
-
                 String insertSql = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
                 try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                     insertStmt.setInt(1, playlistId);
                     insertStmt.setInt(2, songId);
                     insertStmt.setInt(3, currentUser.getId());
                     insertStmt.executeUpdate();
-
                     showSuccess("Song added to " + playlistName + " successfully!");
                 }
             }
 
         } catch (SQLException e) {
-            if (e.getErrorCode() == 1062) {
+            if (e.getErrorCode() == 1062)
                 showError("This song is already in the playlist!");
-            } else {
+            else
                 showError("Error adding song to playlist: " + e.getMessage());
-            }
         }
     }
 
     private void updateStats(int songCount) {
         statsLabel.setText("❤ You have " + songCount + " liked songs");
-        statsLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #333;");
     }
 
     private void showSuccess(String message) {
@@ -236,3 +224,5 @@ public class LikedSongsController implements Initializable {
         alert.showAndWait();
     }
 }
+
+

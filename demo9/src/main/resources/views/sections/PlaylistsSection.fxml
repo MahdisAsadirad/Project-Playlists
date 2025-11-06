@@ -11,16 +11,14 @@
       styleClass="root"
       style="-fx-padding: 30;">
 
-    <!-- نوار بالایی -->
     <HBox spacing="15" alignment="CENTER_LEFT">
         <Label text="📁 My Playlists" styleClass="title"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Button text="+ Create New Playlist"
-                styleClass="button success"
+                styleClass="button-success"
                 onAction="#showCreatePlaylistDialog"/>
     </HBox>
 
-    <!-- لیست پلی‌لیست‌ها -->
     <ScrollPane fitToWidth="true" styleClass="scroll-pane">
         <VBox fx:id="playlistsContainer" spacing="15"/>
     </ScrollPane>

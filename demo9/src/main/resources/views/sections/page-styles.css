@@ -214,8 +214,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
 }
 
-/* ======= Special Buttons ======= */
-.button.success {
+.button-success {
     -fx-background-color: linear-gradient(to right, #00b894, #00cec9);
 }
 
@@ -231,12 +230,31 @@
     -fx-background-color: linear-gradient(to right, #ff7675, #d63031);
 }
 
-/* ======= Headers and separators ======= */
 .separator {
     -fx-background-color: #dfe6e9;
 }
 
-/* ======= Headers and separators ======= */
 .separator {
     -fx-background-color: #dfe6e9;
+}
+
+.heart-icon {
+    -fx-font-size: 20px;
+    -fx-text-fill: #e74c3c;
+}
+
+.song-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+}
+
+.song-artist {
+    -fx-text-fill: #636e72;
+    -fx-font-size: 13px;
+}
+
+.song-details {
+    -fx-text-fill: #b2bec3;
+    -fx-font-size: 12px;
 }
