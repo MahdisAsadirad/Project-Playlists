@@ -18,6 +18,7 @@ public class PlaylistsController{
 
     private User currentUser;
     private final Database db;
+    private DashboardController dashboardController;
 
     public PlaylistsController() {
         this.db = new Database();
@@ -26,6 +27,10 @@ public class PlaylistsController{
     public void setCurrentUser(User user) {
         this.currentUser = user;
         loadPlaylistsFromDatabase();
+    }
+
+    public void setDashboardController(DashboardController dashboardController) {
+        this.dashboardController = dashboardController;
     }
 
     private void loadPlaylistsFromDatabase() {
@@ -137,6 +142,10 @@ public class PlaylistsController{
             if (success) {
                 showSuccess("Playlist '" + playlistName + "' created successfully!");
                 loadPlaylistsFromDatabase();
+                if (dashboardController != null) {
+                    dashboardController.refreshPlaylists();
+                }
+
             } else {
                 showError("Failed to create playlist!");
             }

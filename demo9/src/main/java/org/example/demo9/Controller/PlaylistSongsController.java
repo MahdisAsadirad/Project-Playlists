@@ -39,7 +39,6 @@ public class PlaylistSongsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // کلاس‌های استایل برای دکمه‌ها
         backButton.getStyleClass().add("button");
         addSongButton.getStyleClass().add("button-success");
         playlistTitleLabel.getStyleClass().add("title");
@@ -120,7 +119,7 @@ public class PlaylistSongsController implements Initializable {
 
         Button likeBtn = new Button();
         likeBtn.getStyleClass().add("button");
-        checkAndUpdateLikeButton(likeBtn, songId);
+        checkAndLikeButton(likeBtn, songId);
         likeBtn.setOnAction(e -> toggleLikeSong(songId, likeBtn));
 
         Button removeButton = new Button("Remove");
@@ -149,12 +148,11 @@ public class PlaylistSongsController implements Initializable {
             mediaPlayer.stop();
             mediaPlayer.dispose();
             mediaPlayer = null;
-            System.out.println("⏹ Song stopped");
         }
     }
 
 
-    private void checkAndUpdateLikeButton(Button likeButton, int songId) {
+    private void checkAndLikeButton(Button likeButton, int songId) {
         String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
 
         try (Connection conn = db.getConnection();
@@ -214,7 +212,6 @@ public class PlaylistSongsController implements Initializable {
             java.net.URL resource = getClass().getResource(resourcePath);
 
             if (resource == null) {
-                System.err.println("❌ file not founded. " + resourcePath);
                 showError("Song not found: " + trackName);
                 return;
             }

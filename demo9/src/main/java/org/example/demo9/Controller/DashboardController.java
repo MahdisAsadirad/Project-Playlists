@@ -28,14 +28,13 @@ public class DashboardController {
     private final Map<String, Parent> loadedSections = new HashMap<>();
     private Button activeButton;
 
-    private final String defaultStyle = "sidebar-button";
-    private final String activeStyle = "sidebar-button:selected";
-
 
     private void initializeSidebar() {
         Button[] buttons = {playlistsBtn, discoverSongsBtn, mergeBtn, shuffleBtn, filterBtn, likedBtn, sortBtn};
 
         for (Button btn : buttons) {
+            String defaultStyle = "sidebar-button";
+            String activeStyle = "sidebar-button:selected";
             btn.getStyleClass().removeAll(defaultStyle, activeStyle, "selected");
             if (!btn.getStyleClass().contains(defaultStyle)) {
                 btn.getStyleClass().add(defaultStyle);
@@ -49,10 +48,6 @@ public class DashboardController {
         }
 
         setActiveButton(playlistsBtn);
-    }
-
-    public interface UserAware {
-        void setCurrentUser(User user);
     }
 
     public void setCurrentUser(User user) {
@@ -128,20 +123,27 @@ public class DashboardController {
                 Object controller = loader.getController();
                 if (controller instanceof PlaylistsController) {
                     ((PlaylistsController) controller).setCurrentUser(currentUser);
-                } else if (controller instanceof SongsController) {
-                    ((SongsController) controller).setCurrentUser(currentUser);
+                    ((PlaylistsController) controller).setDashboardController(this);
+
                 } else if (controller instanceof DiscoverSongsController) {
                     ((DiscoverSongsController) controller).setCurrentUser(currentUser);
+
                 } else if (controller instanceof MergeController) {
                     ((MergeController) controller).setCurrentUser(currentUser);
+                    ((MergeController) controller).setDashboardController(this);
+
                 } else if (controller instanceof ShuffleController) {
                     ((ShuffleController) controller).setCurrentUser(currentUser);
                     ((ShuffleController) controller).setDashboardController(this);
+
                 } else if (controller instanceof FilterController) {
                     ((FilterController) controller).setCurrentUser(currentUser);
+                    ((FilterController) controller).setDashboardController(this);
+
                 } else if (controller instanceof SortController) {
                     ((SortController) controller).setCurrentUser(currentUser);
                     ((SortController) controller).setDashboardController(this);
+
                 } else if (controller instanceof LikedSongsController) {
                     ((LikedSongsController) controller).setCurrentUser(currentUser);
                 }
@@ -173,9 +175,5 @@ public class DashboardController {
         if (activeButton == playlistsBtn) {
             showPlaylistsSection();
         }
-    }
-
-    public User getCurrentUser() {
-        return currentUser;
     }
 }

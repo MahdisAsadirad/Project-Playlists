@@ -32,7 +32,6 @@ public class LikedSongsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // اضافه کردن کلاس‌های استایل به عناصر اصلی
         likedSongsContainer.getStyleClass().add("vbox");
         statsLabel.getStyleClass().add("subtitle");
     }
@@ -82,11 +81,9 @@ public class LikedSongsController implements Initializable {
         HBox card = new HBox(15);
         card.getStyleClass().add("song-card");
 
-        // آیکون قلب
         Label heartIcon = new Label("❤");
         heartIcon.getStyleClass().add("heart-icon");
 
-        // اطلاعات آهنگ
         VBox songInfo = new VBox(5);
         songInfo.setPrefWidth(400);
 
@@ -101,7 +98,6 @@ public class LikedSongsController implements Initializable {
 
         songInfo.getChildren().addAll(trackLabel, artistLabel, detailsLabel);
 
-        // دکمه‌ها
         HBox actions = new HBox(10);
 
         Button unlikeButton = new Button("Unlike");

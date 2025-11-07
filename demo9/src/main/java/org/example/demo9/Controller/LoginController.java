@@ -44,6 +44,29 @@ public class LoginController {
     }
 
     @FXML
+    private void handleSignup() {
+        String username = usernameField.getText();
+        String password = passwordField.getText();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            showError("Please enter both username and password!");
+            return;
+        }
+
+        try {
+            if (userController.signUp(username, password)) {
+                showSuccess();
+                clearFields();
+            } else {
+                showError("Sign up failed! Username already exist.");
+            }
+        } catch (SQLException e) {
+            showError("Database error: " + e.getMessage());
+        }
+    }
+
+
+    @FXML
     private void handleLogin() {
         String username = usernameField.getText();
         String password = passwordField.getText();
@@ -65,27 +88,6 @@ public class LoginController {
         }
     }
 
-    @FXML
-    private void handleSignup() {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
-
-        if (username.isEmpty() || password.isEmpty()) {
-            showError("Please enter both username and password!");
-            return;
-        }
-
-        try {
-            if (userController.signUp(username, password)) {
-                showSuccess();
-                clearFields();
-            } else {
-                showError("Sign up failed! Username might already exist.");
-            }
-        } catch (SQLException e) {
-            showError("Database error: " + e.getMessage());
-        }
-    }
 
     private void loadMainDashboard(User user) {
         try {

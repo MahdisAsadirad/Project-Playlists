@@ -56,19 +56,42 @@
     -fx-padding: 12 0;
 }
 
-.logout-button {
-    -fx-background-color: linear-gradient(to right, #ff5c5c, #d63c3c);
+.login-button {
+    -fx-background-color: linear-gradient(to right, #5865f2, #7289da);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-size: 13px;
-    -fx-background-radius: 8;
-    -fx-padding: 10 15;
+    -fx-font-size: 15px;
+    -fx-pref-width: 300;
+    -fx-pref-height: 45;
+    -fx-background-radius: 10;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(255,92,92,0.4), 8, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(114,137,218,0.3), 10, 0, 0, 0);
+    -fx-transition: 0.3s;
 }
-.logout-button:hover {
-    -fx-background-color: linear-gradient(to right, #ff7676, #e05252);
+.login-button:hover {
+    -fx-background-color: linear-gradient(to right, #8892f6, #9ea6ff);
+    -fx-translate-y: -2;
 }
+
+.signup-button {
+    -fx-background-color: transparent;
+    -fx-border-color: #7289da;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-text-fill: #7289da;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-pref-width: 300;
+    -fx-pref-height: 45;
+    -fx-cursor: hand;
+    -fx-transition: 0.3s;
+}
+.signup-button:hover {
+    -fx-background-color: rgba(114,137,218,0.1);
+    -fx-text-fill: white;
+    -fx-border-color: #9ea6ff;
+}
+
 
 .content-area {
     -fx-background-color: linear-gradient(to bottom right, #222238, #181827);

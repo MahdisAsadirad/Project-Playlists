@@ -13,13 +13,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class DiscoverSongsController implements Initializable {
-    @FXML private VBox discoverSongsContainer;
-    @FXML private TextField searchField;
-    @FXML private ComboBox<String> genreFilter;
-    @FXML private ComboBox<String> artistFilter;
+    @FXML
+    private VBox discoverSongsContainer;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ComboBox<String> genreFilter;
+    @FXML
+    private ComboBox<String> artistFilter;
 
 
     private User currentUser;
@@ -137,10 +143,7 @@ public class DiscoverSongsController implements Initializable {
 
 
         Button likeButton = new Button("♡");
-        likeButton.getStyleClass().add("button");
-
-//        Button likeButton = new Button("♡");
-//        likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
+        likeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 16;");
 
 
         checkAndUpdateLikeButton(likeButton, songId);
@@ -269,8 +272,6 @@ public class DiscoverSongsController implements Initializable {
             sql += " AND artist_name = ?";
         }
 
-        sql += " ORDER BY track_name";
-
         discoverSongsContainer.getChildren().clear();
 
         try (Connection conn = db.getConnection();
@@ -313,8 +314,8 @@ public class DiscoverSongsController implements Initializable {
         });
     }
 
-    private java.util.List<String> getUserPlaylists() {
-        java.util.List<String> playlists = new java.util.ArrayList<>();
+    private List<String> getUserPlaylists() {
+        List<String> playlists = new ArrayList<>();
         String sql = "SELECT name FROM playlists WHERE user_id = ?";
 
         try (Connection conn = db.getConnection();

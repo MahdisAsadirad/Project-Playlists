@@ -26,6 +26,7 @@ public class MergeController implements Initializable {
     private User currentUser;
     private final Database db;
     Playlist mergedPlaylist;
+    private DashboardController dashboardController;
 
     public MergeController() {
         this.db = new Database();
@@ -34,6 +35,10 @@ public class MergeController implements Initializable {
     public void setCurrentUser(User user) {
         this.currentUser = user;
         loadUserPlaylists();
+    }
+
+    public void setDashboardController(DashboardController dashboardController) {
+        this.dashboardController = dashboardController;
     }
 
     @Override
@@ -86,6 +91,9 @@ public class MergeController implements Initializable {
 
             mergedPlaylist = playlist1.merge(playlist2, newName, db);
             mergedPlaylist.savePlaylistToDatabase(db);
+            if (dashboardController != null) {
+                dashboardController.refreshPlaylists();
+            }
 
             showSuccess("Playlists merged successfully! \n" + "New playlist: " + newName +
                     " with " + mergedPlaylist.getSize() + " songs") ;

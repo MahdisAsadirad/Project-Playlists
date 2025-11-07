@@ -25,7 +25,8 @@ public class FilterController implements Initializable {
     @FXML private VBox resultContainer;
 
     private User currentUser;
-    private Database db;
+    private final Database db;
+    private DashboardController dashboardController;
 
     public FilterController() {
         this.db = new Database();
@@ -35,6 +36,10 @@ public class FilterController implements Initializable {
         this.currentUser = user;
         loadUserPlaylists();
         setupCriteriaCombo();
+    }
+
+    public void setDashboardController(DashboardController dashboardController) {
+        this.dashboardController = dashboardController;
     }
 
     @Override
@@ -104,6 +109,7 @@ public class FilterController implements Initializable {
                 int filteredCount = copyFilteredSongs(conn, sourcePlaylistId, newPlaylistId, criteria, filterValue);
 
                 conn.commit();
+                if (dashboardController != null) dashboardController.refreshPlaylists();
 
                 if (filteredCount > 0) {
                     showSuccess("Filtered playlist created successfully! \n" +
