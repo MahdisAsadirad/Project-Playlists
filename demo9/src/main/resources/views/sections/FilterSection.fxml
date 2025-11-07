@@ -37,7 +37,7 @@
             <TextField fx:id="newPlaylistNameField" prefWidth="300" promptText="Enter name for filtered playlist" styleClass="text-field" />
         </VBox>
 
-        <Button fx:id="filterButton" styleClass="button success" text="Create Filtered Playlist" />
+        <Button fx:id="filterButton" styleClass="button-success" text="Create Filtered Playlist" />
     </VBox>
 
     <VBox fx:id="resultContainer" spacing="10" styleClass="card" />

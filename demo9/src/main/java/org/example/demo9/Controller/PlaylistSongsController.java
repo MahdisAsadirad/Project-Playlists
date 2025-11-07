@@ -15,7 +15,6 @@ import java.sql.*;
 import java.util.ResourceBundle;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import java.io.File;
 
 public class PlaylistSongsController implements Initializable {
     @FXML

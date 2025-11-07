@@ -2,6 +2,8 @@ package org.example.demo9.Model.Classes;
 
 import org.example.demo9.Model.util.Database;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class User {
     private final int id;
@@ -54,8 +56,8 @@ public class User {
         }
     }
 
-    public java.util.List<Playlist> getPlaylistsFromDatabase() {
-        java.util.List<Playlist> playlists = new java.util.ArrayList<>();
+    public List<Playlist> getPlaylistsFromDatabase() {
+        List<Playlist> playlists = new ArrayList<>();
         String sql = "SELECT id, name FROM playlists WHERE user_id = ?";
 
         try (Connection conn = db.getConnection();

@@ -23,8 +23,8 @@ public class SongsController implements Initializable {
     @FXML private ComboBox<String> sortCombo;
 
     private User currentUser;
-    private Database db;
-    private List<SongNodeWrapper> allSongs;
+    private final Database db;
+    private final List<SongNodeWrapper> allSongs;
 
     public SongsController() {
         this.db = new Database();

@@ -130,7 +130,6 @@ public class Playlist {
         try (Connection conn = db.getConnection()) {
             conn.setAutoCommit(false);
 
-            // ایجاد پلی‌لیست جدید در دیتابیس
             String insertPlaylistSql = "INSERT INTO playlists (user_id, name) VALUES (?, ?)";
             int newPlaylistId;
 
@@ -239,36 +238,6 @@ public class Playlist {
             stmt.executeBatch();
         }
     }
-
-    public void updateSongOrderInDatabase(Database db) throws SQLException {
-        String sql = "UPDATE playlist_songs SET song_order = ? WHERE playlist_id = ? AND song_id = ?";
-
-        try (Connection conn = db.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            SongNode current = this.head;
-            int order = 1;
-
-            while (current != null) {
-                stmt.setInt(1, order);
-                stmt.setInt(2, this.id);
-                stmt.setInt(3, current.getSongId());
-                stmt.addBatch();
-
-                current = current.getNext();
-                order++;
-            }
-            stmt.executeBatch();
-        }
-    }
-
-
-    public void clear() {
-        head = null;
-        tail = null;
-        size = 0;
-    }
-
     public void sortByCriteria(String subject) {
         if (head == null || head.getNext() == null) return;
 
@@ -278,6 +247,12 @@ public class Playlist {
         while (tail != null && tail.getNext() != null) {
             tail = tail.getNext();
         }
+    }
+
+    public void clear() {
+        head = null;
+        tail = null;
+        size = 0;
     }
 
     public int getId() {
