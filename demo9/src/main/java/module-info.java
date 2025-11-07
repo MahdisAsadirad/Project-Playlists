@@ -1,6 +1,7 @@
 module org.example.demo9 {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.media;
     requires java.sql;
 
     opens org.example.demo9.Controller to javafx.fxml;

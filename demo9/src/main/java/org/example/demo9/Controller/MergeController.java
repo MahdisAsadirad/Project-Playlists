@@ -85,6 +85,7 @@ public class MergeController implements Initializable {
             Playlist playlist2 = loadPlaylistFromDB(secondPlaylistName);
 
             mergedPlaylist = playlist1.merge(playlist2, newName, db);
+            mergedPlaylist.savePlaylistToDatabase(db);
 
             showSuccess("Playlists merged successfully! \n" + "New playlist: " + newName +
                     " with " + mergedPlaylist.getSize() + " songs") ;

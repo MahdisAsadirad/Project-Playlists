@@ -1,131 +1,164 @@
+/* ====== Base Styles ====== */
 .root {
     -fx-font-family: "Poppins", "Segoe UI", sans-serif;
     -fx-font-smoothing-type: gray;
 }
 
+/* ====== Sidebar ====== */
 .sidebar {
-    -fx-background-color: linear-gradient(to bottom, #2c3e50, #34495e);
-    -fx-padding: 25 15;
-    -fx-pref-width: 280;
-    -fx-spacing: 20;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0, 0, 0);
+    -fx-background-color: linear-gradient(to bottom, #1e1e2f, #151524);
+    -fx-padding: 30 20;
+    -fx-pref-width: 260;
+    -fx-spacing: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 12, 0, 0, 0);
 }
 
 .title-label {
-    -fx-font-size: 20px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: #ecf0f1;
-    -fx-padding: 0 0 15 5;
+    -fx-text-fill: #e0e0ff;
+    -fx-padding: 0 0 25 5;
 }
 
+/* ====== Sidebar Buttons ====== */
 .sidebar-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #ecf0f1;
-    -fx-font-size: 14px;
+    -fx-text-fill: #bdbdfc;
+    -fx-font-size: 15px;
     -fx-alignment: center-left;
     -fx-padding: 12 15;
-    -fx-background-radius: 10;
+    -fx-background-radius: 8;
     -fx-cursor: hand;
     -fx-transition: 0.3s;
 }
 
 .sidebar-button:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-color: rgba(114, 137, 218, 0.15);
     -fx-text-fill: #ffffff;
-    -fx-translate-x: 5;
+    -fx-translate-x: 6;
 }
 
 .sidebar-button:focused,
-.sidebar-button:selected {
-    -fx-background-color: #6c5ce7;
+.sidebar-button:selected,
+.sidebar-button.active {
+    -fx-background-color: linear-gradient(to right, #7289da, #5865f2);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.6), 8, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(88,101,242,0.6), 10, 0, 0, 2);
 }
 
+/* ====== User Section ====== */
 .user-section {
-    -fx-padding: 30 0 0 0;
-    -fx-border-color: #3b4a59;
+    -fx-padding: 40 0 0 0;
+    -fx-border-color: #2a2a3d;
     -fx-border-width: 1 0 0 0;
 }
 
 .user-info-label {
-    -fx-text-fill: #bdc3c7;
+    -fx-text-fill: #a6accd;
     -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-padding: 10 0;
+    -fx-padding: 12 0;
 }
 
 .logout-button {
-    -fx-background-color: linear-gradient(to right, #e74c3c, #c0392b);
+    -fx-background-color: linear-gradient(to right, #ff5c5c, #d63c3c);
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 13px;
-    -fx-background-radius: 10;
+    -fx-background-radius: 8;
     -fx-padding: 10 15;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(231,76,60,0.3), 8, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(255,92,92,0.4), 8, 0, 0, 0);
 }
-
 .logout-button:hover {
-    -fx-background-color: #ff6b6b;
+    -fx-background-color: linear-gradient(to right, #ff7676, #e05252);
 }
 
+/* ====== Content Area ====== */
 .content-area {
-    -fx-background-color: linear-gradient(to bottom right, #f5f7fa, #e4ebf1);
-    -fx-padding: 25;
+    -fx-background-color: linear-gradient(to bottom right, #222238, #181827);
+    -fx-padding: 30;
 }
 
+/* ====== Cards (Playlists / Songs) ====== */
 .playlist-card, .song-card {
-    -fx-background-color: white;
-    -fx-background-radius: 15;
+    -fx-background-color: rgba(255,255,255,0.05);
+    -fx-background-radius: 14;
     -fx-border-color: transparent;
-    -fx-padding: 18;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0, 0, 2);
     -fx-transition: 0.3s;
 }
 
 .playlist-card:hover, .song-card:hover {
+    -fx-background-color: rgba(255,255,255,0.12);
     -fx-translate-y: -3;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
 }
 
+/* ====== Buttons (General) ====== */
 .primary-button {
-    -fx-background-color: linear-gradient(to right, #6c5ce7, #74b9ff);
+    -fx-background-color: linear-gradient(to right, #5865f2, #7289da);
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 14px;
     -fx-background-radius: 8;
-    -fx-padding: 10 18;
+    -fx-padding: 10 20;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.3), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(114,137,218,0.4), 8, 0, 0, 0);
 }
-
 .primary-button:hover {
-    -fx-background-color: linear-gradient(to right, #a29bfe, #81ecec);
+    -fx-background-color: linear-gradient(to right, #8892f6, #9ea6ff);
 }
 
 .text-field, .password-field, .combo-box {
-    -fx-background-color: white;
-    -fx-border-color: #dfe6e9;
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-border-color: #3a3a5c;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
     -fx-padding: 10;
+    -fx-text-fill: black;
     -fx-font-size: 14px;
 }
-
 .text-field:focused, .password-field:focused, .combo-box:focused {
-    -fx-border-color: #6c5ce7;
-    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.3), 10, 0, 0, 0);
+    -fx-border-color: #7289da;
+    -fx-effect: dropshadow(gaussian, rgba(114,137,218,0.3), 8, 0, 0, 0);
 }
 
+/* ====== Scrollbar ====== */
 .scroll-pane, .scroll-bar:vertical {
     -fx-background-color: transparent;
 }
 .scroll-bar:vertical .thumb {
-    -fx-background-color: #b2bec3;
+    -fx-background-color: #50507a;
     -fx-background-radius: 4;
 }
 .scroll-bar:vertical .thumb:hover {
-    -fx-background-color: #6c5ce7;
+    -fx-background-color: #7289da;
+}
+
+.login-pane {
+    -fx-background-color: linear-gradient(to bottom right, #202033, #181828);
+}
+
+.login-card {
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-background-radius: 15;
+    -fx-padding: 40;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 15, 0, 0, 0);
+}
+
+.login-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.login-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #a8a8d6;
+}
+
+.error-label {
+    -fx-text-fill: #ff6b6b;
+    -fx-font-size: 12px;
 }

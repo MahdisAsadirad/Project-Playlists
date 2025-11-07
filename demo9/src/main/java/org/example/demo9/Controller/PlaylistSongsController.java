@@ -13,6 +13,9 @@ import org.example.demo9.Model.util.Database;
 import java.net.URL;
 import java.sql.*;
 import java.util.ResourceBundle;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import java.io.File;
 
 public class PlaylistSongsController implements Initializable {
     @FXML
@@ -28,6 +31,8 @@ public class PlaylistSongsController implements Initializable {
     private String playlistName;
     private User currentUser;
     private final Database db;
+    private MediaPlayer mediaPlayer;
+    private String currentSongPath;
 
     public PlaylistSongsController() {
         this.db = new Database();
@@ -125,15 +130,30 @@ public class PlaylistSongsController implements Initializable {
         removeButton.setOnAction(e -> removeSongFromPlaylist(songId));
 
         Button playBtn = new Button("▶");
-        playBtn.getStyleClass().add("button");
-        playBtn.getStyleClass().add("success");
-        playBtn.setOnAction(e -> playSong(trackName, artistName));
+        playBtn.getStyleClass().addAll("button", "success");
 
-        HBox buttonsBox = new HBox(10, playBtn, likeBtn, removeButton);
+        Button stopBtn = new Button("■");
+        stopBtn.getStyleClass().addAll("button", "danger");
+
+        playBtn.setOnAction(e -> playSong(trackName, artistName));
+        stopBtn.setOnAction(e -> stopSong());
+
+        HBox buttonsBox = new HBox(10, playBtn, stopBtn, likeBtn, removeButton);
+
 
         card.getChildren().addAll(icon, songInfo, buttonsBox);
         songsContainer.getChildren().add(card);
     }
+
+    private void stopSong() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.dispose();
+            mediaPlayer = null;
+            System.out.println("⏹ Song stopped");
+        }
+    }
+
 
     private void checkAndUpdateLikeButton(Button likeButton, int songId) {
         String checkSql = "SELECT COUNT(*) FROM liked_songs WHERE user_id = ? AND song_id = ?";
@@ -190,8 +210,41 @@ public class PlaylistSongsController implements Initializable {
     }
 
     private void playSong(String trackName, String artistName) {
-        showSuccess("Now playing: " + trackName + " - " + artistName);
+        try {
+            String resourcePath = "/music/" + trackName + ".mp3";
+            java.net.URL resource = getClass().getResource(resourcePath);
+
+            if (resource == null) {
+                System.err.println("❌ file not founded. " + resourcePath);
+                showError("Song not found: " + trackName);
+                return;
+            }
+
+            String mediaUrl = resource.toExternalForm();
+
+            if (mediaPlayer != null) {
+                mediaPlayer.stop();
+                mediaPlayer.dispose();
+                mediaPlayer = null;
+            }
+
+            Media media = new Media(mediaUrl);
+            mediaPlayer = new MediaPlayer(media);
+
+            mediaPlayer.setOnError(() -> {
+                System.err.println("Media error: " + mediaPlayer.getError());
+            });
+
+            mediaPlayer.play();
+            System.out.println("🎵 Now playing: " + trackName + " - " + artistName);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error playing song: " + e.getMessage());
+        }
     }
+
+
 
     @FXML
     private void handleAddSong() {
@@ -269,6 +322,8 @@ public class PlaylistSongsController implements Initializable {
             throw e;
         }
     }
+
+
 
     private void addSongToPlaylist(int songId) {
         String query = "INSERT INTO playlist_songs (playlist_id, song_id, user_id) VALUES (?, ?, ?)";
